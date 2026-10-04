@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Usuários · CRM WhatsApp Tractom</title>
+<link rel="stylesheet" href="/css/base.css" />
+<style>
+  .role-select { width: auto; }
+  .status-toggle { cursor: pointer; }
+</style>
+</head>
+<body class="ds">
+  <div class="ds-shell">
+    <aside class="ds-sidebar">
+      <div class="ds-sidebar-logo"><div class="mark">T</div> CRM WhatsApp</div>
+      <nav class="ds-nav">
+        <a class="ds-nav-item" href="/"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"/></svg> Atendimento</a>
+        <a class="ds-nav-item active" href="/users/"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"/></svg> Usuários</a>
+      </nav>
+      <div class="ds-sidebar-spacer"></div>
+    </aside>
+
+    <div class="ds-main">
+      <header class="ds-header">
+        <div class="ds-user">
+          <div class="ds-user-avatar" id="user-avatar">–</div>
+          <span id="user-name">Carregando...</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="logout-btn">Sair</button>
+      </header>
+
+      <main class="ds-content">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-6);">
+          <div>
+            <h1 class="ds-h1">Usuários</h1>
+            <p class="ds-muted" style="margin-top:4px;">Quem tem acesso ao CRM e com qual papel</p>
+          </div>
+          <button class="btn btn-primary" id="new-user-btn">+ Novo usuário</button>
+        </div>
+
+        <div class="card">
+          <table class="table" id="users-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Papel</th>
+                <th>Status</th>
+                <th>Último acesso</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody">
+              <tr><td colspan="6"><div class="skeleton" style="height:16px;width:100%;"></div></td></tr>
+            </tbody>
+          </table>
+          <div id="users-empty" class="empty-state" style="display:none;">
+            <div class="empty-state-title">Nenhum usuário ainda</div>
+            <p class="ds-muted">Crie o primeiro usuário da equipe.</p>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal: novo usuário -->
+  <div class="modal-overlay" id="new-user-modal" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Novo usuário</h2>
+        <button class="btn btn-ghost btn-sm" id="close-new-user">✕</button>
+      </div>
+      <form id="new-user-form">
+        <div class="modal-body">
+          <div id="new-user-error" class="ds-auth-error" style="display:none;background:var(--color-danger-bg);color:var(--color-danger);font-size:var(--font-size-sm);padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);"></div>
+          <div class="field">
+            <label class="label" for="nu-name">Nome</label>
+            <input class="input" id="nu-name" required />
+          </div>
+          <div class="field">
+            <label class="label" for="nu-email">E-mail</label>
+            <input class="input" id="nu-email" type="email" required />
+          </div>
+          <div class="field">
+            <label class="label" for="nu-password">Senha provisória</label>
+            <input class="input" id="nu-password" type="password" minlength="8" required />
+            <span class="field-hint">Mínimo 8 caracteres. O usuário pode trocar depois.</span>
+          </div>
+          <div class="field">
+            <label class="label" for="nu-role">Papel</label>
+            <select class="select" id="nu-role">
+              <option value="atendente">Atendente</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancel-new-user">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="create-user-submit">Criar usuário</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toast-stack"></div>
+
+  <script>
+    function toast(message, kind) {
+      const el = document.createElement('div');
+      el.className = 'toast' + (kind ? ' ' + kind : '');
+      el.textContent = message;
+      document.getElementById('toast-stack').appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    }
+
+    async function api(path, opts = {}) {
+      const res = await fetch('/api' + path, {
+        headers: { 'Content-Type': 'application/json' },
+        ...opts,
+      });
+      if (res.status === 401) {
+        window.location.href = '/login.html?next=' + encodeURIComponent(window.location.pathname);
+        throw new Error('not_authenticated');
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error?.message || 'Erro na requisição');
+      return data;
+    }
+
+    function initialsOf(name) {
+      return (name || '').split(' ').filter(Boolean).slice(0, 2).map((p) => p[0].toUpperCase()).join('') || '?';
+    }
+
+    const roleLabels = { admin: 'Admin', supervisor: 'Supervisor', atendente: 'Atendente' };
+
+    async function loadMe() {
+      const { user } = await api('/auth/me');
+      document.getElementById('user-name').textContent = user.name;
+      document.getElementById('user-avatar').textContent = initialsOf(user.name);
+      if (user.role !== 'admin' && !user.isPlatformAdmin) {
+        document.body.innerHTML = '<div class="empty-state" style="min-height:100vh;justify-content:center;"><div class="empty-state-title">Acesso restrito</div><p class="ds-muted">Essa tela é só para administradores.</p></div>';
+        throw new Error('forbidden');
+      }
+    }
+
+    function renderRow(user) {
+      const tr = document.createElement('tr');
+      const lastLogin = user.last_login_at ? new Date(user.last_login_at).toLocaleString('pt-BR') : '—';
+      const statusBadge = user.status === 'active'
+        ? '<span class="badge badge-success">Ativo</span>'
+        : '<span class="badge badge-neutral">Desativado</span>';
+      tr.innerHTML = `
+        <td>${user.name}</td>
+        <td>${user.email}</td>
+        <td>
+          <select class="select role-select" data-id="${user.id}" data-field="role">
+            ${Object.entries(roleLabels).map(([v, l]) => `<option value="${v}" ${v === user.role ? 'selected' : ''}>${l}</option>`).join('')}
+          </select>
+        </td>
+        <td class="status-toggle" data-id="${user.id}" data-status="${user.status}">${statusBadge}</td>
+        <td class="ds-subtle">${lastLogin}</td>
+        <td style="text-align:right;">
+          <button class="btn btn-ghost btn-sm reset-pw-btn" data-id="${user.id}">Redefinir senha</button>
+        </td>
+      `;
+      return tr;
+    }
+
+    async function loadUsers() {
+      const tbody = document.getElementById('users-tbody');
+      const users = await api('/users');
+      tbody.innerHTML = '';
+      document.getElementById('users-empty').style.display = users.length ? 'none' : 'flex';
+      users.forEach((u) => tbody.appendChild(renderRow(u)));
+
+      tbody.querySelectorAll('[data-field="role"]').forEach((sel) => {
+        sel.addEventListener('change', async () => {
+          try {
+            await api('/users/' + sel.dataset.id, { method: 'PATCH', body: JSON.stringify({ role: sel.value }) });
+            toast('Papel atualizado.', 'success');
+          } catch (err) {
+            toast(err.message, 'danger');
+          }
+        });
+      });
+
+      tbody.querySelectorAll('.status-toggle').forEach((cell) => {
+        cell.addEventListener('click', async () => {
+          const next = cell.dataset.status === 'active' ? 'disabled' : 'active';
+          try {
+            await api('/users/' + cell.dataset.id, { method: 'PATCH', body: JSON.stringify({ status: next }) });
+            toast(next === 'active' ? 'Usuário reativado.' : 'Usuário desativado.', 'success');
+            loadUsers();
+          } catch (err) {
+            toast(err.message, 'danger');
+          }
+        });
+      });
+
+      tbody.querySelectorAll('.reset-pw-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const newPassword = prompt('Nova senha provisória (mínimo 8 caracteres):');
+          if (!newPassword) return;
+          try {
+            await api('/users/' + btn.dataset.id + '/reset-password', { method: 'POST', body: JSON.stringify({ newPassword }) });
+            toast('Senha redefinida.', 'success');
+          } catch (err) {
+            toast(err.message, 'danger');
+          }
+        });
+      });
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await api('/auth/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    });
+
+    const modal = document.getElementById('new-user-modal');
+    document.getElementById('new-user-btn').addEventListener('click', () => { modal.style.display = 'flex'; });
+    document.getElementById('close-new-user').addEventListener('click', () => { modal.style.display = 'none'; });
+    document.getElementById('cancel-new-user').addEventListener('click', () => { modal.style.display = 'none'; });
+
+    document.getElementById('new-user-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errBox = document.getElementById('new-user-error');
+      errBox.style.display = 'none';
+      const submitBtn = document.getElementById('create-user-submit');
+      submitBtn.disabled = true;
+
+      try {
+        await api('/users', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: document.getElementById('nu-name').value,
+            email: document.getElementById('nu-email').value,
+            password: document.getElementById('nu-password').value,
+            role: document.getElementById('nu-role').value,
+          }),
+        });
+        modal.style.display = 'none';
+        document.getElementById('new-user-form').reset();
+        toast('Usuário criado.', 'success');
+        loadUsers();
+      } catch (err) {
+        errBox.textContent = err.message;
+        errBox.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    (async () => {
+      try {
+        await loadMe();
+        await loadUsers();
+      } catch (err) {
+        if (err.message !== 'not_authenticated' && err.message !== 'forbidden') {
+          toast('Erro ao carregar: ' + err.message, 'danger');
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

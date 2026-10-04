@@ -1,5 +1,6 @@
 import { query } from '../db/pool.js';
 import { logActivity } from './activityLog.js';
+import { getDefaultTenantId } from '../tenant.js';
 
 export async function findOpenConversationForContact(contactId) {
   const result = await query(
@@ -11,10 +12,11 @@ export async function findOpenConversationForContact(contactId) {
 }
 
 export async function createConversation(contactId, { funnelId, funnelStageId } = {}) {
+  const tenantId = await getDefaultTenantId();
   const result = await query(
-    `INSERT INTO conversations (contact_id, funnel_id, funnel_stage_id, last_message_at)
-     VALUES ($1, $2, $3, now()) RETURNING *`,
-    [contactId, funnelId || null, funnelStageId || null]
+    `INSERT INTO conversations (tenant_id, contact_id, funnel_id, funnel_stage_id, last_message_at)
+     VALUES ($1, $2, $3, $4, now()) RETURNING *`,
+    [tenantId, contactId, funnelId || null, funnelStageId || null]
   );
   const conversation = result.rows[0];
 

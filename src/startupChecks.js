@@ -12,4 +12,13 @@ export function assertProductionSecrets(env = process.env) {
       'app → Configurações → Básico → Chave secreta do aplicativo) antes de subir.'
     );
   }
+
+  if (!env.SESSION_SECRET) {
+    throw new Error(
+      'SESSION_SECRET ausente em produção (NODE_ENV=production). ' +
+      'Sem ele, as sessões de login usam o segredo padrão de desenvolvimento, ' +
+      'o que permitiria forjar cookies de sessão válidos. Configure SESSION_SECRET ' +
+      'em .env.production (qualquer string longa e aleatória, ex: openssl rand -hex 32).'
+    );
+  }
 }

@@ -56,7 +56,7 @@ function asyncHandler(fn) {
 }
 
 apiRouter.get('/contacts', asyncHandler(async (req, res) => {
-  res.json(await listContacts(req.query.q, req.query.funnel_id));
+  res.json(await listContacts(req.tenantId, req.query.q, req.query.funnel_id));
 }));
 
 apiRouter.post('/contacts', asyncHandler(async (req, res) => {
@@ -72,7 +72,7 @@ apiRouter.post('/contacts', asyncHandler(async (req, res) => {
 }));
 
 apiRouter.get('/contacts/:id', asyncHandler(async (req, res) => {
-  const contact = await getContactById(req.params.id);
+  const contact = await getContactById(req.tenantId, req.params.id);
   if (!contact) return res.status(404).json({ error: 'Contato não encontrado' });
   const conversations = await getContactConversations(req.params.id);
   res.json({ ...contact, conversations });
@@ -95,8 +95,8 @@ apiRouter.delete('/contacts/:id/tags/:tag', asyncHandler(async (req, res) => {
   res.json(await removeTagFromContact(req.params.id, req.params.tag));
 }));
 
-apiRouter.get('/funnels', asyncHandler(async (_req, res) => {
-  res.json(await listFunnelsWithStages());
+apiRouter.get('/funnels', asyncHandler(async (req, res) => {
+  res.json(await listFunnelsWithStages(req.tenantId));
 }));
 
 apiRouter.post('/funnels', asyncHandler(async (req, res) => {
@@ -147,12 +147,12 @@ apiRouter.patch('/stages/:id/move', asyncHandler(async (req, res) => {
   res.json(await moveStage(req.params.id, direction));
 }));
 
-apiRouter.get('/dashboard/summary', asyncHandler(async (_req, res) => {
-  res.json(await getDashboardSummary());
+apiRouter.get('/dashboard/summary', asyncHandler(async (req, res) => {
+  res.json(await getDashboardSummary(req.tenantId));
 }));
 
-apiRouter.get('/dashboard/recent-conversations', asyncHandler(async (_req, res) => {
-  res.json(await getRecentConversations());
+apiRouter.get('/dashboard/recent-conversations', asyncHandler(async (req, res) => {
+  res.json(await getRecentConversations(req.tenantId));
 }));
 
 apiRouter.get('/settings/whatsapp-status', asyncHandler(async (_req, res) => {
@@ -240,7 +240,7 @@ apiRouter.post('/conversations/:id/messages', asyncHandler(async (req, res) => {
 }));
 
 apiRouter.get('/automation-flows', asyncHandler(async (req, res) => {
-  res.json(await listFlowsWithSteps(req.query.funnel_id));
+  res.json(await listFlowsWithSteps(req.tenantId, req.query.funnel_id));
 }));
 
 apiRouter.get('/automation-flows/:id', asyncHandler(async (req, res) => {
@@ -272,8 +272,8 @@ apiRouter.patch('/automation-flows/:id/active', asyncHandler(async (req, res) =>
   res.json(await setFlowActive(req.params.id, req.body.is_active));
 }));
 
-apiRouter.get('/tags', asyncHandler(async (_req, res) => {
-  res.json(await listTags());
+apiRouter.get('/tags', asyncHandler(async (req, res) => {
+  res.json(await listTags(req.tenantId));
 }));
 
 apiRouter.post('/tags', asyncHandler(async (req, res) => {

@@ -1,16 +1,17 @@
 import { query } from '../db/pool.js';
 
-export async function getDashboardSummary() {
+export async function getDashboardSummary(tenantId) {
   const [contacts, openConversations, closedThisWeek, messagesLast7Days, automationsActive] = await Promise.all([
-    query('SELECT count(*)::int AS count FROM contacts'),
-    query("SELECT count(*)::int AS count FROM conversations WHERE status != 'closed'"),
+    query('SELECT count(*)::int AS count FROM contacts WHERE tenant_id = $1', [tenantId]),
+    query("SELECT count(*)::int AS count FROM conversations WHERE tenant_id = $1 AND status != 'closed'", [tenantId]),
     query(
       `SELECT count(*)::int AS count FROM conversations c
        JOIN funnel_stages fs ON fs.id = c.funnel_stage_id
-       WHERE fs.is_closed_stage = true AND c.updated_at >= now() - interval '7 days'`
+       WHERE c.tenant_id = $1 AND fs.is_closed_stage = true AND c.updated_at >= now() - interval '7 days'`,
+      [tenantId]
     ),
-    query("SELECT count(*)::int AS count FROM messages WHERE created_at >= now() - interval '7 days'"),
-    query('SELECT count(*)::int AS count FROM automation_flows WHERE is_active = true'),
+    query("SELECT count(*)::int AS count FROM messages WHERE tenant_id = $1 AND created_at >= now() - interval '7 days'", [tenantId]),
+    query('SELECT count(*)::int AS count FROM automation_flows WHERE tenant_id = $1 AND is_active = true', [tenantId]),
   ]);
 
   return {
@@ -22,15 +23,16 @@ export async function getDashboardSummary() {
   };
 }
 
-export async function getRecentConversations(limit = 8) {
+export async function getRecentConversations(tenantId, limit = 8) {
   const result = await query(
     `SELECT c.*, ct.name AS contact_name, ct.phone_display, ct.avatar_initials, fs.name AS stage_name
      FROM conversations c
      JOIN contacts ct ON ct.id = c.contact_id
      LEFT JOIN funnel_stages fs ON fs.id = c.funnel_stage_id
+     WHERE c.tenant_id = $1
      ORDER BY c.last_message_at DESC NULLS LAST
-     LIMIT $1`,
-    [limit]
+     LIMIT $2`,
+    [tenantId, limit]
   );
   return result.rows;
 }

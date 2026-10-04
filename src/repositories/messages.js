@@ -1,4 +1,5 @@
 import { query } from '../db/pool.js';
+import { getDefaultTenantId } from '../tenant.js';
 
 export async function insertMessage({
   conversationId,
@@ -11,13 +12,14 @@ export async function insertMessage({
   status = 'sent',
   automationFlowId,
 }) {
+  const tenantId = await getDefaultTenantId();
   const result = await query(
     `INSERT INTO messages
-      (conversation_id, wa_message_id, direction, sender_type, body, media_url, media_type, status, automation_flow_id)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      (tenant_id, conversation_id, wa_message_id, direction, sender_type, body, media_url, media_type, status, automation_flow_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
      ON CONFLICT (wa_message_id) DO NOTHING
      RETURNING *`,
-    [conversationId, waMessageId || null, direction, senderType, body || null, mediaUrl || null, mediaType || null, status, automationFlowId || null]
+    [tenantId, conversationId, waMessageId || null, direction, senderType, body || null, mediaUrl || null, mediaType || null, status, automationFlowId || null]
   );
   return result.rows[0];
 }

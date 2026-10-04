@@ -1,14 +1,18 @@
 import { query } from '../db/pool.js';
+import { getDefaultTenantId } from '../tenant.js';
 
-export async function listFlowsWithSteps(funnelId) {
+export async function listFlowsWithSteps(tenantId, funnelId) {
   const flows = funnelId
     ? await query(
-        'SELECT * FROM automation_flows WHERE funnel_id = $1 OR funnel_id IS NULL ORDER BY created_at DESC',
-        [funnelId]
+        'SELECT * FROM automation_flows WHERE tenant_id = $1 AND (funnel_id = $2 OR funnel_id IS NULL) ORDER BY created_at DESC',
+        [tenantId, funnelId]
       )
-    : await query('SELECT * FROM automation_flows ORDER BY created_at DESC');
+    : await query('SELECT * FROM automation_flows WHERE tenant_id = $1 ORDER BY created_at DESC', [tenantId]);
 
-  const steps = await query('SELECT * FROM automation_flow_steps ORDER BY position ASC');
+  const steps = await query(
+    'SELECT afs.* FROM automation_flow_steps afs JOIN automation_flows af ON af.id = afs.automation_flow_id WHERE af.tenant_id = $1 ORDER BY afs.position ASC',
+    [tenantId]
+  );
   return flows.rows.map((flow) => ({
     ...flow,
     steps: steps.rows.filter((s) => s.automation_flow_id === flow.id),
@@ -27,10 +31,11 @@ export async function getFlowWithSteps(flowId) {
 }
 
 export async function createFlow({ name, funnelId, triggerType, triggerConfig = {}, isActive = true }) {
+  const tenantId = await getDefaultTenantId();
   const result = await query(
-    `INSERT INTO automation_flows (name, funnel_id, trigger_type, trigger_config, is_active)
-     VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-    [name, funnelId || null, triggerType, JSON.stringify(triggerConfig), isActive]
+    `INSERT INTO automation_flows (tenant_id, name, funnel_id, trigger_type, trigger_config, is_active)
+     VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+    [tenantId, name, funnelId || null, triggerType, JSON.stringify(triggerConfig), isActive]
   );
   return result.rows[0];
 }

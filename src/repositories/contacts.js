@@ -1,6 +1,7 @@
 import { query } from '../db/pool.js';
 import { createTag } from './tags.js';
 import { logActivity } from './activityLog.js';
+import { getDefaultTenantId } from '../tenant.js';
 
 function initialsOf(name, fallback) {
   return (
@@ -17,19 +18,21 @@ export async function findOrCreateContactByWaId(waId, { name, phoneDisplay } = {
   const existing = await query('SELECT * FROM contacts WHERE wa_id = $1', [waId]);
   if (existing.rows[0]) return existing.rows[0];
 
+  const tenantId = await getDefaultTenantId();
   const inserted = await query(
-    `INSERT INTO contacts (wa_id, name, phone_display, avatar_initials)
-     VALUES ($1, $2, $3, $4) RETURNING *`,
-    [waId, name || null, phoneDisplay || waId, initialsOf(name, waId)]
+    `INSERT INTO contacts (tenant_id, wa_id, name, phone_display, avatar_initials)
+     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    [tenantId, waId, name || null, phoneDisplay || waId, initialsOf(name, waId)]
   );
   return inserted.rows[0];
 }
 
 export async function createContact({ waId, name, phoneDisplay, source, email }) {
+  const tenantId = await getDefaultTenantId();
   const inserted = await query(
-    `INSERT INTO contacts (wa_id, name, phone_display, avatar_initials, source, email)
-     VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-    [waId, name || null, phoneDisplay || waId, initialsOf(name, waId), source || null, email || null]
+    `INSERT INTO contacts (tenant_id, wa_id, name, phone_display, avatar_initials, source, email)
+     VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+    [tenantId, waId, name || null, phoneDisplay || waId, initialsOf(name, waId), source || null, email || null]
   );
   return inserted.rows[0];
 }
@@ -38,7 +41,7 @@ export async function createContact({ waId, name, phoneDisplay, source, email })
 // string vazia é um valor válido e limpa o campo.
 export async function updateContact(id, fields) {
   const columns = ['name', 'email', 'source', 'notes'].filter((key) => fields[key] !== undefined);
-  if (!columns.length) return getContactById(id);
+  if (!columns.length) return getContactById(await getDefaultTenantId(), id);
 
   const setClause = columns.map((col, i) => `${col} = $${i + 2}`).join(', ');
   const values = columns.map((col) => fields[col] || null);
@@ -58,9 +61,9 @@ export async function removeTagFromContact(contactId, tag) {
   return result.rows[0];
 }
 
-export async function listContacts(searchTerm, funnelId) {
-  const conditions = [];
-  const params = [];
+export async function listContacts(tenantId, searchTerm, funnelId) {
+  const conditions = ['c.tenant_id = $1'];
+  const params = [tenantId];
 
   if (searchTerm) {
     params.push(`%${searchTerm}%`);
@@ -71,13 +74,13 @@ export async function listContacts(searchTerm, funnelId) {
     conditions.push(`EXISTS (SELECT 1 FROM conversations conv WHERE conv.contact_id = c.id AND conv.funnel_id = $${params.length})`);
   }
 
-  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  const where = `WHERE ${conditions.join(' AND ')}`;
   const result = await query(`SELECT c.* FROM contacts c ${where} ORDER BY c.created_at DESC`, params);
   return result.rows;
 }
 
-export async function getContactById(id) {
-  const result = await query('SELECT * FROM contacts WHERE id = $1', [id]);
+export async function getContactById(tenantId, id) {
+  const result = await query('SELECT * FROM contacts WHERE id = $1 AND tenant_id = $2', [id, tenantId]);
   return result.rows[0];
 }
 
@@ -103,5 +106,5 @@ export async function addTagToContact(contactId, tag) {
   if (result.rows[0]) {
     await logActivity({ contactId, type: 'tag_added', description: `Tag adicionada: "${tag}"` });
   }
-  return result.rows[0] || (await getContactById(contactId));
+  return result.rows[0] || (await getContactById(await getDefaultTenantId(), contactId));
 }

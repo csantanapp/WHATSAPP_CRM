@@ -4,8 +4,12 @@ import { fileURLToPath } from 'node:url';
 import { webhookRouter } from './whatsapp/webhook.js';
 import { apiRouter } from './routes/api.js';
 import { healthRouter } from './routes/health.js';
+import { authRouter } from './routes/auth.js';
+import { usersRouter } from './routes/users.js';
 import { securityHeaders, webhookRateLimit, apiRateLimit } from './middleware/security.js';
 import { logger, requestLogger } from './logger.js';
+import { createSessionMiddleware } from './auth/session.js';
+import { requireAuth, verifyOrigin } from './middleware/auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -36,7 +40,14 @@ export function createApp() {
   );
 
   app.use('/webhook/whatsapp', webhookRateLimit, webhookRouter);
-  app.use('/api', apiRateLimit, apiRouter);
+
+  // Sessão só é necessária a partir daqui (login e tudo que exige usuário).
+  app.use(createSessionMiddleware());
+  app.use(verifyOrigin);
+
+  app.use('/api/auth', apiRateLimit, authRouter);
+  app.use('/api/users', apiRateLimit, usersRouter);
+  app.use('/api', apiRateLimit, requireAuth, apiRouter);
   app.use(express.static(path.join(__dirname, '..', 'public')));
 
   // eslint-disable-next-line no-unused-vars

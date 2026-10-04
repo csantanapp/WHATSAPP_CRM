@@ -1,9 +1,13 @@
 import { query } from '../db/pool.js';
 import { createTag } from './tags.js';
+import { getDefaultTenantId } from '../tenant.js';
 
-export async function listFunnelsWithStages() {
-  const funnels = await query('SELECT * FROM funnels ORDER BY position ASC');
-  const stages = await query('SELECT * FROM funnel_stages ORDER BY position ASC');
+export async function listFunnelsWithStages(tenantId) {
+  const funnels = await query('SELECT * FROM funnels WHERE tenant_id = $1 ORDER BY position ASC', [tenantId]);
+  const stages = await query(
+    'SELECT fs.* FROM funnel_stages fs JOIN funnels f ON f.id = fs.funnel_id WHERE f.tenant_id = $1 ORDER BY fs.position ASC',
+    [tenantId]
+  );
   return funnels.rows.map((f) => ({
     ...f,
     stages: stages.rows.filter((s) => s.funnel_id === f.id),
@@ -28,7 +32,8 @@ const DEFAULT_STAGES = [
 ];
 
 export async function createFunnel({ name, color = '#12A37D', welcomeMessage, stages, defaultTags }) {
-  const positionResult = await query('SELECT COALESCE(MAX(position), -1) + 1 AS next FROM funnels');
+  const tenantId = await getDefaultTenantId();
+  const positionResult = await query('SELECT COALESCE(MAX(position), -1) + 1 AS next FROM funnels WHERE tenant_id = $1', [tenantId]);
   const position = positionResult.rows[0].next;
 
   // Gera uma palavra-chave única e curta pro link wa.me (ex: "evento-sp-2026" -> "evento-sp-2026-x4k9").
@@ -40,9 +45,9 @@ export async function createFunnel({ name, color = '#12A37D', welcomeMessage, st
   for (const tag of tags) await createTag(tag); // garante que entram no catálogo
 
   const result = await query(
-    `INSERT INTO funnels (name, color, position, is_default, entry_keyword, welcome_message, default_tags)
-     VALUES ($1,$2,$3,false,$4,$5,$6) RETURNING *`,
-    [name, color, position, entryKeyword, welcomeMessage || null, tags]
+    `INSERT INTO funnels (tenant_id, name, color, position, is_default, entry_keyword, welcome_message, default_tags)
+     VALUES ($1,$2,$3,$4,false,$5,$6,$7) RETURNING *`,
+    [tenantId, name, color, position, entryKeyword, welcomeMessage || null, tags]
   );
   const funnel = result.rows[0];
 

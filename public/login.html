@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Entrar · CRM WhatsApp Tractom</title>
+<link rel="stylesheet" href="/css/base.css" />
+<style>
+  .ds-auth-error { display: none; background: var(--color-danger-bg); color: var(--color-danger); font-size: var(--font-size-sm); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); margin-bottom: var(--space-4); }
+  .ds-auth-error.show { display: block; }
+  .btn-block { width: 100%; }
+</style>
+</head>
+<body class="ds">
+  <div class="ds-auth-page">
+    <div class="ds-auth-card">
+      <div class="ds-auth-logo"><div class="mark">T</div></div>
+      <div class="card card-padded">
+        <div style="text-align:center;margin-bottom:var(--space-6);">
+          <h1 class="ds-h1">CRM WhatsApp</h1>
+          <p class="ds-muted" style="margin-top:4px;">Entre com seu e-mail e senha</p>
+        </div>
+
+        <div id="login-error" class="ds-auth-error"></div>
+
+        <form id="login-form" style="display:flex;flex-direction:column;gap:var(--space-4);">
+          <div class="field">
+            <label class="label" for="email">E-mail</label>
+            <input class="input" id="email" name="email" type="email" autocomplete="username" required />
+          </div>
+          <div class="field">
+            <label class="label" for="password">Senha</label>
+            <input class="input" id="password" name="password" type="password" autocomplete="current-password" required />
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="login-submit">Entrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('login-form');
+    const errorBox = document.getElementById('login-error');
+    const submitBtn = document.getElementById('login-submit');
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.add('show');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBox.classList.remove('show');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Entrando...';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.error?.message || 'Não foi possível entrar.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Entrar';
+          return;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        window.location.href = params.get('next') || '/';
+      } catch (err) {
+        showError('Falha de conexão. Tente de novo.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Entrar';
+      }
+    });
+  </script>
+</body>
+</html>

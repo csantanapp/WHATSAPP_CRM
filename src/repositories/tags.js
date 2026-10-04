@@ -1,16 +1,18 @@
 import { query } from '../db/pool.js';
+import { getDefaultTenantId } from '../tenant.js';
 
-export async function listTags() {
-  const result = await query('SELECT * FROM tags ORDER BY name ASC');
+export async function listTags(tenantId) {
+  const result = await query('SELECT * FROM tags WHERE tenant_id = $1 ORDER BY name ASC', [tenantId]);
   return result.rows;
 }
 
 export async function createTag(name, color) {
+  const tenantId = await getDefaultTenantId();
   const result = await query(
-    `INSERT INTO tags (name, color) VALUES ($1, $2)
+    `INSERT INTO tags (tenant_id, name, color) VALUES ($1, $2, $3)
      ON CONFLICT (name) DO UPDATE SET color = tags.color
      RETURNING *`,
-    [name, color || '#5B5F58']
+    [tenantId, name, color || '#5B5F58']
   );
   return result.rows[0];
 }
