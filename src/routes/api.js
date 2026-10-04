@@ -16,8 +16,17 @@ import {
   moveConversationToFunnel,
   getConversationDetail,
   markConversationAsRead,
+  assignConversation,
+  unassignConversation,
+  setConversationStatus,
+  setConversationPriority,
+  markFirstResponseIfNeeded,
+  isWindowOpen,
+  touchConversation,
 } from '../repositories/conversations.js';
-import { listMessagesByConversation, insertMessage } from '../repositories/messages.js';
+import { listMessagesByConversation, insertMessage, insertInternalNote } from '../repositories/messages.js';
+import { listQuickReplies, createQuickReply, updateQuickReply, deleteQuickReply } from '../repositories/quickReplies.js';
+import { requireRole } from '../middleware/auth.js';
 import { sendTextMessage, checkConnectionStatus } from '../whatsapp/client.js';
 import { broadcast } from '../realtime.js';
 import {
@@ -170,7 +179,7 @@ apiRouter.put('/settings/whatsapp-number', asyncHandler(async (req, res) => {
 }));
 
 apiRouter.get('/funnels/:id/conversations', asyncHandler(async (req, res) => {
-  res.json(await listConversationsByFunnel(req.params.id));
+  res.json(await listConversationsByFunnel(req.params.id, req.user));
 }));
 
 apiRouter.get('/conversations/:id/messages', asyncHandler(async (req, res) => {
@@ -223,6 +232,16 @@ apiRouter.post('/conversations/:id/messages', asyncHandler(async (req, res) => {
   const conversation = convResult.rows[0];
   if (!conversation) return res.status(404).json({ error: 'Conversa não encontrada' });
 
+  // Janela de 24h: mensagem livre só é permitida se o contato escreveu nas
+  // últimas 24h. Validado SEMPRE no backend — o frontend pode mostrar o aviso
+  // antes, mas não é confiável sozinho (ver seção 21 do roadmap da Fase 2).
+  const windowOpen = await isWindowOpen(conversationId);
+  if (!windowOpen) {
+    return res.status(422).json({
+      error: { code: 'WINDOW_CLOSED', message: 'A janela de 24h desse contato está fechada — envie um template aprovado pela Meta.' },
+    });
+  }
+
   try {
     const sent = await sendTextMessage(conversation.wa_id, text);
     const saved = await insertMessage({
@@ -232,11 +251,83 @@ apiRouter.post('/conversations/:id/messages', asyncHandler(async (req, res) => {
       senderType: 'agent',
       body: text,
     });
+    await touchConversation(conversationId, { incrementUnread: false, isInbound: false });
+    await markFirstResponseIfNeeded(conversationId);
     broadcast({ type: 'message:new', conversationId: Number(conversationId), message: saved });
     res.status(201).json(saved);
   } catch (err) {
     res.status(502).json({ error: err.message });
   }
+}));
+
+// --- Atendimento: atribuição, status, prioridade, notas internas ---
+
+apiRouter.patch('/conversations/:id/assign', asyncHandler(async (req, res) => {
+  const userId = req.body.user_id ?? req.user.id; // sem user_id = "assumir pra mim"
+  const updated = await assignConversation(req.params.id, userId);
+  if (!updated) return res.status(404).json({ error: 'Conversa não encontrada' });
+  broadcast({ type: 'conversation:assigned', conversation: updated });
+  res.json(updated);
+}));
+
+apiRouter.patch('/conversations/:id/unassign', asyncHandler(async (req, res) => {
+  const updated = await unassignConversation(req.params.id);
+  if (!updated) return res.status(404).json({ error: 'Conversa não encontrada' });
+  broadcast({ type: 'conversation:assigned', conversation: updated });
+  res.json(updated);
+}));
+
+apiRouter.patch('/conversations/:id/status', asyncHandler(async (req, res) => {
+  const { status } = req.body;
+  if (!['open', 'pending', 'closed'].includes(status)) {
+    return res.status(400).json({ error: 'status deve ser open, pending ou closed' });
+  }
+  const updated = await setConversationStatus(req.params.id, status);
+  if (!updated) return res.status(404).json({ error: 'Conversa não encontrada' });
+  broadcast({ type: 'conversation:updated', conversation: updated });
+  res.json(updated);
+}));
+
+apiRouter.patch('/conversations/:id/priority', asyncHandler(async (req, res) => {
+  const updated = await setConversationPriority(req.params.id, !!req.body.is_priority);
+  if (!updated) return res.status(404).json({ error: 'Conversa não encontrada' });
+  broadcast({ type: 'conversation:updated', conversation: updated });
+  res.json(updated);
+}));
+
+// Nota interna — nunca passa pela Graph API, nunca atualiza a janela de 24h.
+apiRouter.post('/conversations/:id/notes', asyncHandler(async (req, res) => {
+  const { text } = req.body;
+  if (!text) return res.status(400).json({ error: 'text é obrigatório' });
+  const saved = await insertInternalNote({ conversationId: req.params.id, authorUserId: req.user.id, body: text });
+  broadcast({ type: 'message:new', conversationId: Number(req.params.id), message: saved });
+  res.status(201).json(saved);
+}));
+
+// --- Respostas rápidas ---
+
+apiRouter.get('/quick-replies', asyncHandler(async (req, res) => {
+  res.json(await listQuickReplies(req.tenantId));
+}));
+
+apiRouter.post('/quick-replies', asyncHandler(async (req, res) => {
+  const { shortcut, title, body } = req.body;
+  if (!shortcut || !title || !body) return res.status(400).json({ error: 'shortcut, title e body são obrigatórios' });
+  try {
+    res.status(201).json(await createQuickReply(req.tenantId, { shortcut, title, body, createdBy: req.user.id }));
+  } catch (err) {
+    if (err.code === '23505') return res.status(409).json({ error: 'Já existe uma resposta rápida com esse atalho' });
+    throw err;
+  }
+}));
+
+apiRouter.patch('/quick-replies/:id', asyncHandler(async (req, res) => {
+  res.json(await updateQuickReply(req.tenantId, req.params.id, req.body));
+}));
+
+apiRouter.delete('/quick-replies/:id', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
+  await deleteQuickReply(req.tenantId, req.params.id);
+  res.status(204).end();
 }));
 
 apiRouter.get('/automation-flows', asyncHandler(async (req, res) => {

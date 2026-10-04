@@ -126,7 +126,7 @@ async function handleInboundMessages(value) {
     // caso não processa de novo (evita contar não-lida em dobro e automação repetida).
     if (!saved) continue;
 
-    await touchConversation(conversation.id, { incrementUnread: true });
+    await touchConversation(conversation.id, { incrementUnread: true, isInbound: true });
 
     broadcast({
       type: 'message:new',

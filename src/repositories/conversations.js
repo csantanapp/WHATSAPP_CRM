@@ -2,9 +2,13 @@ import { query } from '../db/pool.js';
 import { logActivity } from './activityLog.js';
 import { getDefaultTenantId } from '../tenant.js';
 
+// Apesar do nome (mantido por compatibilidade com os imports existentes),
+// retorna a conversa mais recente do contato INDEPENDENTE do status — uma
+// conversa fechada é reaberta automaticamente quando o contato escreve de
+// novo (ver touchConversation), em vez de nascer uma conversa nova do zero.
 export async function findOpenConversationForContact(contactId) {
   const result = await query(
-    `SELECT * FROM conversations WHERE contact_id = $1 AND status != 'closed'
+    `SELECT * FROM conversations WHERE contact_id = $1
      ORDER BY created_at DESC LIMIT 1`,
     [contactId]
   );
@@ -40,12 +44,60 @@ export async function findOrCreateOpenConversation(contactId, defaults) {
   return createConversation(contactId, defaults);
 }
 
-export async function touchConversation(conversationId, { incrementUnread = false } = {}) {
+export async function touchConversation(conversationId, { incrementUnread = false, isInbound = false } = {}) {
   const result = await query(
     `UPDATE conversations SET last_message_at = now(), updated_at = now(),
-       unread_count = unread_count + $2
+       unread_count = unread_count + $2,
+       last_inbound_at = CASE WHEN $3 THEN now() ELSE last_inbound_at END,
+       status = CASE WHEN $3 AND status = 'closed' THEN 'open' ELSE status END,
+       closed_at = CASE WHEN $3 AND status = 'closed' THEN NULL ELSE closed_at END
      WHERE id = $1 RETURNING *`,
-    [conversationId, incrementUnread ? 1 : 0]
+    [conversationId, incrementUnread ? 1 : 0, isInbound]
+  );
+  return result.rows[0];
+}
+
+// Marca o SLA de primeira resposta na primeira vez que alguém (humano ou
+// automação) responde depois de uma mensagem do contato — nunca sobrescreve
+// depois de setado uma vez.
+export async function markFirstResponseIfNeeded(conversationId) {
+  await query(
+    `UPDATE conversations SET first_response_at = now()
+     WHERE id = $1 AND first_response_at IS NULL`,
+    [conversationId]
+  );
+}
+
+export async function assignConversation(conversationId, userId) {
+  const result = await query(
+    'UPDATE conversations SET assigned_user_id = $2, updated_at = now() WHERE id = $1 RETURNING *',
+    [conversationId, userId]
+  );
+  return result.rows[0];
+}
+
+export async function unassignConversation(conversationId) {
+  const result = await query(
+    'UPDATE conversations SET assigned_user_id = NULL, updated_at = now() WHERE id = $1 RETURNING *',
+    [conversationId]
+  );
+  return result.rows[0];
+}
+
+export async function setConversationStatus(conversationId, status) {
+  const result = await query(
+    `UPDATE conversations SET status = $2, updated_at = now(),
+       closed_at = CASE WHEN $2 = 'closed' THEN now() ELSE NULL END
+     WHERE id = $1 RETURNING *`,
+    [conversationId, status]
+  );
+  return result.rows[0];
+}
+
+export async function setConversationPriority(conversationId, isPriority) {
+  const result = await query(
+    'UPDATE conversations SET is_priority = $2, updated_at = now() WHERE id = $1 RETURNING *',
+    [conversationId, isPriority]
   );
   return result.rows[0];
 }
@@ -123,29 +175,57 @@ export async function moveConversationToNextStage(conversationId) {
   return moveConversationToStage(conversationId, nextStage.id);
 }
 
+const WINDOW_HOURS = 24;
+
 export async function getConversationDetail(conversationId) {
   const result = await query(
     `SELECT c.*, ct.name AS contact_name, ct.email AS contact_email, ct.phone_display, ct.avatar_initials,
             ct.tags AS contact_tags, ct.source AS contact_source, ct.notes AS contact_notes, ct.wa_id,
-            f.id AS funnel_id_full, f.name AS funnel_name, fs.name AS stage_name
+            f.id AS funnel_id_full, f.name AS funnel_name, fs.name AS stage_name,
+            u.name AS assigned_user_name,
+            (c.last_inbound_at IS NOT NULL AND c.last_inbound_at > now() - interval '${WINDOW_HOURS} hours') AS window_open
      FROM conversations c
      JOIN contacts ct ON ct.id = c.contact_id
      LEFT JOIN funnels f ON f.id = c.funnel_id
      LEFT JOIN funnel_stages fs ON fs.id = c.funnel_stage_id
+     LEFT JOIN users u ON u.id = c.assigned_user_id
      WHERE c.id = $1`,
     [conversationId]
   );
   return result.rows[0];
 }
 
-export async function listConversationsByFunnel(funnelId) {
+// Usado pelo backend antes de mandar mensagem livre — nunca confiar só no
+// que o frontend acha que sabe sobre a janela.
+export async function isWindowOpen(conversationId) {
   const result = await query(
-    `SELECT c.*, ct.name AS contact_name, ct.phone_display, ct.avatar_initials
+    `SELECT (last_inbound_at IS NOT NULL AND last_inbound_at > now() - interval '${WINDOW_HOURS} hours') AS open
+     FROM conversations WHERE id = $1`,
+    [conversationId]
+  );
+  return result.rows[0]?.open === true;
+}
+
+// Atendente só vê as conversas atribuídas a ele + as não atribuídas (regra da
+// Fase 2). Admin e supervisor veem tudo. `viewer` é opcional pra não quebrar
+// chamadas internas que não têm contexto de usuário (ex: automação).
+export async function listConversationsByFunnel(funnelId, viewer) {
+  const params = [funnelId];
+  let visibilityClause = '';
+  if (viewer && viewer.role === 'atendente' && !viewer.isPlatformAdmin) {
+    params.push(viewer.id);
+    visibilityClause = `AND (c.assigned_user_id = $${params.length} OR c.assigned_user_id IS NULL)`;
+  }
+
+  const result = await query(
+    `SELECT c.*, ct.name AS contact_name, ct.phone_display, ct.avatar_initials,
+            u.name AS assigned_user_name
      FROM conversations c
      JOIN contacts ct ON ct.id = c.contact_id
-     WHERE c.funnel_id = $1
-     ORDER BY c.last_message_at DESC NULLS LAST`,
-    [funnelId]
+     LEFT JOIN users u ON u.id = c.assigned_user_id
+     WHERE c.funnel_id = $1 ${visibilityClause}
+     ORDER BY c.is_priority DESC, c.last_message_at DESC NULLS LAST`,
+    params
   );
   return result.rows;
 }
