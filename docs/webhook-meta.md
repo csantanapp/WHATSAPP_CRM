@@ -2,11 +2,15 @@
 
 ## App e número
 
-- **App Meta**: não identificado pelo nome nesta sessão — confirmar no Meta for Developers com o `WHATSAPP_BUSINESS_ACCOUNT_ID` abaixo.
-- `WHATSAPP_PHONE_NUMBER_ID` = `1278704765331255`
-- `WHATSAPP_BUSINESS_ACCOUNT_ID` (WABA) = `2001578900552069`
-- `WHATSAPP_ACCESS_TOKEN`: configurado (não é token de teste de 24h — não foi possível confirmar validade/expiração sem consultar o Meta for Developers diretamente)
+- **App Meta**: "Tractom Whats" (app_id `2530369790765391`)
+- **⚠️ Correção importante (2026-10-04)**: o sistema estava configurado com o **número de teste da Meta** (`+1 555-150-6330`), não com o número real da Tractom. Corrigido:
+  - `WHATSAPP_PHONE_NUMBER_ID` = `862747723583228` (**real**: +55 44 3101-0272, "Cristiano - TRACTOM Marketing Estratégico")
+  - `WHATSAPP_BUSINESS_ACCOUNT_ID` (WABA) = `994468479393590` (**real** — antes estava `2001578900552069`, que é a WABA do número de teste)
+  - Essa WABA real **não tinha nenhum app inscrito pra receber webhook** (`GET /{waba-id}/subscribed_apps` retornava vazio) — é por isso que mensagens pro número real nunca chegariam ao sistema, mesmo com tudo mais certo. Inscrito via `POST /{waba-id}/subscribed_apps` com o token de sistema existente.
+  - Token de acesso é SYSTEM_USER (não expira por tempo — `expires_at: 0` no `debug_token`), escopos `whatsapp_business_management` + `whatsapp_business_messaging`.
+- `WHATSAPP_ACCESS_TOKEN`: configurado, confirmado como token de sistema permanente
 - `WHATSAPP_VERIFY_TOKEN`: configurado, usado na verificação `GET /webhook/whatsapp`
+- **Número de teste** (`1278704765331255` / WABA `2001578900552069`) continua existindo na mesma conta Meta, só não é mais o configurado no `.env.production` — útil pra testes futuros sem usar o número real.
 
 ## URL do webhook
 
