@@ -44,3 +44,32 @@ Enquanto isso não for feito, uma correção de código que já apliquei na Fase
 `isValidSignature()` usava `crypto.timingSafeEqual()` diretamente nos buffers da assinatura recebida e da esperada. Essa função **lança `RangeError`** (em vez de retornar `false`) quando os dois buffers têm tamanhos diferentes — o que acontece com qualquer assinatura forjada de tamanho "errado". Como a rota é `async` e o erro não era capturado, isso virava uma `unhandledRejection` por requisição malformada — um vetor de negação de serviço trivial assim que `WHATSAPP_APP_SECRET` for configurado (hoje não é explorável só porque a validação está desligada, ver acima).
 
 **Correção**: comparar o tamanho dos buffers antes de chamar `timingSafeEqual`, retornando `false` para tamanhos diferentes sem lançar exceção. Coberto pelo teste `webhook POST com assinatura HMAC inválida é rejeitado (401)` em `test/regression.test.js`.
+
+
+## ⏸️ Verificação do número real — PAUSADA (2026-10-04)
+
+Status atual: número `862747723583228` (+55 44 3101-0272) com `status: DISCONNECTED`,
+`platform_type: ON_PREMISE`, `code_verification_status: NOT_VERIFIED` na WABA real
+(`994468479393590`).
+
+**Causa confirmada**: o número está ativamente em uso no WhatsApp Business App comum
+(celular), o que bloqueia o registro na Cloud API.
+
+**Tentativas feitas**:
+- `POST /{phone-number-id}/request_code` (SMS, pt_BR) — recusado 2x com erro
+  136024/2388091 (aguarde 1 hora), mesmo após esperar o tempo indicado.
+- Busca por fluxo de migração no WhatsApp Business App (celular) — opção
+  Migrar para API da Cloud / API do WhatsApp Business **não encontrada** no
+  menu de Configurações.
+- Busca por fluxo de migração no WhatsApp Manager (web) — tela de perfil do
+  número não tem opção de migração; botão Adicionar telefone está
+  **desabilitado** (provavelmente por já existir um número pendente/não
+  verificado nessa WABA).
+
+**Decisão**: pausado por ora (2026-10-04). O sistema segue operacional e testável
+com o número de teste da Meta (`1278704765331255` / WABA `2001578900552069`,
+ver seção acima). Próximo passo recomendado quando for retomar: abrir chamado
+com o suporte comercial da Meta (Business Help Center), explicando o estado
+preso em DISCONNECTED/NOT_VERIFIED e que o self-service (API e painel) não
+está oferecendo o caminho de migração esperado para um número já ativo no
+WhatsApp Business App.
