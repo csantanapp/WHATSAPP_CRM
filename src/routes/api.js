@@ -47,6 +47,8 @@ import {
 import { getSourceForConversation } from '../repositories/conversationSources.js';
 import { runTriggersForTagAdded, runTriggersForStageEntered } from '../automation/engine.js';
 import { getDistributionRule, upsertDistributionRule } from '../services/distribution.js';
+import { summarizeConversation, getLatestInsight, getAiSettings, updateAiSettings } from '../services/ai/AIService.js';
+import { runRadarNow } from '../jobs/dailyRadarJob.js';
 import { requireRole } from '../middleware/auth.js';
 import { sendTextMessage, checkConnectionStatus } from '../whatsapp/client.js';
 import { broadcast } from '../realtime.js';
@@ -325,6 +327,49 @@ apiRouter.patch('/conversations/:id/status', asyncHandler(async (req, res) => {
   if (!updated) return res.status(404).json({ error: 'Conversa não encontrada' });
   broadcast({ type: 'conversation:updated', conversation: updated });
   res.json(updated);
+
+  // Resumo automático ao fechar — não bloqueia a resposta, nunca quebra o fluxo.
+  if (status === 'closed') {
+    summarizeConversation(req.tenantId, req.params.id).catch((err) => {
+      console.error('Falha ao gerar resumo automático:', err.message);
+    });
+  }
+}));
+
+// --- IA ---
+
+apiRouter.post('/conversations/:id/summarize', asyncHandler(async (req, res) => {
+  const insight = await summarizeConversation(req.tenantId, req.params.id);
+  if (!insight) return res.status(503).json({ error: { code: 'ai_unavailable', message: 'Não foi possível gerar o resumo agora (limite mensal atingido ou conversa sem mensagens).' } });
+  res.json(insight);
+}));
+
+apiRouter.get('/conversations/:id/insight', asyncHandler(async (req, res) => {
+  res.json(await getLatestInsight(req.params.id));
+}));
+
+apiRouter.get('/ai/settings', requireRole('admin'), asyncHandler(async (req, res) => {
+  res.json(await getAiSettings(req.tenantId));
+}));
+
+apiRouter.put('/ai/settings', requireRole('admin'), asyncHandler(async (req, res) => {
+  const { provider, summarize_enabled, radar_enabled, monthly_limit } = req.body;
+  res.json(await updateAiSettings(req.tenantId, {
+    provider, summarizeEnabled: summarize_enabled, radarEnabled: radar_enabled, monthlyLimit: monthly_limit,
+  }));
+}));
+
+apiRouter.get('/ai/radar/latest', asyncHandler(async (req, res) => {
+  const result = await query(
+    'SELECT * FROM daily_radar_results WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT 1',
+    [req.tenantId]
+  );
+  res.json(result.rows[0] || null);
+}));
+
+apiRouter.post('/ai/radar/run', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
+  const result = await runRadarNow(req.tenantId);
+  res.status(201).json(result);
 }));
 
 apiRouter.patch('/conversations/:id/priority', asyncHandler(async (req, res) => {
