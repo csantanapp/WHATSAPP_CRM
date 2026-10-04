@@ -259,14 +259,33 @@ button{font-family:'Inter',sans-serif;}
                 <span id="conversa-etapa" style="font-size:12px;font-weight:600;color:#D85A26;">--</span>
               </div>
             </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:10px 28px;border-bottom:1px solid #E7E5DF;background:#FBFAF7;flex-wrap:wrap;">
+              <button id="conversa-assumir-btn" style="background:#FFFFFF;border:1px solid #E4E1D8;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:#3A3D38;cursor:pointer;">Assumir conversa</button>
+              <span id="conversa-atribuido" style="font-size:12px;color:#82867F;"></span>
+              <div style="width:1px;height:18px;background:#E4E1D8;margin:0 4px;"></div>
+              <button id="conversa-prioridade-btn" title="Marcar prioridade" style="background:#FFFFFF;border:1px solid #E4E1D8;border-radius:8px;padding:7px 10px;font-size:14px;cursor:pointer;line-height:1;">☆</button>
+              <select id="conversa-status-select" style="background:#FFFFFF;border:1px solid #E4E1D8;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:600;color:#3A3D38;cursor:pointer;">
+                <option value="open">Aberta</option>
+                <option value="pending">Pendente</option>
+                <option value="closed">Fechada</option>
+              </select>
+              <div style="width:1px;height:18px;background:#E4E1D8;margin:0 4px;"></div>
+              <span id="conversa-janela" style="font-size:11.5px;color:#82867F;"></span>
+            </div>
 
             <div style="flex-grow:1;display:flex;min-height:0;">
               <div style="flex-grow:1;display:flex;flex-direction:column;min-width:0;">
                 <div id="conversa-messages" style="flex-grow:1;overflow-y:auto;padding:24px 32px;display:flex;flex-direction:column;gap:14px;"></div>
-                <form id="conversa-form" style="display:flex;align-items:center;gap:10px;padding:16px 28px;border-top:1px solid #E7E5DF;">
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 28px 0;">
+                  <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:#82867F;cursor:pointer;">
+                    <input type="checkbox" id="conversa-nota-toggle" style="cursor:pointer;"/> Nota interna (não envia pro WhatsApp)
+                  </label>
+                  <button type="button" id="conversa-resposta-rapida-btn" style="background:none;border:none;color:#5B5F58;font-size:11.5px;font-weight:600;cursor:pointer;padding:0;">⚡ Resposta rápida</button>
+                </div>
+                <form id="conversa-form" style="display:flex;align-items:center;gap:10px;padding:10px 28px 16px;border-top:1px solid #E7E5DF;">
                   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9A9D96" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05 12.25 20.24a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.5 3.5 0 0 1 4.95 4.95L9.42 17.4a1.5 1.5 0 0 1-2.12-2.12l8.49-8.49"></path></svg>
                   <input id="conversa-input" autocomplete="off" placeholder="Digite uma mensagem..." style="flex-grow:1;background:#F5F4EF;border:none;border-radius:20px;padding:10px 16px;font-size:13px;color:#14181A;font-family:'Inter',sans-serif;"/>
-                  <button type="submit" style="width:38px;height:38px;border-radius:50%;background:#EB6D37;border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;">
+                  <button type="submit" id="conversa-send-btn" style="width:38px;height:38px;border-radius:50%;background:#EB6D37;border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"></path><path d="M22 2 15 22l-4-9-9-4 20-7Z"></path></svg>
                   </button>
                 </form>
@@ -580,7 +599,11 @@ button{font-family:'Inter',sans-serif;}
       var message = 'Falha na API: ' + path;
       try {
         var body = await res.json();
-        if (body && body.error) message = body.error;
+        if (body && body.error) {
+          // Rotas novas retornam { error: { code, message } }; rotas mais
+          // antigas retornam { error: "string" } — aceita os dois formatos.
+          message = (typeof body.error === 'string') ? body.error : (body.error.message || message);
+        }
       } catch (e) {}
       throw new Error(message);
     }
@@ -816,6 +839,13 @@ button{font-family:'Inter',sans-serif;}
     document.getElementById('painel-funil').textContent = conv.funnel_name || '--';
     document.getElementById('painel-etapa').textContent = conv.stage_name || '--';
 
+    document.getElementById('conversa-atribuido').textContent = conv.assigned_user_name ? ('Com: ' + conv.assigned_user_name) : 'Não atribuída';
+    document.getElementById('conversa-status-select').value = conv.status || 'open';
+    var janelaEl = document.getElementById('conversa-janela');
+    janelaEl.textContent = conv.window_open ? '🟢 Janela aberta (24h)' : '🔴 Janela fechada — só com template';
+    janelaEl.style.color = conv.window_open ? '#15803D' : '#B91C1C';
+    renderPriorityButton();
+
     var notesEl = document.getElementById('painel-notas');
     if (document.activeElement !== notesEl) notesEl.value = conv.contact_notes || '';
 
@@ -905,6 +935,17 @@ button{font-family:'Inter',sans-serif;}
     var isOutbound = m.direction === 'outbound';
     wrap.style.cssText = 'display:flex;flex-direction:column;align-items:' + (isOutbound ? 'flex-end' : 'flex-start') + ';';
 
+    if (m.kind === 'internal_note') {
+      wrap.style.cssText += 'width:100%;';
+      wrap.innerHTML =
+        '<div style="max-width:520px;width:100%;background:#FFFBEB;border:1px solid #F0C77E;border-radius:10px;padding:10px 14px;margin:2px 0;">' +
+          '<div style="font-size:10.5px;font-weight:700;color:#B45309;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px;">📝 Nota interna</div>' +
+          '<div style="font-size:13px;color:#78350F;line-height:1.5;">' + escapeHtml(m.body) + '</div>' +
+        '</div>' +
+        '<div style="font-size:10.5px;color:#ACAFA8;margin-top:2px;">' + formatTime(m.created_at) + '</div>';
+      return wrap;
+    }
+
     var isAutomation = m.sender_type === 'automation';
     var bubbleStyle = isOutbound
       ? (isAutomation
@@ -930,17 +971,75 @@ button{font-family:'Inter',sans-serif;}
     var input = document.getElementById('conversa-input');
     var text = input.value.trim();
     if (!text || !state.currentConversationId) return;
+    var isNote = document.getElementById('conversa-nota-toggle').checked;
     input.value = '';
     try {
-      var saved = await api('/conversations/' + state.currentConversationId + '/messages', {
-        method: 'POST',
-        body: JSON.stringify({ text: text }),
-      });
+      var endpoint = isNote
+        ? '/conversations/' + state.currentConversationId + '/notes'
+        : '/conversations/' + state.currentConversationId + '/messages';
+      var saved = await api(endpoint, { method: 'POST', body: JSON.stringify({ text: text }) });
       document.getElementById('conversa-messages').appendChild(renderBubble(saved));
+      document.getElementById('conversa-messages').scrollTop = document.getElementById('conversa-messages').scrollHeight;
     } catch (err) {
-      alert('Não foi possível enviar (confira as credenciais da Meta Cloud API no .env): ' + err.message);
+      if (err.message && err.message.indexOf('janela de 24h') !== -1) {
+        alert('A janela de 24h desse contato está fechada. Pra falar com ele de novo é preciso usar um template aprovado pela Meta (ainda não disponível nesta tela).');
+      } else {
+        alert('Não foi possível enviar: ' + err.message);
+      }
+      input.value = text;
     }
   });
+
+  document.getElementById('conversa-assumir-btn').addEventListener('click', async function () {
+    if (!state.currentConversationId) return;
+    await api('/conversations/' + state.currentConversationId + '/assign', { method: 'PATCH', body: JSON.stringify({}) });
+    refreshConversationPanel();
+  });
+
+  document.getElementById('conversa-prioridade-btn').addEventListener('click', async function () {
+    var conv = state.currentConversationDetail;
+    if (!conv) return;
+    var updated = await api('/conversations/' + state.currentConversationId + '/priority', {
+      method: 'PATCH',
+      body: JSON.stringify({ is_priority: !conv.is_priority }),
+    });
+    state.currentConversationDetail = Object.assign({}, conv, updated);
+    renderPriorityButton();
+  });
+
+  document.getElementById('conversa-status-select').addEventListener('change', async function () {
+    if (!state.currentConversationId) return;
+    await api('/conversations/' + state.currentConversationId + '/status', {
+      method: 'PATCH',
+      body: JSON.stringify({ status: this.value }),
+    });
+    refreshConversationPanel();
+  });
+
+  document.getElementById('conversa-resposta-rapida-btn').addEventListener('click', async function () {
+    try {
+      var replies = await api('/quick-replies');
+      if (!replies.length) { alert('Nenhuma resposta rápida cadastrada ainda.'); return; }
+      var options = replies.map(function (r, i) { return (i + 1) + '. /' + r.shortcut + ' — ' + r.title; }).join(String.fromCharCode(10));
+      var choice = prompt('Qual resposta rápida?' + String.fromCharCode(10) + options + String.fromCharCode(10) + String.fromCharCode(10) + 'Digite o número:');
+      if (!choice) return;
+      var picked = replies[parseInt(choice, 10) - 1];
+      if (!picked) { alert('Opção inválida.'); return; }
+      var input = document.getElementById('conversa-input');
+      input.value = picked.body;
+      input.focus();
+    } catch (err) {
+      alert('Não foi possível carregar respostas rápidas: ' + err.message);
+    }
+  });
+
+  function renderPriorityButton() {
+    var conv = state.currentConversationDetail;
+    var btn = document.getElementById('conversa-prioridade-btn');
+    if (!conv) { btn.textContent = '☆'; return; }
+    btn.textContent = conv.is_priority ? '★' : '☆';
+    btn.style.color = conv.is_priority ? '#D85A26' : '#3A3D38';
+  }
 
   function connectRealtime() {
     var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
