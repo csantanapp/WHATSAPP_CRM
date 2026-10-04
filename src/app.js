@@ -15,6 +15,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export function createApp() {
   const app = express();
 
+  // O app roda atrás do Caddy compartilhado (reverse proxy na mesma rede
+  // Docker) — sem isso, o Express não confia no cabeçalho X-Forwarded-For,
+  // e o express-rate-limit recusa (por segurança) usar o IP dali, lançando
+  // ERR_ERL_UNEXPECTED_X_FORWARDED_FOR em toda requisição. 1 = confia em
+  // 1 hop de proxy à frente (o Caddy), não a cadeia inteira.
+  app.set('trust proxy', 1);
+
   app.use(securityHeaders);
   app.use(requestLogger);
   app.use(healthRouter);
