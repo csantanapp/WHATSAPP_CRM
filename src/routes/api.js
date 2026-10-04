@@ -49,6 +49,10 @@ import { runTriggersForTagAdded, runTriggersForStageEntered } from '../automatio
 import { getDistributionRule, upsertDistributionRule } from '../services/distribution.js';
 import { summarizeConversation, getLatestInsight, getAiSettings, updateAiSettings } from '../services/ai/AIService.js';
 import { runRadarNow } from '../jobs/dailyRadarJob.js';
+import multer from 'multer';
+import { readFile } from 'node:fs/promises';
+import { mediaFilePath, saveMediaFile } from '../services/mediaStorage.js';
+import { uploadMedia, sendMediaMessage } from '../whatsapp/client.js';
 import { requireRole } from '../middleware/auth.js';
 import { sendTextMessage, checkConnectionStatus } from '../whatsapp/client.js';
 import { broadcast } from '../realtime.js';
@@ -573,4 +577,74 @@ apiRouter.put('/distribution-rule', requireRole('admin', 'supervisor'), asyncHan
     mode: mode || 'manual', participantUserIds: participant_user_ids, isActive: is_active,
   });
   res.json(rule);
+}));
+
+// --- Mídia ---
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 16 * 1024 * 1024 } }); // 16MB, teto da própria Meta
+
+apiRouter.get('/media/:tenantId/:filename', asyncHandler(async (req, res) => {
+  if (String(req.tenantId) !== String(req.params.tenantId)) {
+    return res.status(403).json({ error: { code: 'forbidden', message: 'Mídia de outro tenant.' } });
+  }
+  const filePath = mediaFilePath(req.params.tenantId, req.params.filename);
+  if (!filePath) return res.status(400).json({ error: 'Nome de arquivo inválido' });
+  try {
+    const buffer = await readFile(filePath);
+    res.send(buffer);
+  } catch {
+    res.status(404).json({ error: 'Arquivo não encontrado' });
+  }
+}));
+
+function graphMediaTypeFor(mimeType) {
+  if (mimeType.startsWith('image/')) return 'image';
+  if (mimeType.startsWith('audio/')) return 'audio';
+  if (mimeType.startsWith('video/')) return 'video';
+  return 'document';
+}
+
+apiRouter.post('/conversations/:id/media', upload.single('file'), asyncHandler(async (req, res) => {
+  const conversationId = req.params.id;
+  if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+
+  const windowOpen = await isWindowOpen(conversationId);
+  if (!windowOpen) {
+    return res.status(422).json({ error: { code: 'WINDOW_CLOSED', message: 'Janela de 24h fechada — não é possível enviar mídia livre.' } });
+  }
+
+  const convResult = await query(
+    `SELECT c.*, ct.wa_id FROM conversations c JOIN contacts ct ON ct.id = c.contact_id WHERE c.id = $1`,
+    [conversationId]
+  );
+  const conversation = convResult.rows[0];
+  if (!conversation) return res.status(404).json({ error: 'Conversa não encontrada' });
+
+  const graphType = graphMediaTypeFor(req.file.mimetype);
+
+  try {
+    const metaMediaId = await uploadMedia(req.file.buffer, req.file.mimetype, req.file.originalname);
+    const sent = await sendMediaMessage(conversation.wa_id, metaMediaId, graphType, req.body.caption);
+
+    // Salva uma cópia local também (pra exibir no histórico sem depender da
+    // URL temporária da Meta, que expira).
+    const { servePath } = await saveMediaFile(req.tenantId, req.file.buffer, req.file.mimetype);
+
+    const saved = await insertMessage({
+      conversationId,
+      waMessageId: sent?.messages?.[0]?.id,
+      direction: 'outbound',
+      senderType: 'agent',
+      body: req.body.caption || null,
+      mediaUrl: servePath,
+      mediaType: req.file.mimetype,
+      mediaFilename: req.file.originalname,
+      mediaSizeBytes: req.file.size,
+    });
+    await touchConversation(conversationId, { incrementUnread: false, isInbound: false });
+    broadcast({ type: 'message:new', conversationId: Number(conversationId), message: saved });
+    res.status(201).json(saved);
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
 }));

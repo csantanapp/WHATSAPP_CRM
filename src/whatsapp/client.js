@@ -71,3 +71,53 @@ export async function checkConnectionStatus() {
     return { configured: true, connected: false, message: err.message };
   }
 }
+
+// --- Mídia ---
+
+// 1) Pega a URL temporária (expira em minutos) + mime type de um media_id recebido.
+// 2) Baixa os bytes de verdade com o token de acesso (a URL sozinha não é pública).
+export async function downloadMedia(mediaId) {
+  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+  const metaRes = await fetch(apiUrl(mediaId), {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const meta = await metaRes.json();
+  if (!metaRes.ok) throw new Error(meta?.error?.message || 'Falha ao obter URL da mídia');
+
+  const fileRes = await fetch(meta.url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!fileRes.ok) throw new Error(`Falha ao baixar mídia (${fileRes.status})`);
+  const buffer = Buffer.from(await fileRes.arrayBuffer());
+
+  return { buffer, mimeType: meta.mime_type, sizeBytes: meta.file_size };
+}
+
+// Envia o arquivo (multipart/form-data) pra Meta antes de poder mandar como
+// mensagem — a API exige um media_id próprio dela, não aceita bytes direto.
+export async function uploadMedia(buffer, mimeType, filename) {
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+
+  const form = new FormData();
+  form.append('messaging_product', 'whatsapp');
+  form.append('file', new Blob([buffer], { type: mimeType }), filename);
+
+  const res = await fetch(apiUrl(`${phoneNumberId}/media`), {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error?.message || 'Falha ao enviar mídia pra Meta');
+  return data.id;
+}
+
+export async function sendMediaMessage(toWaId, mediaId, type, caption) {
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const body = {
+    messaging_product: 'whatsapp',
+    to: toWaId,
+    type,
+    [type]: { id: mediaId, ...(caption && type !== 'audio' ? { caption } : {}) },
+  };
+  return callGraphApi(`${phoneNumberId}/messages`, body);
+}

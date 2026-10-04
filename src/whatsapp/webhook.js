@@ -14,7 +14,10 @@ import {
 } from '../repositories/funnels.js';
 import { insertMessage, updateMessageStatusByWaId } from '../repositories/messages.js';
 import { recordConversationSource } from '../repositories/conversationSources.js';
-import { sendTextMessage } from './client.js';
+import { sendTextMessage, downloadMedia } from './client.js';
+import { saveMediaFile } from '../services/mediaStorage.js';
+import { transcribeAudio } from '../services/transcription/TranscriptionService.js';
+import { getDefaultTenantId } from '../tenant.js';
 import { broadcast } from '../realtime.js';
 import { runTriggersForInboundMessage } from '../automation/engine.js';
 
@@ -124,13 +127,18 @@ async function handleInboundMessages(value) {
 
   for (const msg of value.messages) {
     const body = msg.text?.body || msg.button?.text || msg.interactive?.button_reply?.title || null;
+    const media = await processInboundMedia(msg);
 
     const saved = await insertMessage({
       conversationId: conversation.id,
       waMessageId: msg.id,
       direction: 'inbound',
       senderType: 'contact',
-      body,
+      body: body || media?.caption || null,
+      mediaUrl: media?.servePath,
+      mediaType: media?.mimeType,
+      mediaFilename: media?.filename,
+      mediaSizeBytes: media?.sizeBytes,
     });
 
     // A Meta reenvia webhooks (entrega "pelo menos uma vez"); se a mensagem já
@@ -156,11 +164,50 @@ async function handleInboundMessages(value) {
       continue;
     }
 
+    if (msg.type === 'audio' && saved.media_url) {
+      transcribeAudio({
+        tenantId: await getDefaultTenantId(),
+        messageId: saved.id,
+        buffer: media.buffer,
+        mimeType: media.mimeType,
+        filename: media.filename,
+      }).then((text) => {
+        if (text) broadcast({ type: 'message:transcribed', conversationId: conversation.id, messageId: saved.id, transcription: text });
+      }).catch((err) => console.error('Falha ao transcrever áudio:', err.message));
+    }
+
     // Opt-out (LGPD): "SAIR"/"PARAR"/"CANCELAR" marca o contato e confirma —
     // nenhuma automação de marketing roda depois disso pra ele (ver engine.js).
     if (await handleOptOutIfRequested(conversation, contact, body)) continue;
 
     await runTriggersForInboundMessage({ conversation, contact, message: saved });
+  }
+}
+
+const MEDIA_TYPES = ['image', 'audio', 'video', 'document', 'sticker'];
+
+// Baixa e salva a mídia de uma mensagem recebida, se houver. Nunca lança —
+// uma falha de download não pode travar o resto do processamento do webhook.
+async function processInboundMedia(msg) {
+  if (!MEDIA_TYPES.includes(msg.type)) return null;
+  const mediaRef = msg[msg.type];
+  if (!mediaRef?.id) return null;
+
+  try {
+    const { buffer, mimeType, sizeBytes } = await downloadMedia(mediaRef.id);
+    const tenantId = await getDefaultTenantId();
+    const { servePath } = await saveMediaFile(tenantId, buffer, mimeType);
+    return {
+      servePath,
+      mimeType,
+      sizeBytes,
+      filename: mediaRef.filename || `${msg.type}.${(mimeType || '').split('/')[1] || 'bin'}`,
+      caption: mediaRef.caption || null,
+      buffer, // só usado internamente pra transcrição de áudio, não sobe pra insertMessage
+    };
+  } catch (err) {
+    console.error(`Falha ao baixar mídia (${msg.type}, ${mediaRef.id}):`, err.message);
+    return null;
   }
 }
 

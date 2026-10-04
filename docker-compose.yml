@@ -11,6 +11,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - whatsapp_crm_media:/data/media
     networks:
       - whatsapp-crm
       - caddy_net
@@ -40,3 +42,4 @@ networks:
 
 volumes:
   whatsapp_crm_db_data:
+  whatsapp_crm_media:

@@ -9,6 +9,8 @@ export async function insertMessage({
   body,
   mediaUrl,
   mediaType,
+  mediaFilename,
+  mediaSizeBytes,
   status = 'sent',
   automationFlowId,
   kind = 'message',
@@ -16,11 +18,11 @@ export async function insertMessage({
   const tenantId = await getDefaultTenantId();
   const result = await query(
     `INSERT INTO messages
-      (tenant_id, conversation_id, wa_message_id, direction, sender_type, body, media_url, media_type, status, automation_flow_id, kind)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      (tenant_id, conversation_id, wa_message_id, direction, sender_type, body, media_url, media_type, media_filename, media_size_bytes, status, automation_flow_id, kind)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
      ON CONFLICT (wa_message_id) DO NOTHING
      RETURNING *`,
-    [tenantId, conversationId, waMessageId || null, direction, senderType, body || null, mediaUrl || null, mediaType || null, status, automationFlowId || null, kind]
+    [tenantId, conversationId, waMessageId || null, direction, senderType, body || null, mediaUrl || null, mediaType || null, mediaFilename || null, mediaSizeBytes || null, status, automationFlowId || null, kind]
   );
   return result.rows[0];
 }

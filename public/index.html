@@ -307,7 +307,10 @@ button{font-family:'Inter',sans-serif;}
                   <button type="button" id="conversa-resposta-rapida-btn" style="background:none;border:none;color:#5B5F58;font-size:11.5px;font-weight:600;cursor:pointer;padding:0;">⚡ Resposta rápida</button>
                 </div>
                 <form id="conversa-form" style="display:flex;align-items:center;gap:10px;padding:10px 28px 16px;border-top:1px solid #E7E5DF;">
-                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9A9D96" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05 12.25 20.24a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.5 3.5 0 0 1 4.95 4.95L9.42 17.4a1.5 1.5 0 0 1-2.12-2.12l8.49-8.49"></path></svg>
+                  <label id="conversa-anexo-label" style="cursor:pointer;display:flex;" title="Anexar arquivo">
+                    <input type="file" id="conversa-anexo-input" style="display:none;" accept="image/*,audio/*,video/*,application/pdf"/>
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9A9D96" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05 12.25 20.24a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.5 3.5 0 0 1 4.95 4.95L9.42 17.4a1.5 1.5 0 0 1-2.12-2.12l8.49-8.49"></path></svg>
+                  </label>
                   <input id="conversa-input" autocomplete="off" placeholder="Digite uma mensagem..." style="flex-grow:1;background:#F5F4EF;border:none;border-radius:20px;padding:10px 16px;font-size:13px;color:#14181A;font-family:'Inter',sans-serif;"/>
                   <button type="submit" id="conversa-send-btn" style="width:38px;height:38px;border-radius:50%;background:#EB6D37;border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"></path><path d="M22 2 15 22l-4-9-9-4 20-7Z"></path></svg>
@@ -990,11 +993,33 @@ button{font-family:'Inter',sans-serif;}
       ? '<div style="font-size:11px;color:#B45309;font-style:italic;margin-bottom:4px;margin-right:4px;">Enviado automaticamente</div>'
       : '';
 
+    var mediaHtml = renderMediaContent(m, textColor);
+    var textHtml = m.body ? '<div style="font-size:13.5px;color:' + textColor + ';line-height:1.5;' + (mediaHtml ? 'margin-top:6px;' : '') + '">' + escapeHtml(m.body) + '</div>' : '';
+
     wrap.innerHTML =
       tagHtml +
-      '<div style="' + bubbleStyle + '"><div style="font-size:13.5px;color:' + textColor + ';line-height:1.5;">' + escapeHtml(m.body) + '</div></div>' +
+      '<div style="' + bubbleStyle + '">' + mediaHtml + textHtml + '</div>' +
       '<div style="font-size:10.5px;color:#ACAFA8;margin-top:4px;' + (isOutbound ? 'margin-right' : 'margin-left') + ':4px;">' + formatTime(m.created_at) + '</div>';
     return wrap;
+  }
+
+  function renderMediaContent(m, textColor) {
+    if (!m.media_url) return '';
+    var type = (m.media_type || '').split('/')[0];
+    if (type === 'image') {
+      return '<a href="' + m.media_url + '" target="_blank"><img src="' + m.media_url + '" style="max-width:260px;border-radius:8px;display:block;"/></a>';
+    }
+    if (type === 'audio') {
+      var transcriptHtml = m.transcription
+        ? '<div style="font-size:11.5px;color:' + textColor + ';opacity:.75;margin-top:6px;max-width:260px;font-style:italic;">🎧 ' + escapeHtml(m.transcription) + '</div>'
+        : '<div class="transcricao-pendente" data-msg-id="' + m.id + '" style="font-size:11px;color:' + textColor + ';opacity:.6;margin-top:4px;">Transcrevendo...</div>';
+      return '<audio controls src="' + m.media_url + '" style="max-width:260px;"></audio>' + transcriptHtml;
+    }
+    // documento/vídeo/outros: link simples com nome do arquivo
+    return '<a href="' + m.media_url + '" target="_blank" style="display:flex;align-items:center;gap:8px;color:' + textColor + ';text-decoration:none;">' +
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + textColor + '" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>' +
+      '<span style="font-size:12.5px;text-decoration:underline;">' + escapeHtml(m.media_filename || 'Arquivo') + '</span>' +
+    '</a>';
   }
 
   var form = document.getElementById('conversa-form');
@@ -1019,6 +1044,32 @@ button{font-family:'Inter',sans-serif;}
         alert('Não foi possível enviar: ' + err.message);
       }
       input.value = text;
+    }
+  });
+
+  document.getElementById('conversa-anexo-input').addEventListener('change', async function () {
+    var file = this.files[0];
+    this.value = '';
+    if (!file || !state.currentConversationId) return;
+
+    var formData = new FormData();
+    formData.append('file', file);
+
+    var sendBtn = document.getElementById('conversa-send-btn');
+    sendBtn.disabled = true;
+    try {
+      var res = await fetch('/api/conversations/' + state.currentConversationId + '/media', { method: 'POST', body: formData });
+      var data = await res.json();
+      if (!res.ok) {
+        var msg = (data.error && data.error.message) || data.error || 'Erro ao enviar arquivo';
+        throw new Error(msg);
+      }
+      document.getElementById('conversa-messages').appendChild(renderBubble(data));
+      document.getElementById('conversa-messages').scrollTop = 1e9;
+    } catch (err) {
+      alert('Não foi possível enviar o arquivo: ' + err.message);
+    } finally {
+      sendBtn.disabled = false;
     }
   });
 
@@ -1143,6 +1194,14 @@ button{font-family:'Inter',sans-serif;}
       }
       if (data.type === 'message:new' || data.type === 'conversation:stage_changed') {
         if (state.currentFunnelId) renderFunnel(state.currentFunnelId);
+      }
+      if (data.type === 'message:transcribed' && data.conversationId === state.currentConversationId) {
+        var pending = document.querySelector('.transcricao-pendente[data-msg-id="' + data.messageId + '"]');
+        if (pending) {
+          pending.textContent = '🎧 ' + data.transcription;
+          pending.classList.remove('transcricao-pendente');
+          pending.style.fontStyle = 'italic';
+        }
       }
     };
     ws.onclose = function () { setTimeout(connectRealtime, 3000); };
