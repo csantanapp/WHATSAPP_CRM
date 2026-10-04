@@ -3,6 +3,14 @@ import http from 'node:http';
 import { createApp } from './app.js';
 import { attachRealtime, closeRealtime } from './realtime.js';
 import { logger } from './logger.js';
+import { assertProductionSecrets } from './startupChecks.js';
+
+try {
+  assertProductionSecrets();
+} catch (err) {
+  logger.error('startup_check_failed', { message: err.message });
+  process.exit(1);
+}
 
 const app = createApp();
 const server = http.createServer(app);

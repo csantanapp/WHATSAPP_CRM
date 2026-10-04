@@ -206,3 +206,107 @@ test('contatos: criar, buscar e listar', async () => {
   assert.equal(list.status, 200);
   assert.equal(list.body.length, 1);
 });
+
+// --- Envio manual de mensagem (atendente), Graph API mockada ---
+
+test('envio manual de mensagem chama a Graph API e salva a mensagem como outbound/agent', async () => {
+  const graphCalls = [];
+  installMockFetch(async (url, opts) => {
+    graphCalls.push({ url, body: JSON.parse(opts.body) });
+    return jsonResponse({ messages: [{ id: 'wamid.manual.1' }] });
+  });
+
+  // Conversa precisa existir — nasce via webhook, como no fluxo real.
+  const body = inboundPayload({ waId: '5511933332222', text: 'oi, quero um orçamento' });
+  await request(app).post('/webhook/whatsapp').set('x-hub-signature-256', signPayload(body).sig).send(body);
+  await new Promise((r) => setTimeout(r, 300));
+
+  const contacts = await request(app).get('/api/contacts');
+  const contact = contacts.body.find((c) => c.wa_id === '5511933332222');
+  const detail = await request(app).get(`/api/contacts/${contact.id}`);
+  const conversationId = detail.body.conversations[0].id;
+
+  const sendRes = await request(app)
+    .post(`/api/conversations/${conversationId}/messages`)
+    .send({ text: 'Claro! Te mando os valores agora.' });
+
+  assert.equal(sendRes.status, 201);
+  assert.equal(sendRes.body.direction, 'outbound');
+  assert.equal(sendRes.body.sender_type, 'agent');
+  assert.equal(sendRes.body.body, 'Claro! Te mando os valores agora.');
+
+  const graphCall = graphCalls.find((c) => c.body?.text?.body === 'Claro! Te mando os valores agora.');
+  assert.ok(graphCall, 'deveria ter chamado a Graph API com o texto enviado');
+  assert.equal(graphCall.body.to, '5511933332222');
+
+  const messages = await request(app).get(`/api/conversations/${conversationId}/messages`);
+  assert.ok(
+    messages.body.some((m) => m.body === 'Claro! Te mando os valores agora.' && m.sender_type === 'agent'),
+    'mensagem enviada manualmente deveria estar salva no histórico'
+  );
+});
+
+// --- Automação: ask_question (pergunta → resposta do contato → avança passo) ---
+
+test('automação ask_question pausa aguardando resposta e avança ao passo seguinte quando o contato responde', async () => {
+  const sentTexts = [];
+  installMockFetch(async (_url, opts) => {
+    const payload = JSON.parse(opts.body);
+    sentTexts.push(payload.text.body);
+    return jsonResponse({ messages: [{ id: 'wamid.ask.' + sentTexts.length }] });
+  });
+
+  // Fluxo: pergunta -> (aguarda resposta) -> tag "qualificado"
+  const flowRes = await request(app).post('/api/automation-flows').send({
+    name: 'Qualificação',
+    trigger_type: 'first_message',
+    steps: [
+      { step_type: 'ask_question', config: { text: 'Qual seu orçamento disponível?' }, position: 0 },
+      { step_type: 'add_tag', config: { tag: 'qualificado' }, position: 1 },
+    ],
+  });
+  assert.equal(flowRes.status, 201);
+
+  // 1ª mensagem do contato dispara o fluxo e a pergunta é enviada.
+  const first = inboundPayload({ waId: '5511922221111', text: 'oi', msgId: 'wamid.ask.in.1' });
+  await request(app).post('/webhook/whatsapp').set('x-hub-signature-256', signPayload(first).sig).send(first);
+  await new Promise((r) => setTimeout(r, 300));
+
+  assert.ok(sentTexts.includes('Qual seu orçamento disponível?'), 'a pergunta deveria ter sido enviada');
+
+  const contacts = await request(app).get('/api/contacts');
+  const contact = contacts.body.find((c) => c.wa_id === '5511922221111');
+  assert.ok(!contact.tags.includes('qualificado'), 'a tag só deveria ser aplicada depois da resposta');
+
+  // Contato responde — o fluxo deve avançar pro próximo passo (add_tag).
+  const reply = inboundPayload({ waId: '5511922221111', text: 'uns 5 mil por mês', msgId: 'wamid.ask.in.2' });
+  await request(app).post('/webhook/whatsapp').set('x-hub-signature-256', signPayload(reply).sig).send(reply);
+  await new Promise((r) => setTimeout(r, 300));
+
+  const contactsAfter = await request(app).get('/api/contacts');
+  const contactAfter = contactsAfter.body.find((c) => c.wa_id === '5511922221111');
+  assert.ok(contactAfter.tags.includes('qualificado'), 'a tag deveria ter sido aplicada após a resposta');
+});
+
+// --- Exportação CSV de contatos (frontend lê de GET /api/contacts; ver public/index.html) ---
+
+test('GET /api/contacts retorna os campos usados pela exportação CSV do frontend', async () => {
+  await request(app).post('/api/contacts').send({
+    wa_id: '5511911110000',
+    name: 'Lead CSV',
+    source: 'Instagram Ads',
+  });
+
+  const list = await request(app).get('/api/contacts').query({ q: 'Lead CSV' });
+  assert.equal(list.status, 200);
+  const contact = list.body[0];
+
+  // public/index.html monta o CSV com: name, phone_display, source, tags —
+  // se qualquer um desses sumir do payload, a exportação quebra silenciosamente.
+  assert.ok('name' in contact);
+  assert.ok('phone_display' in contact);
+  assert.ok('source' in contact);
+  assert.ok('tags' in contact && Array.isArray(contact.tags));
+  assert.equal(contact.name, 'Lead CSV');
+  assert.equal(contact.source, 'Instagram Ads');
+});

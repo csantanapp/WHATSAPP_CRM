@@ -32,7 +32,10 @@ webhookRouter.get('/', (req, res) => {
 
 function isValidSignature(req) {
   const appSecret = process.env.WHATSAPP_APP_SECRET;
-  if (!appSecret) return true; // permite rodar sem validação em dev, se não configurado
+  // Fallback só fora de produção (dev local, sem secret configurado ainda).
+  // Em produção o boot já recusa subir sem WHATSAPP_APP_SECRET (ver server.js),
+  // mas blindamos aqui também — nunca aceitar sem assinatura quando NODE_ENV=production.
+  if (!appSecret) return process.env.NODE_ENV !== 'production';
   const signature = req.get('x-hub-signature-256');
   if (!signature) return false;
 
