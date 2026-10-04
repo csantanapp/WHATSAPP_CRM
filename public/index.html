@@ -171,9 +171,33 @@ button{font-family:'Inter',sans-serif;}
               <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;">Conversas recentes</div>
               <a href="#kanban" data-goto="kanban" style="font-size:12.5px;color:#D85A26;font-weight:600;">Ver Kanban completo →</a>
             </div>
-            <div id="dashboard-recent" style="display:flex;flex-direction:column;gap:8px;">
+            <div id="dashboard-recent" style="display:flex;flex-direction:column;gap:8px;margin-bottom:28px;">
               <div style="font-size:12.5px;color:#9A9D96;">Carregando...</div>
             </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;">Comercial</div>
+              <a href="/tasks/" style="font-size:12.5px;color:#D85A26;font-weight:600;">Minhas tarefas →</a>
+            </div>
+            <div id="comercial-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">
+              <div style="grid-column:span 4;font-size:12.5px;color:#9A9D96;">Carregando...</div>
+            </div>
+            <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Receita por origem</div>
+            <table style="width:100%;border-collapse:collapse;font-size:13px;background:#FFFFFF;border:1px solid #E7E5DF;border-radius:10px;overflow:hidden;">
+              <thead>
+                <tr style="background:#F5F4EF;">
+                  <th style="text-align:left;padding:10px 14px;font-size:11px;color:#82867F;text-transform:uppercase;">Origem</th>
+                  <th style="text-align:left;padding:10px 14px;font-size:11px;color:#82867F;text-transform:uppercase;">Campanha</th>
+                  <th style="text-align:right;padding:10px 14px;font-size:11px;color:#82867F;text-transform:uppercase;">Conversas</th>
+                  <th style="text-align:right;padding:10px 14px;font-size:11px;color:#82867F;text-transform:uppercase;">Oportunidades</th>
+                  <th style="text-align:right;padding:10px 14px;font-size:11px;color:#82867F;text-transform:uppercase;">Ganhas</th>
+                  <th style="text-align:right;padding:10px 14px;font-size:11px;color:#82867F;text-transform:uppercase;">Receita</th>
+                </tr>
+              </thead>
+              <tbody id="receita-origem-tbody">
+                <tr><td colspan="6" style="padding:14px;font-size:12.5px;color:#9A9D96;">Carregando...</td></tr>
+              </tbody>
+            </table>
           </div>
         </section>
 
@@ -320,6 +344,13 @@ button{font-family:'Inter',sans-serif;}
                       Redirecionar para outro funil
                     </button>
                   </div>
+                </div>
+                <div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;">Oportunidade</div>
+                    <button id="oportunidade-nova-btn" style="background:none;border:none;color:#D85A26;font-size:11px;font-weight:700;cursor:pointer;padding:0;">+ nova</button>
+                  </div>
+                  <div id="oportunidade-box" style="background:#F5F4EF;border:1px solid #E4E1D8;border-radius:10px;padding:12px;font-size:12.5px;color:#82867F;">Nenhuma oportunidade aberta.</div>
                 </div>
                 <div>
                   <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Notas internas</div>
@@ -845,6 +876,7 @@ button{font-family:'Inter',sans-serif;}
     janelaEl.textContent = conv.window_open ? '🟢 Janela aberta (24h)' : '🔴 Janela fechada — só com template';
     janelaEl.style.color = conv.window_open ? '#15803D' : '#B91C1C';
     renderPriorityButton();
+    loadOpportunityBox(conv.contact_id);
 
     var notesEl = document.getElementById('painel-notas');
     if (document.activeElement !== notesEl) notesEl.value = conv.contact_notes || '';
@@ -1040,6 +1072,65 @@ button{font-family:'Inter',sans-serif;}
     btn.textContent = conv.is_priority ? '★' : '☆';
     btn.style.color = conv.is_priority ? '#D85A26' : '#3A3D38';
   }
+
+  async function loadOpportunityBox(contactId) {
+    var box = document.getElementById('oportunidade-box');
+    try {
+      var opps = await api('/opportunities?contact_id=' + contactId + '&status=open');
+    } catch (err) {
+      box.textContent = 'Erro ao carregar.';
+      return;
+    }
+    if (!opps.length) {
+      box.innerHTML = 'Nenhuma oportunidade aberta.';
+      return;
+    }
+    var o = opps[0];
+    box.innerHTML =
+      '<div style="font-weight:700;color:#14181A;margin-bottom:3px;">' + escapeHtml(o.title) + '</div>' +
+      (o.value ? '<div style="color:#D85A26;font-weight:700;margin-bottom:8px;">' + formatMoney(o.value) + '</div>' : '') +
+      '<div style="display:flex;gap:6px;">' +
+        '<button id="oportunidade-ganhar-btn" data-id="' + o.id + '" style="flex:1;background:#15803D;color:#fff;border:none;border-radius:7px;padding:7px;font-size:11.5px;font-weight:600;cursor:pointer;">Ganhar</button>' +
+        '<button id="oportunidade-perder-btn" data-id="' + o.id + '" style="flex:1;background:#FFFFFF;color:#B91C1C;border:1px solid #FCA5A5;border-radius:7px;padding:7px;font-size:11.5px;font-weight:600;cursor:pointer;">Perder</button>' +
+      '</div>';
+
+    document.getElementById('oportunidade-ganhar-btn').addEventListener('click', async function () {
+      await api('/opportunities/' + this.getAttribute('data-id') + '/won', { method: 'POST', body: JSON.stringify({}) });
+      loadOpportunityBox(contactId);
+    });
+    document.getElementById('oportunidade-perder-btn').addEventListener('click', async function () {
+      try {
+        var reasons = await api('/loss-reasons');
+        var options = reasons.map(function (r, i) { return (i + 1) + '. ' + r.name; }).join(String.fromCharCode(10));
+        var choice = prompt('Motivo da perda?' + String.fromCharCode(10) + options + String.fromCharCode(10) + String.fromCharCode(10) + 'Digite o número:');
+        if (!choice) return;
+        var picked = reasons[parseInt(choice, 10) - 1];
+        if (!picked) { alert('Opção inválida.'); return; }
+        await api('/opportunities/' + this.getAttribute('data-id') + '/lost', { method: 'POST', body: JSON.stringify({ loss_reason_id: picked.id }) });
+        loadOpportunityBox(contactId);
+      } catch (err) {
+        alert('Não foi possível marcar como perdida: ' + err.message);
+      }
+    });
+  }
+
+  document.getElementById('oportunidade-nova-btn').addEventListener('click', async function () {
+    var conv = state.currentConversationDetail;
+    if (!conv) return;
+    var title = prompt('Título da oportunidade:');
+    if (!title) return;
+    var valueStr = prompt('Valor estimado (R$, opcional):');
+    var value = valueStr ? parseFloat(valueStr.replace(',', '.')) : null;
+    try {
+      await api('/opportunities', {
+        method: 'POST',
+        body: JSON.stringify({ contact_id: conv.contact_id, conversation_id: conv.id, title: title, value: value }),
+      });
+      loadOpportunityBox(conv.contact_id);
+    } catch (err) {
+      alert('Não foi possível criar: ' + err.message);
+    }
+  });
 
   function connectRealtime() {
     var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -1461,6 +1552,60 @@ button{font-family:'Inter',sans-serif;}
         window.__goto && window.__goto('conversa');
       });
       recentEl.appendChild(row);
+    });
+
+    loadComercial();
+  }
+
+  function formatMoney(v) {
+    return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  async function loadComercial() {
+    var cardsEl = document.getElementById('comercial-cards');
+    var tbody = document.getElementById('receita-origem-tbody');
+    var summary, bySource;
+    try {
+      summary = await api('/opportunities/summary');
+      bySource = await api('/opportunities/revenue-by-source');
+    } catch (err) {
+      cardsEl.innerHTML = '<div style="grid-column:span 4;color:#B42318;font-size:12.5px;">Não foi possível carregar o comercial.</div>';
+      return;
+    }
+
+    var cards = [
+      { label: 'Oportunidades abertas', value: summary.open_count },
+      { label: 'Ganhas', value: summary.won_count },
+      { label: 'Valor ganho', value: formatMoney(summary.won_value) },
+      { label: 'Taxa de conversão', value: Math.round(summary.conversion_rate * 100) + '%' },
+    ];
+    cardsEl.innerHTML = '';
+    cards.forEach(function (c) {
+      var card = document.createElement('div');
+      card.style.cssText = 'background:#FFFFFF;border:1px solid #E7E5DF;border-radius:14px;padding:18px;';
+      card.innerHTML =
+        '<div style="font-size:12px;color:#82867F;margin-bottom:6px;">' + escapeHtml(c.label) + '</div>' +
+        '<div style="font-family:Sora,sans-serif;font-weight:700;font-size:22px;color:#14181A;">' + c.value + '</div>';
+      cardsEl.appendChild(card);
+    });
+
+    tbody.innerHTML = '';
+    if (!bySource.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="padding:14px;font-size:12.5px;color:#9A9D96;">Nenhuma conversa ainda.</td></tr>';
+      return;
+    }
+    var sourceLabels = { referral_ad: 'Anúncio', campaign_keyword: 'Campanha (link)', direct: 'Direto' };
+    bySource.forEach(function (r) {
+      var tr = document.createElement('tr');
+      tr.style.cssText = 'border-top:1px solid #E7E5DF;';
+      tr.innerHTML =
+        '<td style="padding:10px 14px;">' + escapeHtml(sourceLabels[r.source_type] || r.source_type) + '</td>' +
+        '<td style="padding:10px 14px;color:#82867F;">' + escapeHtml(r.campaign_key) + '</td>' +
+        '<td style="padding:10px 14px;text-align:right;">' + r.conversations + '</td>' +
+        '<td style="padding:10px 14px;text-align:right;">' + r.opportunities + '</td>' +
+        '<td style="padding:10px 14px;text-align:right;">' + r.won + '</td>' +
+        '<td style="padding:10px 14px;text-align:right;font-weight:700;">' + formatMoney(r.revenue) + '</td>';
+      tbody.appendChild(tr);
     });
   }
 

@@ -12,15 +12,15 @@ export async function createOpportunity({ contactId, conversationId, funnelId, s
 }
 
 export async function listOpportunities(tenantId, { status, contactId } = {}) {
-  const conditions = ['tenant_id = $1'];
+  const conditions = ['o.tenant_id = $1'];
   const params = [tenantId];
   if (status) {
     params.push(status);
-    conditions.push(`status = $${params.length}`);
+    conditions.push(`o.status = $${params.length}`);
   }
   if (contactId) {
     params.push(contactId);
-    conditions.push(`contact_id = $${params.length}`);
+    conditions.push(`o.contact_id = $${params.length}`);
   }
   const result = await query(
     `SELECT o.*, c.name AS contact_name, c.phone_display, u.name AS owner_name, lr.name AS loss_reason_name

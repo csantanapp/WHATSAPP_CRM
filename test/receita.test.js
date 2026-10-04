@@ -145,6 +145,21 @@ test('receita por origem: oportunidade ganha aparece somada na origem certa', as
   assert.equal(row.won, 1);
 });
 
+test('listar oportunidades filtradas por contact_id e status (rota usada pelo painel da conversa)', async () => {
+  const { conversationId, contactId } = await createConversationViaWebhook('5511600000007');
+  const create = await agent.post('/api/opportunities').send({ contact_id: contactId, conversation_id: conversationId, title: 'Filtro teste', value: 2000 });
+  assert.equal(create.status, 201);
+
+  const res = await agent.get(`/api/opportunities?contact_id=${contactId}&status=open`);
+  assert.equal(res.status, 200);
+  assert.equal(res.body.length, 1);
+  assert.equal(res.body[0].id, create.body.id);
+
+  await agent.post(`/api/opportunities/${create.body.id}/won`).send({});
+  const resAfter = await agent.get(`/api/opportunities?contact_id=${contactId}&status=open`);
+  assert.equal(resAfter.body.length, 0, 'não deveria mais aparecer como aberta depois de ganha');
+});
+
 test('tarefas: criar, listar minhas, completar', async () => {
   const { contactId } = await createConversationViaWebhook('5511600000006');
 
