@@ -2,8 +2,12 @@ import { query } from '../db/pool.js';
 import { sendTextMessage } from '../whatsapp/client.js';
 import { insertMessage } from '../repositories/messages.js';
 import { addTagToContact } from '../repositories/contacts.js';
-import { moveConversationToStage } from '../repositories/conversations.js';
+import { moveConversationToStage, assignConversation, setConversationStatus } from '../repositories/conversations.js';
+import { createTask } from '../repositories/tasks.js';
+import { pickNextRoundRobinUser } from '../services/distribution.js';
+import { scheduleJob } from '../jobs/scheduledJobs.js';
 import { broadcast } from '../realtime.js';
+import { logger } from '../logger.js';
 
 async function isFirstMessageOfConversation(conversationId) {
   const result = await query(
@@ -56,10 +60,14 @@ async function updateRun(runId, { currentStepId, status }) {
   return result.rows[0];
 }
 
-// Executa passos em sequência até encontrar um que precise de resposta do contato.
+async function isOptedOut(contactId) {
+  const result = await query('SELECT opted_out_at FROM contacts WHERE id = $1', [contactId]);
+  return result.rows[0]?.opted_out_at != null;
+}
+
+// Executa passos em sequência até encontrar um que precise de resposta do
+// contato (ask_question) ou de tempo (wait) — os dois pausam a run.
 async function runFlowFromStep({ flow, conversation, contact, step, run }) {
-  // `cursor` é compartilhado com executeSteps para que o catch abaixo saiba
-  // em qual passo o fluxo travou, mesmo com a reatribuição dentro do while.
   const cursor = { current: step };
 
   try {
@@ -75,8 +83,14 @@ async function runFlowFromStep({ flow, conversation, contact, step, run }) {
 async function executeSteps({ flow, conversation, contact, run, cursor }) {
   while (cursor.current) {
     const current = cursor.current;
+    let nextOverride; // usado pelo 'condition' pra escolher o ramo certo
+
     switch (current.step_type) {
       case 'send_message': {
+        if (await isOptedOut(contact.id)) {
+          logger.info('automation_skip_opted_out', { contactId: contact.id, stepId: current.id });
+          break;
+        }
         const text = current.config?.text || '';
         const sent = await sendTextMessage(contact.wa_id, text);
         const saved = await insertMessage({
@@ -95,13 +109,68 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
         if (tag) await addTagToContact(contact.id, tag);
         break;
       }
+      case 'remove_tag': {
+        const tag = current.config?.tag;
+        if (tag) {
+          await query(
+            `UPDATE contacts SET tags = array_remove(tags, $2), updated_at = now() WHERE id = $1`,
+            [contact.id, tag]
+          );
+        }
+        break;
+      }
       case 'move_stage': {
         const stageId = current.config?.funnel_stage_id;
         if (stageId) await moveConversationToStage(conversation.id, stageId);
         break;
       }
+      case 'assign_user': {
+        const userId = current.config?.user_id;
+        if (userId) await assignConversation(conversation.id, userId);
+        break;
+      }
+      case 'assign_round_robin': {
+        const userId = await pickNextRoundRobinUser(flow.tenant_id);
+        if (userId) await assignConversation(conversation.id, userId);
+        else logger.info('automation_round_robin_sem_participantes', { flowId: flow.id });
+        break;
+      }
+      case 'create_task': {
+        await createTask({
+          contactId: contact.id,
+          conversationId: conversation.id,
+          assignedUserId: current.config?.assigned_user_id || null,
+          title: current.config?.title || 'Follow-up',
+          description: current.config?.description || null,
+          dueAt: current.config?.due_in_hours
+            ? new Date(Date.now() + current.config.due_in_hours * 3600 * 1000)
+            : null,
+        });
+        break;
+      }
+      case 'close_conversation': {
+        await setConversationStatus(conversation.id, 'closed');
+        break;
+      }
+      case 'condition': {
+        const result = await evaluateCondition(current.config, { contact, conversation });
+        nextOverride = result ? current.next_step_id_true : current.next_step_id_false;
+        break;
+      }
+      case 'wait': {
+        // Pausa a run e agenda a retomada — nenhum setTimeout em memória
+        // (sobrevive a restart/redeploy do container).
+        const minutes = current.config?.minutes || 60;
+        const runAt = new Date(Date.now() + minutes * 60 * 1000);
+        await scheduleJob('automation_resume', runAt, { runId: run.id, stepId: current.id });
+        await updateRun(run.id, { currentStepId: current.id, status: 'waiting_delay' });
+        return;
+      }
       case 'ask_question': {
-        // Envia a pergunta e pausa o fluxo aguardando a resposta do contato.
+        if (await isOptedOut(contact.id)) {
+          await updateRun(run.id, { currentStepId: null, status: 'stopped' });
+          return;
+        }
         const text = current.config?.text || '';
         const sent = await sendTextMessage(contact.wa_id, text);
         const saved = await insertMessage({
@@ -120,10 +189,22 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
         break;
     }
 
-    cursor.current = current.next_step_id ? await getStep(current.next_step_id) : null;
+    const nextId = nextOverride !== undefined ? nextOverride : current.next_step_id;
+    cursor.current = nextId ? await getStep(nextId) : null;
   }
 
   await updateRun(run.id, { currentStepId: null, status: 'completed' });
+}
+
+async function evaluateCondition(config, { contact, conversation }) {
+  const check = config?.check;
+  if (check === 'tag_exists') {
+    return (contact.tags || []).includes(config.tag);
+  }
+  if (check === 'stage_equals') {
+    return conversation.funnel_stage_id === config.funnel_stage_id;
+  }
+  return false;
 }
 
 export async function runTriggersForInboundMessage({ conversation, contact, message }) {
@@ -179,6 +260,57 @@ export async function runTriggersForInboundMessage({ conversation, contact, mess
     return;
   }
 
+  await updateRun(run.id, { currentStepId: nextStep.id, status: 'running' });
+  await runFlowFromStep({ flow, conversation, contact, step: nextStep, run });
+}
+
+// Gatilho: tag adicionada a um contato (chamado pela rota de tags em api.js).
+export async function runTriggersForTagAdded({ conversation, contact, tag }) {
+  if (!conversation) return;
+  const flows = await getActiveFlowsByTrigger('tag_added', conversation.funnel_id);
+  for (const flow of flows) {
+    if (flow.trigger_config?.tag && flow.trigger_config.tag !== tag) continue;
+    const firstStep = await getFirstStep(flow.id);
+    if (!firstStep) continue;
+    const run = await createRun(flow.id, conversation.id, firstStep.id, 'running');
+    await runFlowFromStep({ flow, conversation, contact, step: firstStep, run });
+  }
+}
+
+// Gatilho: conversa entrou numa etapa de funil (chamado pela rota de mover etapa).
+export async function runTriggersForStageEntered({ conversation, contact }) {
+  const flows = await getActiveFlowsByTrigger('stage_entered', conversation.funnel_id);
+  for (const flow of flows) {
+    if (flow.trigger_config?.funnel_stage_id && flow.trigger_config.funnel_stage_id !== conversation.funnel_stage_id) continue;
+    const firstStep = await getFirstStep(flow.id);
+    if (!firstStep) continue;
+    const run = await createRun(flow.id, conversation.id, firstStep.id, 'running');
+    await runFlowFromStep({ flow, conversation, contact, step: firstStep, run });
+  }
+}
+
+// Retomada de uma run pausada em 'wait' — chamado pelo worker de jobs agendados.
+export async function resumeRunAfterWait(runId) {
+  const runResult = await query('SELECT * FROM automation_runs WHERE id = $1', [runId]);
+  const run = runResult.rows[0];
+  if (!run || run.status !== 'waiting_delay') return; // já foi adiante por outro motivo
+
+  const step = await getStep(run.current_step_id);
+  const nextId = step?.next_step_id;
+  if (!nextId) {
+    await updateRun(run.id, { currentStepId: null, status: 'completed' });
+    return;
+  }
+
+  const flowResult = await query('SELECT * FROM automation_flows WHERE id = $1', [run.automation_flow_id]);
+  const flow = flowResult.rows[0];
+  const convResult = await query('SELECT * FROM conversations WHERE id = $1', [run.conversation_id]);
+  const conversation = convResult.rows[0];
+  if (!conversation) return;
+  const contactResult = await query('SELECT * FROM contacts WHERE id = $1', [conversation.contact_id]);
+  const contact = contactResult.rows[0];
+
+  const nextStep = await getStep(nextId);
   await updateRun(run.id, { currentStepId: nextStep.id, status: 'running' });
   await runFlowFromStep({ flow, conversation, contact, step: nextStep, run });
 }

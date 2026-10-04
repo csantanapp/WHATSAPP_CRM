@@ -45,6 +45,8 @@ import {
   cancelTask,
 } from '../repositories/tasks.js';
 import { getSourceForConversation } from '../repositories/conversationSources.js';
+import { runTriggersForTagAdded, runTriggersForStageEntered } from '../automation/engine.js';
+import { getDistributionRule, upsertDistributionRule } from '../services/distribution.js';
 import { requireRole } from '../middleware/auth.js';
 import { sendTextMessage, checkConnectionStatus } from '../whatsapp/client.js';
 import { broadcast } from '../realtime.js';
@@ -116,7 +118,20 @@ apiRouter.patch('/contacts/:id', asyncHandler(async (req, res) => {
 
 apiRouter.post('/contacts/:id/tags', asyncHandler(async (req, res) => {
   if (!req.body.tag) return res.status(400).json({ error: 'tag é obrigatório' });
-  res.json(await addTagToContact(req.params.id, req.body.tag));
+  const contact = await addTagToContact(req.params.id, req.body.tag);
+  res.json(contact);
+
+  // Gatilho de automação "tag_added" — roda depois de responder, não bloqueia a requisição.
+  const convResult = await query(
+    "SELECT * FROM conversations WHERE contact_id = $1 ORDER BY created_at DESC LIMIT 1",
+    [req.params.id]
+  );
+  const conversation = convResult.rows[0];
+  if (conversation) {
+    runTriggersForTagAdded({ conversation, contact, tag: req.body.tag }).catch((err) => {
+      console.error('Falha no gatilho tag_added:', err.message);
+    });
+  }
 }));
 
 apiRouter.delete('/contacts/:id/tags/:tag', asyncHandler(async (req, res) => {
@@ -222,6 +237,11 @@ apiRouter.patch('/conversations/:id/stage', asyncHandler(async (req, res) => {
   const updated = await moveConversationToStage(req.params.id, funnel_stage_id);
   broadcast({ type: 'conversation:stage_changed', conversation: updated });
   res.json(updated);
+
+  const contactResult = await query('SELECT * FROM contacts WHERE id = $1', [updated.contact_id]);
+  runTriggersForStageEntered({ conversation: updated, contact: contactResult.rows[0] }).catch((err) => {
+    console.error('Falha no gatilho stage_entered:', err.message);
+  });
 }));
 
 apiRouter.post('/conversations/:id/advance-stage', asyncHandler(async (req, res) => {
@@ -491,4 +511,21 @@ apiRouter.post('/tasks/:id/cancel', asyncHandler(async (req, res) => {
   const updated = await cancelTask(req.tenantId, req.params.id);
   if (!updated) return res.status(404).json({ error: 'Tarefa não encontrada' });
   res.json(updated);
+}));
+
+// --- Distribuição automática (round-robin) ---
+
+apiRouter.get('/distribution-rule', asyncHandler(async (req, res) => {
+  res.json(await getDistributionRule(req.tenantId) || { mode: 'manual', participant_user_ids: [], is_active: false });
+}));
+
+apiRouter.put('/distribution-rule', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
+  const { mode, participant_user_ids, is_active } = req.body;
+  if (mode && !['manual', 'round_robin'].includes(mode)) {
+    return res.status(400).json({ error: 'mode deve ser manual ou round_robin' });
+  }
+  const rule = await upsertDistributionRule(req.tenantId, {
+    mode: mode || 'manual', participantUserIds: participant_user_ids, isActive: is_active,
+  });
+  res.json(rule);
 }));

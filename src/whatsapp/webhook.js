@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { query } from '../db/pool.js';
 import crypto from 'node:crypto';
 import { findOrCreateContactByWaId } from '../repositories/contacts.js';
 import {
@@ -155,8 +156,38 @@ async function handleInboundMessages(value) {
       continue;
     }
 
+    // Opt-out (LGPD): "SAIR"/"PARAR"/"CANCELAR" marca o contato e confirma —
+    // nenhuma automação de marketing roda depois disso pra ele (ver engine.js).
+    if (await handleOptOutIfRequested(conversation, contact, body)) continue;
+
     await runTriggersForInboundMessage({ conversation, contact, message: saved });
   }
+}
+
+const OPT_OUT_KEYWORDS = ['sair', 'parar', 'cancelar'];
+
+async function handleOptOutIfRequested(conversation, contact, body) {
+  const normalized = (body || '').trim().toLowerCase();
+  if (!OPT_OUT_KEYWORDS.includes(normalized)) return false;
+
+  await query("UPDATE contacts SET opted_out_at = now(), marketing_opt_in = false WHERE id = $1", [contact.id]);
+
+  try {
+    const confirmText = 'Você não vai mais receber mensagens automáticas da gente por aqui. Se precisar de algo, é só chamar quando quiser.';
+    const sent = await sendTextMessage(contact.wa_id, confirmText);
+    const saved = await insertMessage({
+      conversationId: conversation.id,
+      waMessageId: sent?.messages?.[0]?.id,
+      direction: 'outbound',
+      senderType: 'automation',
+      body: confirmText,
+    });
+    broadcast({ type: 'message:new', conversationId: conversation.id, message: saved });
+  } catch (err) {
+    console.error('Falha ao confirmar opt-out:', err.message);
+  }
+
+  return true;
 }
 
 async function sendCampaignWelcome(conversation, contact, funnel) {
