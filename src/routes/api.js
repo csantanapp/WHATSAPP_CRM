@@ -26,6 +26,25 @@ import {
 } from '../repositories/conversations.js';
 import { listMessagesByConversation, insertMessage, insertInternalNote } from '../repositories/messages.js';
 import { listQuickReplies, createQuickReply, updateQuickReply, deleteQuickReply } from '../repositories/quickReplies.js';
+import {
+  createOpportunity,
+  listOpportunities,
+  getOpportunityById,
+  updateOpportunity,
+  markOpportunityWon,
+  markOpportunityLost,
+  listLossReasons,
+  getOpportunitySummary,
+  getRevenueBySource,
+} from '../repositories/opportunities.js';
+import {
+  createTask,
+  listTasksForUser,
+  listTasksForContact,
+  completeTask,
+  cancelTask,
+} from '../repositories/tasks.js';
+import { getSourceForConversation } from '../repositories/conversationSources.js';
 import { requireRole } from '../middleware/auth.js';
 import { sendTextMessage, checkConnectionStatus } from '../whatsapp/client.js';
 import { broadcast } from '../realtime.js';
@@ -375,4 +394,101 @@ apiRouter.post('/tags', asyncHandler(async (req, res) => {
 apiRouter.delete('/tags/:id', asyncHandler(async (req, res) => {
   await deleteTag(req.params.id);
   res.status(204).end();
+}));
+
+// --- Origem da conversa ---
+
+apiRouter.get('/conversations/:id/source', asyncHandler(async (req, res) => {
+  const source = await getSourceForConversation(req.params.id);
+  res.json(source || null);
+}));
+
+// --- Oportunidades ---
+
+apiRouter.get('/opportunities', asyncHandler(async (req, res) => {
+  res.json(await listOpportunities(req.tenantId, { status: req.query.status, contactId: req.query.contact_id }));
+}));
+
+apiRouter.get('/opportunities/summary', asyncHandler(async (req, res) => {
+  res.json(await getOpportunitySummary(req.tenantId));
+}));
+
+apiRouter.get('/opportunities/revenue-by-source', asyncHandler(async (req, res) => {
+  res.json(await getRevenueBySource(req.tenantId));
+}));
+
+apiRouter.get('/loss-reasons', asyncHandler(async (req, res) => {
+  res.json(await listLossReasons(req.tenantId));
+}));
+
+apiRouter.post('/opportunities', asyncHandler(async (req, res) => {
+  const { contact_id, conversation_id, funnel_id, stage_id, title, value, product, owner_user_id, expected_close_date } = req.body;
+  if (!contact_id || !title) return res.status(400).json({ error: 'contact_id e title são obrigatórios' });
+  const opp = await createOpportunity({
+    contactId: contact_id, conversationId: conversation_id, funnelId: funnel_id, stageId: stage_id,
+    title, value, product, ownerUserId: owner_user_id || req.user.id, expectedCloseDate: expected_close_date,
+  });
+  res.status(201).json(opp);
+}));
+
+apiRouter.get('/opportunities/:id', asyncHandler(async (req, res) => {
+  const opp = await getOpportunityById(req.tenantId, req.params.id);
+  if (!opp) return res.status(404).json({ error: 'Oportunidade não encontrada' });
+  res.json(opp);
+}));
+
+apiRouter.patch('/opportunities/:id', asyncHandler(async (req, res) => {
+  const { title, value, product, stage_id, owner_user_id, expected_close_date } = req.body;
+  const updated = await updateOpportunity(req.tenantId, req.params.id, {
+    title, value, product, stageId: stage_id, ownerUserId: owner_user_id, expectedCloseDate: expected_close_date,
+  });
+  if (!updated) return res.status(404).json({ error: 'Oportunidade não encontrada' });
+  res.json(updated);
+}));
+
+apiRouter.post('/opportunities/:id/won', asyncHandler(async (req, res) => {
+  const updated = await markOpportunityWon(req.tenantId, req.params.id, req.body.value);
+  if (!updated) return res.status(404).json({ error: 'Oportunidade não encontrada' });
+  broadcast({ type: 'opportunity:updated', opportunity: updated });
+  res.json(updated);
+}));
+
+apiRouter.post('/opportunities/:id/lost', asyncHandler(async (req, res) => {
+  if (!req.body.loss_reason_id) return res.status(400).json({ error: 'loss_reason_id é obrigatório' });
+  const updated = await markOpportunityLost(req.tenantId, req.params.id, req.body.loss_reason_id);
+  if (!updated) return res.status(404).json({ error: 'Oportunidade não encontrada' });
+  broadcast({ type: 'opportunity:updated', opportunity: updated });
+  res.json(updated);
+}));
+
+// --- Tarefas / follow-up ---
+
+apiRouter.get('/tasks/mine', asyncHandler(async (req, res) => {
+  res.json(await listTasksForUser(req.tenantId, req.user.id));
+}));
+
+apiRouter.get('/contacts/:id/tasks', asyncHandler(async (req, res) => {
+  res.json(await listTasksForContact(req.params.id));
+}));
+
+apiRouter.post('/tasks', asyncHandler(async (req, res) => {
+  const { contact_id, conversation_id, opportunity_id, assigned_user_id, title, description, due_at } = req.body;
+  if (!title) return res.status(400).json({ error: 'title é obrigatório' });
+  const task = await createTask({
+    contactId: contact_id, conversationId: conversation_id, opportunityId: opportunity_id,
+    assignedUserId: assigned_user_id || req.user.id, title, description, dueAt: due_at, createdBy: req.user.id,
+  });
+  res.status(201).json(task);
+}));
+
+apiRouter.post('/tasks/:id/complete', asyncHandler(async (req, res) => {
+  const updated = await completeTask(req.tenantId, req.params.id);
+  if (!updated) return res.status(404).json({ error: 'Tarefa não encontrada' });
+  res.json(updated);
+}));
+
+apiRouter.post('/tasks/:id/cancel', asyncHandler(async (req, res) => {
+  const updated = await cancelTask(req.tenantId, req.params.id);
+  if (!updated) return res.status(404).json({ error: 'Tarefa não encontrada' });
+  res.json(updated);
 }));

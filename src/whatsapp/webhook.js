@@ -12,6 +12,7 @@ import {
   applyFunnelDefaultTagsToContact,
 } from '../repositories/funnels.js';
 import { insertMessage, updateMessageStatusByWaId } from '../repositories/messages.js';
+import { recordConversationSource } from '../repositories/conversationSources.js';
 import { sendTextMessage } from './client.js';
 import { broadcast } from '../realtime.js';
 import { runTriggersForInboundMessage } from '../automation/engine.js';
@@ -108,6 +109,16 @@ async function handleInboundMessages(value) {
     if (routing?.funnel.id) {
       await applyFunnelDefaultTagsToContact(routing.funnel.id, contact.id);
     }
+
+    // Origem do lead (Fase 3) — captura o referral de anúncio Click-to-WhatsApp
+    // se vier, senão a palavra-chave de campanha que já roteou pro funil.
+    const firstMsgForSource = value.messages[0];
+    await recordConversationSource({
+      conversationId: conversation.id,
+      contactId: contact.id,
+      referral: firstMsgForSource?.referral || null,
+      campaignKey: matchedCampaign?.funnel?.entry_keyword || null,
+    });
   }
 
   for (const msg of value.messages) {
