@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.production
+.env.test
+.env.local
+/data/media/
+*.log
+npm-debug.log*
+.DS_Store

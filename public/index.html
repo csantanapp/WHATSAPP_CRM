@@ -1,0 +1,1850 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CRM WhatsApp Prototipo</title>
+<style>
+:root{
+  --bg:#EAE8E0;
+  --ink:#14181A;
+  --muted:#6B6F68;
+  --border:#DAD7CC;
+  --accent:#0C7D60;
+  --chip:#FFFFFF;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#17190F;
+    --ink:#F1EFE6;
+    --muted:#A6A99C;
+    --border:#33352A;
+    --accent:#3FCBA0;
+    --chip:#1F2117;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17190F;
+  --ink:#F1EFE6;
+  --muted:#A6A99C;
+  --border:#33352A;
+  --accent:#3FCBA0;
+  --chip:#1F2117;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Work Sans',sans-serif;
+}
+.page{padding:0 16px 40px;}
+.topbar{
+  max-width:1440px;margin:0 auto;padding:22px 4px 6px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+.topbar-title{font-family:'Sora',sans-serif;font-weight:700;font-size:17px;color:var(--ink);}
+.topbar-title span{font-family:'Work Sans',sans-serif;font-weight:500;font-size:13px;color:var(--muted);}
+.quicknav{display:flex;gap:6px;background:var(--chip);border:1px solid var(--border);border-radius:10px;padding:4px;}
+.qn-btn{
+  appearance:none;border:none;background:transparent;color:var(--muted);
+  font-family:'Work Sans',sans-serif;font-weight:600;font-size:12.5px;padding:7px 13px;border-radius:7px;cursor:pointer;
+}
+.qn-btn.active{background:var(--accent);color:#052E22;}
+.hint{
+  max-width:1440px;margin:0 auto;padding:0 4px 18px;font-size:12.5px;color:var(--muted);
+}
+.stage-outer{width:100%;display:flex;justify-content:center;}
+.stage{position:relative;}
+.frame{
+  width:1440px;height:900px;transform-origin:top left;overflow:hidden;
+  border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,0.28);background:#F5F4EF;
+}
+.screen{display:none;width:1440px;height:900px;background:#F5F4EF;color:#1F2421;}
+.screen.active{display:flex;}
+.screen a{color:inherit;text-decoration:none;}
+.sidebar{width:84px;flex-shrink:0;background:#15191A;display:flex;flex-direction:column;align-items:center;padding:20px 0;}
+.logo-badge{width:40px;height:40px;border-radius:11px;background:#12A37D;display:flex;align-items:center;justify-content:center;margin-bottom:32px;}
+.nav-icons{display:flex;flex-direction:column;gap:8px;align-items:center;}
+.nav-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;padding:0;}
+.nav-icon.clickable{cursor:pointer;}
+.nav-icon.on{background:rgba(18,163,125,0.18);}
+.spacer{flex-grow:1;}
+button{font-family:'Work Sans',sans-serif;}
+.switch{width:40px;height:22px;border-radius:20px;background:#D8D5CC;position:relative;cursor:pointer;flex-shrink:0;border:none;padding:0;}
+.switch .knob{width:18px;height:18px;border-radius:50%;background:#FFFFFF;position:absolute;top:2px;left:2px;box-shadow:0 1px 2px rgba(0,0,0,0.25);transition:left .12s;}
+.switch.on{background:#12A37D;}
+.switch.on .knob{left:20px;}
+</style>
+
+<div class="page">
+
+  <div class="topbar">
+    <div class="topbar-title">CRM WhatsApp <span>· prototipo navegavel</span></div>
+    <nav class="quicknav">
+      <button class="qn-btn" data-goto="dashboard">Dashboard</button>
+      <button class="qn-btn active" data-goto="kanban">Kanban</button>
+      <button class="qn-btn" data-goto="contatos">Contatos</button>
+      <button class="qn-btn" data-goto="automacao">Automacoes</button>
+      <button class="qn-btn" data-goto="funis">Funis</button>
+      <button class="qn-btn" data-goto="config">Configurações</button>
+    </nav>
+  </div>
+  <p class="hint">Protótipo estático — clique nos cards do Kanban, no menu lateral, nos ícones e nos botões para navegar entre as telas, exatamente como seria no produto real. Abra uma automação para ver o construtor de fluxo em blocos.</p>
+
+  <div class="stage-outer">
+    <div class="stage" id="stage">
+      <div class="frame" id="frame">
+
+        <section class="screen active" id="screen-kanban">
+          <div class="sidebar">
+            <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
+            <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
+              <button class="nav-icon on clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#3FCBA0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
+              <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="automacao" aria-label="Automações"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="funis" aria-label="Funis"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54Z"></path></svg></button>
+            </div>
+            <div class="spacer"></div>
+            <button class="nav-icon clickable" data-goto="config" aria-label="Configurações"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.14.6.6 1.09 1.19 1.29.24.08.49.13.75.13H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1 1.55Z"></path></svg></button>
+          </div>
+
+          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;min-width:0;">
+            <div style="margin-bottom:16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:22px;color:#14181A;">Kanban de Atendimento</div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div style="display:flex;align-items:center;gap:8px;background:#FFFFFF;border:1px solid #E4E1D8;border-radius:10px;padding:9px 14px;width:220px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9D96" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                    <input id="kanban-search" placeholder="Buscar contato ou telefone" style="border:none;outline:none;font-size:13px;color:#14181A;flex-grow:1;font-family:'Work Sans',sans-serif;background:transparent;"/>
+                  </div>
+                  <button id="kanban-export-btn" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#3A3D38;border:1px solid #E4E1D8;border-radius:10px;padding:10px 14px;font-weight:600;font-size:13px;cursor:pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B5F58" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"></path><path d="m7 10 5 5 5-5"></path><path d="M4 19h16"></path></svg>
+                    Exportar contatos
+                  </button>
+                  <button id="kanban-novo-contato-btn" style="display:flex;align-items:center;gap:6px;background:#12A37D;color:#FFFFFF;border:none;border-radius:10px;padding:10px 16px;font-weight:600;font-size:13px;cursor:pointer;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+                    Novo contato
+                  </button>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div id="funnel-tabs" style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:12.5px;color:#9A9D96;">Carregando funis...</span>
+                </div>
+                <div id="funnel-summary" style="font-size:13px;color:#82867F;"></div>
+              </div>
+            </div>
+
+            <div id="kanban-columns" style="display:flex;gap:16px;flex-grow:1;min-height:0;">
+              <div style="padding:24px;color:#9A9D96;font-size:13px;">Carregando conversas...</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-dashboard">
+          <div class="sidebar">
+            <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
+            <div class="nav-icons">
+              <button class="nav-icon on clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#3FCBA0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
+              <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="automacao" aria-label="Automações"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="funis" aria-label="Funis"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54Z"></path></svg></button>
+            </div>
+            <div class="spacer"></div>
+            <button class="nav-icon clickable" data-goto="config" aria-label="Configurações"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.14.6.6 1.09 1.19 1.29.24.08.49.13.75.13H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1 1.55Z"></path></svg></button>
+          </div>
+
+          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;overflow-y:auto;">
+            <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:22px;color:#14181A;margin-bottom:4px;">Visão geral</div>
+            <div style="font-size:13px;color:#82867F;margin-bottom:24px;">Resumo em tempo real do atendimento da FullHouse</div>
+
+            <div id="dashboard-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
+              <div style="grid-column:span 4;font-size:12.5px;color:#9A9D96;">Carregando métricas...</div>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;">Conversas recentes</div>
+              <a href="#kanban" data-goto="kanban" style="font-size:12.5px;color:#0C7D60;font-weight:600;">Ver Kanban completo →</a>
+            </div>
+            <div id="dashboard-recent" style="display:flex;flex-direction:column;gap:8px;">
+              <div style="font-size:12.5px;color:#9A9D96;">Carregando...</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-contatos">
+          <div class="sidebar">
+            <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
+            <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
+              <button class="nav-icon on clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#3FCBA0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="automacao" aria-label="Automações"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="funis" aria-label="Funis"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54Z"></path></svg></button>
+            </div>
+            <div class="spacer"></div>
+            <button class="nav-icon clickable" data-goto="config" aria-label="Configurações"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.14.6.6 1.09 1.19 1.29.24.08.49.13.75.13H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1 1.55Z"></path></svg></button>
+          </div>
+
+          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;overflow-y:auto;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+              <div>
+                <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:22px;color:#14181A;">Gestão de Leads</div>
+                <div id="contatos-summary" style="font-size:13px;color:#82867F;margin-top:3px;">Carregando...</div>
+              </div>
+              <button id="contatos-novo-btn" style="display:flex;align-items:center;gap:6px;background:#12A37D;color:#FFFFFF;border:none;border-radius:10px;padding:10px 16px;font-weight:600;font-size:13px;cursor:pointer;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+                Novo lead
+              </button>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+              <select id="contatos-funnel-filter" style="background:#FFFFFF;border:1px solid #E4E1D8;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;color:#14181A;font-family:'Work Sans',sans-serif;cursor:pointer;">
+                <option value="">Todos os leads (geral)</option>
+              </select>
+              <div style="display:flex;align-items:center;gap:8px;background:#FFFFFF;border:1px solid #E4E1D8;border-radius:10px;padding:9px 14px;width:280px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9D96" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                <input id="contatos-search" placeholder="Buscar por nome, e-mail ou telefone" style="border:none;outline:none;font-size:13px;color:#14181A;flex-grow:1;font-family:'Work Sans',sans-serif;"/>
+              </div>
+            </div>
+
+            <div id="contatos-list" style="display:flex;flex-direction:column;gap:8px;">
+              <div style="font-size:12.5px;color:#9A9D96;">Carregando contatos...</div>
+            </div>
+          </div>
+
+          <div id="lead-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(20,24,26,0.4);z-index:50;align-items:center;justify-content:center;">
+            <div style="background:#FFFFFF;border-radius:16px;width:420px;max-height:80vh;overflow-y:auto;padding:24px;position:relative;">
+              <button id="lead-modal-close" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:#9A9D96;font-size:18px;line-height:1;">×</button>
+              <div id="lead-modal-body">Carregando...</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-conversa">
+          <div class="sidebar">
+            <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
+            <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
+              <button class="nav-icon on clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#3FCBA0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
+              <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="automacao" aria-label="Automações"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="funis" aria-label="Funis"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54Z"></path></svg></button>
+            </div>
+            <div class="spacer"></div>
+            <button class="nav-icon clickable" data-goto="config" aria-label="Configurações"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.14.6.6 1.09 1.19 1.29.24.08.49.13.75.13H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1 1.55Z"></path></svg></button>
+          </div>
+
+          <div style="flex-grow:1;display:flex;flex-direction:column;min-width:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 28px;border-bottom:1px solid #E7E5DF;">
+              <div style="display:flex;align-items:center;gap:18px;">
+                <a href="#kanban" data-goto="kanban" style="display:flex;align-items:center;gap:6px;color:#5B5F58;font-size:13px;font-weight:500;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5B5F58" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"></path></svg>
+                  Voltar
+                </a>
+                <div style="width:1px;height:26px;background:#E7E5DF;"></div>
+                <div id="conversa-avatar" style="width:38px;height:38px;border-radius:50%;background:#E5F6EF;color:#0C7D60;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:700;font-size:13.5px;">--</div>
+                <div>
+                  <div id="conversa-nome" style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;color:#14181A;">Selecione uma conversa</div>
+                  <div id="conversa-telefone" style="font-size:12px;color:#82867F;"></div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;background:#E5F6EF;border-radius:20px;padding:6px 12px;">
+                <span style="width:7px;height:7px;border-radius:50%;background:#12A37D;display:inline-block;"></span>
+                <span id="conversa-etapa" style="font-size:12px;font-weight:600;color:#0C7D60;">--</span>
+              </div>
+            </div>
+
+            <div style="flex-grow:1;display:flex;min-height:0;">
+              <div style="flex-grow:1;display:flex;flex-direction:column;min-width:0;">
+                <div id="conversa-messages" style="flex-grow:1;overflow-y:auto;padding:24px 32px;display:flex;flex-direction:column;gap:14px;"></div>
+                <form id="conversa-form" style="display:flex;align-items:center;gap:10px;padding:16px 28px;border-top:1px solid #E7E5DF;">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9A9D96" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05 12.25 20.24a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.5 3.5 0 0 1 4.95 4.95L9.42 17.4a1.5 1.5 0 0 1-2.12-2.12l8.49-8.49"></path></svg>
+                  <input id="conversa-input" autocomplete="off" placeholder="Digite uma mensagem..." style="flex-grow:1;background:#F5F4EF;border:none;border-radius:20px;padding:10px 16px;font-size:13px;color:#14181A;font-family:'Work Sans',sans-serif;"/>
+                  <button type="submit" style="width:38px;height:38px;border-radius:50%;background:#12A37D;border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"></path><path d="M22 2 15 22l-4-9-9-4 20-7Z"></path></svg>
+                  </button>
+                </form>
+              </div>
+
+              <div style="width:340px;flex-shrink:0;border-left:1px solid #E7E5DF;padding:24px 22px;overflow-y:auto;display:flex;flex-direction:column;gap:22px;">
+                <div style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+                  <div id="painel-avatar" style="width:64px;height:64px;border-radius:50%;background:#E5F6EF;color:#0C7D60;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:700;font-size:20px;margin-bottom:10px;">--</div>
+                  <div id="painel-nome" title="Clique para editar o nome" style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;color:#14181A;cursor:pointer;">--</div>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+                    <span id="painel-telefone" style="font-size:12.5px;color:#82867F;"></span>
+                  </div>
+                  <div id="painel-email" title="Clique para editar o e-mail" style="font-size:12px;color:#9A9D96;cursor:pointer;margin-top:2px;">+ adicionar e-mail</div>
+                </div>
+                <div>
+                  <div id="painel-tags" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;"></div>
+                </div>
+                <div>
+                  <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Pipeline</div>
+                  <div style="background:#F5F4EF;border:1px solid #E4E1D8;border-radius:10px;padding:12px;">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#82867F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54Z"></path></svg>
+                      <span id="painel-funil" style="font-size:11.5px;font-weight:600;color:#82867F;">--</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                      <span style="width:8px;height:8px;border-radius:50%;background:#12A37D;display:inline-block;flex-shrink:0;"></span>
+                      <span id="painel-etapa" style="font-size:14.5px;font-weight:700;color:#14181A;">--</span>
+                    </div>
+                    <button id="painel-avancar-etapa" style="width:100%;background:#12A37D;border:none;color:#FFFFFF;border-radius:9px;padding:10px;font-weight:600;font-size:12.5px;cursor:pointer;">Mover para próxima etapa →</button>
+                    <button id="painel-redirecionar-funil" style="width:100%;background:none;border:none;color:#5B5F58;padding:9px 0 0;font-weight:600;font-size:11.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5B5F58" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3 21 7l-4 4"></path><path d="M3 11V9a2 2 0 0 1 2-2h16"></path><path d="M7 21 3 17l4-4"></path><path d="M21 13v2a2 2 0 0 1-2 2H3"></path></svg>
+                      Redirecionar para outro funil
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Notas internas</div>
+                  <textarea id="painel-notas" placeholder="Adicionar nota sobre este lead..." style="width:100%;background:#F5F4EF;border:1px solid #E4E1D8;border-radius:10px;padding:11px 12px;font-size:12.5px;color:#3A3D38;min-height:56px;resize:vertical;font-family:'Work Sans',sans-serif;box-sizing:border-box;"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-automacao">
+          <div class="sidebar">
+            <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
+            <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
+              <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
+              <button class="nav-icon on clickable" data-goto="automacao" aria-label="Automações"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#3FCBA0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="funis" aria-label="Funis"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54Z"></path></svg></button>
+            </div>
+            <div class="spacer"></div>
+            <button class="nav-icon clickable" data-goto="config" aria-label="Configurações"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.14.6.6 1.09 1.19 1.29.24.08.49.13.75.13H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1 1.55Z"></path></svg></button>
+          </div>
+
+          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;overflow-y:auto;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+              <div>
+                <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:22px;color:#14181A;">Fluxos de Automação</div>
+                <div id="automacao-summary" style="font-size:13px;color:#82867F;margin-top:3px;">Carregando...</div>
+              </div>
+              <button id="automacao-nova-btn" style="display:flex;align-items:center;gap:6px;background:#12A37D;color:#FFFFFF;border:none;border-radius:10px;padding:10px 16px;font-weight:600;font-size:13px;cursor:pointer;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+                Nova automação
+              </button>
+            </div>
+
+            <select id="automacao-funnel-filter" style="background:#FFFFFF;border:1px solid #E4E1D8;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;color:#14181A;font-family:'Work Sans',sans-serif;cursor:pointer;margin-bottom:18px;">
+              <option value="">Todos os funis</option>
+            </select>
+
+            <div style="background:#FFFFFF;border:1px solid #E7E5DF;border-radius:16px;padding:22px;margin-bottom:24px;">
+              <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:16px;">Exemplo · como funciona uma automação</div>
+              <div style="display:flex;align-items:center;">
+                <div style="width:322px;flex-shrink:0;border:1px solid #E7E5DF;border-radius:12px;padding:16px;">
+                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">
+                    <div style="width:28px;height:28px;border-radius:8px;background:#E5F6EF;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0C7D60" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path></svg></div>
+                    <span style="font-size:11px;font-weight:700;color:#82867F;text-transform:uppercase;letter-spacing:.03em;">Gatilho</span>
+                  </div>
+                  <div style="font-size:13px;color:#1F2421;margin-bottom:10px;">Mensagem recebida contém</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <span style="font-size:11.5px;font-weight:600;background:#F5F4EF;border:1px solid #E4E1D8;color:#3A3D38;padding:4px 10px;border-radius:20px;">orçamento</span>
+                    <span style="font-size:11.5px;font-weight:600;background:#F5F4EF;border:1px solid #E4E1D8;color:#3A3D38;padding:4px 10px;border-radius:20px;">preço</span>
+                  </div>
+                </div>
+                <svg width="56" height="24" viewBox="0 0 56 24" fill="none" style="flex-shrink:0;"><line x1="2" y1="12" x2="46" y2="12" stroke="#D8D5CC" stroke-width="2"></line><path d="M40 6 48 12 40 18" stroke="#D8D5CC" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <div style="width:322px;flex-shrink:0;border:1px solid #E7E5DF;border-radius:12px;padding:16px;">
+                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">
+                    <div style="width:28px;height:28px;border-radius:8px;background:#FDECC8;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54Z"></path></svg></div>
+                    <span style="font-size:11px;font-weight:700;color:#82867F;text-transform:uppercase;letter-spacing:.03em;">Condição</span>
+                  </div>
+                  <div style="font-size:13px;color:#1F2421;margin-bottom:10px;">Etapa atual é</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;"><span style="font-size:11.5px;font-weight:600;background:#E5F6EF;color:#0C7D60;padding:4px 10px;border-radius:20px;">Novo lead</span></div>
+                </div>
+                <svg width="56" height="24" viewBox="0 0 56 24" fill="none" style="flex-shrink:0;"><line x1="2" y1="12" x2="46" y2="12" stroke="#D8D5CC" stroke-width="2"></line><path d="M40 6 48 12 40 18" stroke="#D8D5CC" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <div style="width:322px;flex-shrink:0;border:1px solid #E7E5DF;border-radius:12px;padding:16px;">
+                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">
+                    <div style="width:28px;height:28px;border-radius:8px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4338CA" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"></path></svg></div>
+                    <span style="font-size:11px;font-weight:700;color:#82867F;text-transform:uppercase;letter-spacing:.03em;">Ações</span>
+                  </div>
+                  <div style="font-size:13px;color:#1F2421;margin-bottom:10px;">Mover para <b>Qualificado</b> e notificar</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;"><span style="font-size:11.5px;font-weight:600;background:#F5F4EF;border:1px solid #E4E1D8;color:#3A3D38;padding:4px 10px;border-radius:20px;">vendedor no Slack</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;">Todas as automações</div>
+            <div id="automacao-list" style="display:flex;flex-direction:column;gap:10px;">
+              <div style="font-size:12.5px;color:#9A9D96;">Carregando fluxos...</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-automacao-flow">
+          <div class="sidebar">
+            <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
+            <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
+              <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
+              <button class="nav-icon on clickable" data-goto="automacao" aria-label="Automações"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#3FCBA0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="funis" aria-label="Funis"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54Z"></path></svg></button>
+            </div>
+            <div class="spacer"></div>
+            <button class="nav-icon clickable" data-goto="config" aria-label="Configurações"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.14.6.6 1.09 1.19 1.29.24.08.49.13.75.13H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1 1.55Z"></path></svg></button>
+          </div>
+
+          <div style="flex-grow:1;display:flex;flex-direction:column;min-width:0;">
+
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid #E7E5DF;flex-shrink:0;">
+              <div style="display:flex;align-items:center;gap:16px;">
+                <a href="#automacao" data-goto="automacao" style="display:flex;align-items:center;gap:6px;color:#5B5F58;font-size:13px;font-weight:500;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5B5F58" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"></path></svg>
+                  Automações
+                </a>
+                <div style="width:1px;height:22px;background:#E7E5DF;"></div>
+                <div id="flow-canvas-name" title="Clique para renomear" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                  <span style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;color:#14181A;">--</span>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9D96" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>
+                </div>
+                <button id="flow-canvas-toggle" class="switch" style="flex-shrink:0;"><span class="knob"></span></button>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <button id="flow-canvas-delete" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#B42318;border:1px solid #E4E1D8;border-radius:10px;padding:9px 14px;font-weight:600;font-size:12.5px;cursor:pointer;">Excluir fluxo</button>
+              </div>
+            </div>
+
+            <div style="position:relative;flex-grow:1;overflow-y:auto;background:#EDEBE3;background-image:radial-gradient(#D3D0C6 1.5px, transparent 1.5px);background-size:22px 22px;">
+              <div id="flow-canvas-body" style="display:flex;flex-direction:column;align-items:center;padding:40px 20px 80px;">Carregando...</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-config">
+          <div class="sidebar">
+            <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
+            <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
+              <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="automacao" aria-label="Automações"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="funis" aria-label="Funis"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54Z"></path></svg></button>
+            </div>
+            <div class="spacer"></div>
+            <button class="nav-icon on clickable" data-goto="config" aria-label="Configurações"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3FCBA0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.14.6.6 1.09 1.19 1.29.24.08.49.13.75.13H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1 1.55Z"></path></svg></button>
+          </div>
+
+          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;overflow-y:auto;">
+            <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:22px;color:#14181A;margin-bottom:22px;">Configurações</div>
+
+            <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Conexão com o WhatsApp</div>
+            <div id="config-whatsapp-status" style="background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#9A9D96;">Verificando...</div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-funis">
+          <div class="sidebar">
+            <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
+            <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
+              <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="automacao" aria-label="Automações"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path></svg></button>
+              <button class="nav-icon on clickable" data-goto="funis" aria-label="Funis"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#3FCBA0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54Z"></path></svg></button>
+            </div>
+            <div class="spacer"></div>
+            <button class="nav-icon clickable" data-goto="config" aria-label="Configurações"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.14.6.6 1.09 1.19 1.29.24.08.49.13.75.13H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1 1.55Z"></path></svg></button>
+          </div>
+
+          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;overflow-y:auto;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+              <div>
+                <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:22px;color:#14181A;">Funis</div>
+                <div style="font-size:13px;color:#82867F;margin-top:3px;">Crie e organize os funis/Kanbans de atendimento — um por campanha, evento ou fluxo de vendas.</div>
+              </div>
+              <button id="funis-novo-funil-btn" style="display:flex;align-items:center;gap:6px;background:#12A37D;color:#FFFFFF;border:none;border-radius:10px;padding:10px 16px;font-weight:600;font-size:13px;cursor:pointer;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+                Novo funil
+              </button>
+            </div>
+            <div id="funis-list" style="display:flex;flex-direction:column;gap:12px;">
+              <div style="font-size:12.5px;color:#9A9D96;">Carregando...</div>
+            </div>
+
+            <div style="margin-top:32px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <div>
+                  <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;">Catálogo de tags</div>
+                  <div style="font-size:12px;color:#82867F;margin-top:2px;">Tags disponíveis pra classificar leads no Kanban e na Gestão de Leads.</div>
+                </div>
+                <button id="tags-novo-btn" style="font-size:12px;font-weight:600;color:#0C7D60;background:none;border:none;cursor:pointer;">+ Nova tag</button>
+              </div>
+              <div id="tags-list" style="display:flex;flex-wrap:wrap;gap:8px;">
+                <div style="font-size:12.5px;color:#9A9D96;">Carregando...</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tag-picker-overlay" style="display:none;position:fixed;inset:0;background:rgba(20,24,26,0.4);z-index:100;align-items:center;justify-content:center;">
+  <div style="background:#FFFFFF;border-radius:16px;width:320px;max-height:70vh;overflow-y:auto;padding:20px;">
+    <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:14px;color:#14181A;margin-bottom:12px;">Escolher tag</div>
+    <div id="tag-picker-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;"></div>
+    <div style="display:flex;gap:8px;">
+      <input id="tag-picker-input" placeholder="Ou digite uma nova tag" style="flex-grow:1;border:1px solid #E4E1D8;border-radius:8px;padding:8px 10px;font-size:12.5px;color:#14181A;font-family:'Work Sans',sans-serif;"/>
+      <button id="tag-picker-create" style="background:#12A37D;color:#FFFFFF;border:none;border-radius:8px;padding:8px 12px;font-weight:600;font-size:12.5px;cursor:pointer;">+</button>
+    </div>
+    <button id="tag-picker-cancel" style="width:100%;background:none;border:none;color:#9A9D96;font-size:12px;margin-top:12px;cursor:pointer;">Cancelar</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var screens = document.querySelectorAll('.screen');
+  var qnBtns = document.querySelectorAll('.qn-btn');
+  var stage = document.getElementById('stage');
+  function goto(id){
+    for (var i = 0; i < screens.length; i++){
+      screens[i].classList.toggle('active', screens[i].id === 'screen-' + id);
+    }
+    for (var j = 0; j < qnBtns.length; j++){
+      qnBtns[j].classList.toggle('active', qnBtns[j].getAttribute('data-goto') === id);
+    }
+    stage.scrollIntoView({block:'nearest'});
+    if (window.__onGoto) window.__onGoto(id);
+  }
+  window.__goto = goto;
+  var navEls = document.querySelectorAll('[data-goto]');
+  for (var k = 0; k < navEls.length; k++){
+    navEls[k].addEventListener('click', function(e){
+      e.preventDefault();
+      goto(this.getAttribute('data-goto'));
+    });
+  }
+
+  var switches = document.querySelectorAll('.switch');
+  for (var s = 0; s < switches.length; s++){
+    switches[s].addEventListener('click', function(e){
+      e.stopPropagation();
+      var isOn = this.classList.toggle('on');
+      this.setAttribute('aria-pressed', isOn ? 'true' : 'false');
+    });
+  }
+
+  var frame = document.getElementById('frame');
+  function layout(){
+    var availW = window.innerWidth - 32;
+    var scale = Math.min(1, availW / 1440);
+    frame.style.transform = 'scale(' + scale + ')';
+    frame.parentElement.style.width = (1440 * scale) + 'px';
+    frame.parentElement.style.height = (900 * scale) + 'px';
+  }
+  window.addEventListener('resize', layout);
+  layout();
+})();
+</script>
+
+<script>
+// Integração real com a API do CRM (substitui os dados estáticos do protótipo).
+(function () {
+  var STAGE_COLORS = ['#12A37D', '#2563EB', '#D97706', '#7C3AED', '#DB2777', '#0891B2'];
+  var state = { funnels: [], currentFunnelId: null, currentConversationId: null };
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function formatTime(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function initials(name) {
+    return (name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (p) { return p[0].toUpperCase(); }).join('');
+  }
+
+  async function api(path, options) {
+    var res = await fetch('/api' + path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, options));
+    if (!res.ok) {
+      var message = 'Falha na API: ' + path;
+      try {
+        var body = await res.json();
+        if (body && body.error) message = body.error;
+      } catch (e) {}
+      throw new Error(message);
+    }
+    if (res.status === 204) return null;
+    return res.json();
+  }
+
+  // Seletor de tags reutilizável: mostra o catálogo já cadastrado (tela Funis)
+  // pra escolher, com opção de criar uma nova na hora.
+  async function openTagPicker(contactId, currentTags, onAssigned) {
+    var overlay = document.getElementById('tag-picker-overlay');
+    var listEl = document.getElementById('tag-picker-list');
+    var input = document.getElementById('tag-picker-input');
+    input.value = '';
+    listEl.innerHTML = 'Carregando...';
+    overlay.style.display = 'flex';
+
+    var tags = [];
+    try { tags = await api('/tags'); } catch (err) {}
+    var available = tags.filter(function (t) { return (currentTags || []).indexOf(t.name) === -1; });
+
+    listEl.innerHTML = available.length
+      ? available.map(function (t) {
+          return '<button data-pick-tag="' + escapeHtml(t.name) + '" style="font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;background:#F5F4EF;color:#3A3D38;border:none;cursor:pointer;">' + escapeHtml(t.name) + '</button>';
+        }).join('')
+      : '<div style="font-size:12px;color:#9A9D96;">Nenhuma tag disponível ainda — crie uma abaixo.</div>';
+
+    function close() { overlay.style.display = 'none'; }
+
+    async function assign(tagName) {
+      if (!tagName) return;
+      await api('/contacts/' + contactId + '/tags', { method: 'POST', body: JSON.stringify({ tag: tagName }) });
+      close();
+      onAssigned();
+    }
+
+    listEl.querySelectorAll('[data-pick-tag]').forEach(function (btn) {
+      btn.onclick = function () { assign(btn.getAttribute('data-pick-tag')); };
+    });
+    document.getElementById('tag-picker-create').onclick = function () { assign(input.value.trim()); };
+    input.onkeydown = function (e) { if (e.key === 'Enter') assign(input.value.trim()); };
+    document.getElementById('tag-picker-cancel').onclick = close;
+    overlay.onclick = function (e) { if (e.target === overlay) close(); };
+  }
+
+  async function loadKanban() {
+    var board = document.getElementById('kanban-columns');
+    try {
+      state.funnels = await api('/funnels');
+    } catch (err) {
+      board.innerHTML = '<div style="padding:24px;color:#B42318;font-size:13px;">Não foi possível carregar o Kanban (verifique se o servidor/API está no ar).</div>';
+      return;
+    }
+
+    populateContatosFunnelFilter();
+    populateAutomacaoFunnelFilter();
+
+    if (!state.funnels.length) {
+      board.innerHTML = '<div style="padding:24px;color:#9A9D96;font-size:13px;">Nenhum funil cadastrado ainda. Rode "npm run seed".</div>';
+      return;
+    }
+
+    var stillExists = state.funnels.some(function (f) { return f.id === state.currentFunnelId; });
+    if (!state.currentFunnelId || !stillExists) state.currentFunnelId = state.funnels[0].id;
+    renderFunnelTabs();
+    await renderFunnel(state.currentFunnelId);
+  }
+
+  function renderFunnelTabs() {
+    var tabs = document.getElementById('funnel-tabs');
+    var current = state.funnels.find(function (f) { return f.id === state.currentFunnelId; });
+    tabs.innerHTML = '';
+    var label = document.createElement('span');
+    label.style.cssText = 'display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:20px;background:rgba(18,163,125,0.14);color:#0C7D60;';
+    label.textContent = current ? current.name : '';
+    tabs.appendChild(label);
+
+    if (state.funnels.length > 1) {
+      var switchLink = document.createElement('span');
+      switchLink.style.cssText = 'font-size:12px;color:#82867F;cursor:pointer;text-decoration:underline;';
+      switchLink.textContent = 'Ver outros funis';
+      switchLink.addEventListener('click', function () { window.__goto && window.__goto('funis'); });
+      tabs.appendChild(switchLink);
+    }
+  }
+
+  // Chamado pela tela de Funis quando o usuário clica pra abrir o Kanban de um funil específico.
+  window.__openKanbanForFunnel = async function (funnelId) {
+    state.currentFunnelId = funnelId;
+    renderFunnelTabs();
+    await renderFunnel(funnelId);
+    window.__goto && window.__goto('kanban');
+  };
+
+  var kanbanSearchTerm = '';
+  document.getElementById('kanban-search').addEventListener('input', function (e) {
+    kanbanSearchTerm = e.target.value.trim().toLowerCase();
+    if (state.currentFunnelId) renderFunnel(state.currentFunnelId);
+  });
+
+  document.getElementById('kanban-novo-contato-btn').addEventListener('click', async function () {
+    var phone = prompt('Telefone do lead (com DDI e DDD, só números, ex: 5511999998888):');
+    if (!phone) return;
+    var name = prompt('Nome do lead (opcional):') || '';
+    var email = prompt('E-mail do lead (opcional):') || '';
+    try {
+      await api('/contacts', { method: 'POST', body: JSON.stringify({ wa_id: phone.replace(/\D/g, ''), name: name, email: email }) });
+      alert('Lead criado. Para ele aparecer no Kanban, é preciso que uma conversa seja iniciada (pela primeira mensagem recebida dele).');
+    } catch (err) {
+      alert('Não foi possível criar: ' + err.message);
+    }
+  });
+
+  document.getElementById('kanban-export-btn').addEventListener('click', async function () {
+    var contacts = await api('/contacts');
+    var header = 'nome,telefone,origem,tags\n';
+    var rows = contacts.map(function (c) {
+      return [c.name || '', c.phone_display || '', c.source || '', (c.tags || []).join('|')]
+        .map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; })
+        .join(',');
+    });
+    var csv = header + rows.join('\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'contatos-fullhouse.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  async function renderFunnel(funnelId) {
+    var funnel = state.funnels.find(function (f) { return f.id === funnelId; });
+    if (!funnel) return;
+    state.currentFunnelId = funnelId;
+
+    var conversations = await api('/funnels/' + funnelId + '/conversations');
+    if (kanbanSearchTerm) {
+      conversations = conversations.filter(function (c) {
+        return (c.contact_name || '').toLowerCase().indexOf(kanbanSearchTerm) !== -1 ||
+          (c.phone_display || '').toLowerCase().indexOf(kanbanSearchTerm) !== -1;
+      });
+    }
+    document.getElementById('funnel-summary').textContent = funnel.stages.length + ' etapas · ' + conversations.length + ' conversas ativas';
+    var board = document.getElementById('kanban-columns');
+    board.innerHTML = '';
+
+    funnel.stages.forEach(function (stage, i) {
+      var col = document.createElement('div');
+      col.style.cssText = 'width:296px;flex-shrink:0;display:flex;flex-direction:column;background:#EFEDE6;border-radius:14px;padding:14px;overflow-y:auto;';
+
+      var stageConvs = conversations.filter(function (c) { return c.funnel_stage_id === stage.id; });
+
+      var header = document.createElement('div');
+      header.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:0 2px;';
+      header.innerHTML =
+        '<span style="width:8px;height:8px;border-radius:50%;background:' + (stage.color || STAGE_COLORS[i % STAGE_COLORS.length]) + ';display:inline-block;"></span>' +
+        '<span style="font-family:\'Sora\',sans-serif;font-weight:700;font-size:13.5px;color:#14181A;">' + escapeHtml(stage.name) + '</span>' +
+        '<span style="font-size:12px;color:#9A9D96;background:#E2DFD5;border-radius:20px;padding:1px 8px;margin-left:2px;">' + stageConvs.length + '</span>';
+      col.appendChild(header);
+
+      var list = document.createElement('div');
+      list.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+
+      if (!stageConvs.length) {
+        var empty = document.createElement('div');
+        empty.style.cssText = 'font-size:12px;color:#ACAFA8;padding:8px 2px;';
+        empty.textContent = 'Sem conversas nesta etapa.';
+        list.appendChild(empty);
+      }
+
+      stageConvs.forEach(function (conv) {
+        var card = document.createElement('a');
+        card.href = '#conversa';
+        card.dataset.goto = 'conversa';
+        card.dataset.conversationId = conv.id;
+        card.style.cssText = 'display:block;background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;padding:13px;cursor:pointer;';
+        card.innerHTML =
+          '<div style="display:flex;align-items:center;gap:9px;margin-bottom:8px;">' +
+            '<div style="width:30px;height:30px;border-radius:50%;background:#E5F6EF;color:#0C7D60;display:flex;align-items:center;justify-content:center;font-family:\'Sora\',sans-serif;font-weight:700;font-size:11.5px;flex-shrink:0;">' + escapeHtml(conv.avatar_initials || initials(conv.contact_name)) + '</div>' +
+            '<div style="flex-grow:1;min-width:0;"><div style="font-weight:600;font-size:13.5px;color:#14181A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(conv.contact_name || 'Sem nome') + '</div></div>' +
+            '<div style="font-size:11px;color:#ACAFA8;flex-shrink:0;">' + formatTime(conv.last_message_at) + '</div>' +
+          '</div>' +
+          '<div style="font-size:11.5px;color:#82867F;margin-bottom:7px;">' + escapeHtml(conv.phone_display || '') + '</div>' +
+          (conv.unread_count > 0
+            ? '<div style="display:flex;align-items:center;gap:6px;"><div style="flex-grow:1;"></div><span style="width:18px;height:18px;border-radius:50%;background:#12A37D;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;">' + conv.unread_count + '</span></div>'
+            : '');
+
+        card.addEventListener('click', function (e) {
+          e.preventDefault();
+          openConversation(conv.id);
+          window.__goto && window.__goto('conversa');
+        });
+        list.appendChild(card);
+      });
+
+      col.appendChild(list);
+      board.appendChild(col);
+    });
+  }
+
+  async function openConversation(conversationId) {
+    state.currentConversationId = conversationId;
+    var messages = await api('/conversations/' + conversationId + '/messages');
+    renderMessages(messages);
+    await refreshConversationPanel();
+    api('/conversations/' + conversationId + '/read', { method: 'POST' }).then(function () {
+      if (state.currentFunnelId) renderFunnel(state.currentFunnelId);
+    });
+  }
+
+  async function refreshConversationPanel() {
+    if (!state.currentConversationId) return;
+    var conv;
+    try {
+      conv = await api('/conversations/' + state.currentConversationId);
+    } catch (err) {
+      return;
+    }
+    state.currentConversationDetail = conv;
+
+    document.getElementById('conversa-nome').textContent = conv.contact_name || 'Sem nome';
+    document.getElementById('conversa-telefone').textContent = conv.phone_display || '';
+    document.getElementById('conversa-avatar').textContent = conv.avatar_initials || initials(conv.contact_name);
+    document.getElementById('conversa-etapa').textContent = conv.stage_name || '--';
+
+    document.getElementById('painel-avatar').textContent = conv.avatar_initials || initials(conv.contact_name);
+    document.getElementById('painel-nome').textContent = conv.contact_name || 'Sem nome';
+    document.getElementById('painel-telefone').textContent = conv.phone_display || '';
+    var emailEl = document.getElementById('painel-email');
+    emailEl.textContent = conv.contact_email || '+ adicionar e-mail';
+    emailEl.style.color = conv.contact_email ? '#5B5F58' : '#9A9D96';
+    document.getElementById('painel-funil').textContent = conv.funnel_name || '--';
+    document.getElementById('painel-etapa').textContent = conv.stage_name || '--';
+
+    var notesEl = document.getElementById('painel-notas');
+    if (document.activeElement !== notesEl) notesEl.value = conv.contact_notes || '';
+
+    var tagsEl = document.getElementById('painel-tags');
+    tagsEl.innerHTML = (conv.contact_tags || []).map(function (tag) {
+      return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:3px 4px 3px 9px;border-radius:20px;background:#EEF2FF;color:#4338CA;">' +
+        escapeHtml(tag) +
+        '<button data-painel-remove-tag="' + escapeHtml(tag) + '" style="background:none;border:none;cursor:pointer;color:#4338CA;opacity:.6;font-size:11px;line-height:1;padding:0 2px;">×</button>' +
+      '</span>';
+    }).join('') + '<span id="painel-add-tag" style="font-size:11px;color:#9A9D96;border:1px dashed #D8D5CC;border-radius:20px;padding:3px 9px;cursor:pointer;">+ tag</span>';
+
+    tagsEl.querySelectorAll('[data-painel-remove-tag]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        await api('/contacts/' + conv.contact_id + '/tags/' + encodeURIComponent(btn.getAttribute('data-painel-remove-tag')), { method: 'DELETE' });
+        refreshConversationPanel();
+      });
+    });
+    document.getElementById('painel-add-tag').addEventListener('click', function () {
+      openTagPicker(conv.contact_id, conv.contact_tags, refreshConversationPanel);
+    });
+  }
+
+  document.getElementById('painel-nome').addEventListener('click', async function () {
+    var conv = state.currentConversationDetail;
+    if (!conv) return;
+    var name = prompt('Nome do lead:', conv.contact_name || '');
+    if (name === null) return;
+    await api('/contacts/' + conv.contact_id, { method: 'PATCH', body: JSON.stringify({ name: name }) });
+    refreshConversationPanel();
+    loadKanban();
+  });
+
+  document.getElementById('painel-email').addEventListener('click', async function () {
+    var conv = state.currentConversationDetail;
+    if (!conv) return;
+    var email = prompt('E-mail do lead:', conv.contact_email || '');
+    if (email === null) return;
+    await api('/contacts/' + conv.contact_id, { method: 'PATCH', body: JSON.stringify({ email: email }) });
+    refreshConversationPanel();
+  });
+
+  document.getElementById('painel-notas').addEventListener('blur', async function () {
+    var conv = state.currentConversationDetail;
+    if (!conv) return;
+    await api('/contacts/' + conv.contact_id, { method: 'PATCH', body: JSON.stringify({ notes: this.value }) });
+  });
+
+  document.getElementById('painel-avancar-etapa').addEventListener('click', async function () {
+    if (!state.currentConversationId) return;
+    await api('/conversations/' + state.currentConversationId + '/advance-stage', { method: 'POST' });
+    refreshConversationPanel();
+    if (state.currentFunnelId) renderFunnel(state.currentFunnelId);
+  });
+
+  document.getElementById('painel-redirecionar-funil').addEventListener('click', async function () {
+    var conv = state.currentConversationDetail;
+    if (!conv) return;
+    var options = state.funnels.map(function (f, i) { return (i + 1) + '. ' + f.name; }).join('\n');
+    var choice = prompt('Redirecionar para qual funil?\n' + options + '\n\nDigite o número:');
+    if (!choice) return;
+    var index = parseInt(choice, 10) - 1;
+    var target = state.funnels[index];
+    if (!target) { alert('Opção inválida.'); return; }
+    var firstStage = target.stages[0];
+    await api('/conversations/' + state.currentConversationId + '/funnel', {
+      method: 'PATCH',
+      body: JSON.stringify({ funnel_id: target.id, funnel_stage_id: firstStage ? firstStage.id : null }),
+    });
+    refreshConversationPanel();
+    if (state.currentFunnelId) renderFunnel(state.currentFunnelId);
+    alert('Lead movido para "' + target.name + '".');
+  });
+
+  function renderMessages(messages) {
+    var box = document.getElementById('conversa-messages');
+    box.innerHTML = '';
+    if (!messages.length) {
+      box.innerHTML = '<div style="text-align:center;color:#9A9D96;font-size:12.5px;padding:24px;">Nenhuma mensagem ainda.</div>';
+      return;
+    }
+    messages.forEach(function (m) { box.appendChild(renderBubble(m)); });
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function renderBubble(m) {
+    var wrap = document.createElement('div');
+    var isOutbound = m.direction === 'outbound';
+    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:' + (isOutbound ? 'flex-end' : 'flex-start') + ';';
+
+    var isAutomation = m.sender_type === 'automation';
+    var bubbleStyle = isOutbound
+      ? (isAutomation
+          ? 'max-width:420px;background:#FFFFFF;border:1.5px dashed #F0C77E;border-radius:14px 14px 4px 14px;padding:11px 15px;'
+          : 'max-width:420px;background:#12A37D;border-radius:14px 14px 4px 14px;padding:11px 15px;')
+      : 'max-width:420px;background:#FFFFFF;border:1px solid #E7E5DF;border-radius:14px 14px 14px 4px;padding:11px 15px;';
+    var textColor = (isOutbound && !isAutomation) ? '#FFFFFF' : '#1F2421';
+
+    var tagHtml = isAutomation
+      ? '<div style="font-size:11px;color:#B45309;font-style:italic;margin-bottom:4px;margin-right:4px;">Enviado automaticamente</div>'
+      : '';
+
+    wrap.innerHTML =
+      tagHtml +
+      '<div style="' + bubbleStyle + '"><div style="font-size:13.5px;color:' + textColor + ';line-height:1.5;">' + escapeHtml(m.body) + '</div></div>' +
+      '<div style="font-size:10.5px;color:#ACAFA8;margin-top:4px;' + (isOutbound ? 'margin-right' : 'margin-left') + ':4px;">' + formatTime(m.created_at) + '</div>';
+    return wrap;
+  }
+
+  var form = document.getElementById('conversa-form');
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var input = document.getElementById('conversa-input');
+    var text = input.value.trim();
+    if (!text || !state.currentConversationId) return;
+    input.value = '';
+    try {
+      var saved = await api('/conversations/' + state.currentConversationId + '/messages', {
+        method: 'POST',
+        body: JSON.stringify({ text: text }),
+      });
+      document.getElementById('conversa-messages').appendChild(renderBubble(saved));
+    } catch (err) {
+      alert('Não foi possível enviar (confira as credenciais da Meta Cloud API no .env): ' + err.message);
+    }
+  });
+
+  function connectRealtime() {
+    var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var ws = new WebSocket(proto + '//' + location.host + '/ws');
+    ws.onmessage = function (event) {
+      var data = JSON.parse(event.data);
+      if (data.type === 'message:new' && data.conversationId === state.currentConversationId) {
+        document.getElementById('conversa-messages').appendChild(renderBubble(data.message));
+        document.getElementById('conversa-messages').scrollTop = 1e9;
+      }
+      if (data.type === 'message:new' || data.type === 'conversation:stage_changed') {
+        if (state.currentFunnelId) renderFunnel(state.currentFunnelId);
+      }
+    };
+    ws.onclose = function () { setTimeout(connectRealtime, 3000); };
+  }
+
+  var TRIGGER_LABELS = {
+    first_message: 'Nova conversa iniciada (primeira mensagem)',
+    keyword: 'Mensagem contém palavra-chave',
+    tag_added: 'Tag adicionada ao contato',
+    stage_entered: 'Conversa entrou numa etapa',
+    manual: 'Disparo manual',
+  };
+
+  var STEP_LABELS = {
+    send_message: 'Enviar mensagem',
+    ask_question: 'Perguntar e aguardar resposta',
+    add_tag: 'Adicionar tag',
+    move_stage: 'Mover para outra etapa',
+    delay: 'Aguardar um tempo',
+    condition: 'Condição',
+  };
+
+  function populateAutomacaoFunnelFilter() {
+    var select = document.getElementById('automacao-funnel-filter');
+    var currentValue = select.value;
+    select.innerHTML = '<option value="">Todos os funis</option>';
+    state.funnels.forEach(function (f) {
+      var opt = document.createElement('option');
+      opt.value = f.id;
+      opt.textContent = f.name;
+      select.appendChild(opt);
+    });
+    select.value = currentValue;
+  }
+
+  async function loadAutomationFlows() {
+    var summary = document.getElementById('automacao-summary');
+    var list = document.getElementById('automacao-list');
+    var funnelId = document.getElementById('automacao-funnel-filter').value;
+    var flows;
+    try {
+      flows = await api('/automation-flows' + (funnelId ? '?funnel_id=' + funnelId : ''));
+    } catch (err) {
+      summary.textContent = 'Não foi possível carregar as automações.';
+      list.innerHTML = '';
+      return;
+    }
+
+    summary.textContent = flows.length + (flows.length === 1 ? ' regra cadastrada' : ' regras cadastradas');
+    list.innerHTML = '';
+
+    if (!flows.length) {
+      list.innerHTML = '<div style="font-size:12.5px;color:#9A9D96;">Nenhum fluxo cadastrado ainda. Clique em "Nova automação" pra criar o primeiro.</div>';
+      return;
+    }
+
+    flows.forEach(function (flow) {
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:16px;padding:16px 18px;background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;';
+
+      var toggle = document.createElement('button');
+      toggle.className = 'switch' + (flow.is_active ? ' on' : '');
+      toggle.setAttribute('aria-pressed', flow.is_active ? 'true' : 'false');
+      toggle.setAttribute('aria-label', 'Ativar ou pausar regra');
+      toggle.innerHTML = '<span class="knob"></span>';
+      toggle.addEventListener('click', async function (e) {
+        e.stopPropagation();
+        var newState = !toggle.classList.contains('on');
+        await api('/automation-flows/' + flow.id + '/active', {
+          method: 'PATCH',
+          body: JSON.stringify({ is_active: newState }),
+        });
+        toggle.classList.toggle('on', newState);
+        toggle.setAttribute('aria-pressed', newState ? 'true' : 'false');
+      });
+
+      var stepsSummary = flow.steps.map(function (s) { return STEP_LABELS[s.step_type] || s.step_type; }).join(' → ') || 'Sem passos configurados';
+      var flowFunnel = state.funnels.find(function (f) { return f.id === flow.funnel_id; });
+      var triggerLabel = TRIGGER_LABELS[flow.trigger_type] || flow.trigger_type;
+      if (flow.trigger_type === 'keyword' && flow.trigger_config && flow.trigger_config.keyword) {
+        triggerLabel += ' ("' + flow.trigger_config.keyword + '")';
+      }
+
+      var info = document.createElement('div');
+      info.style.cssText = 'flex-grow:1;min-width:0;';
+      info.innerHTML =
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
+          '<span style="font-family:\'Sora\',sans-serif;font-weight:700;font-size:14px;color:#14181A;">' + escapeHtml(flow.name) + '</span>' +
+          '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#E2DFD5;color:#5B5F58;">' + escapeHtml(flowFunnel ? flowFunnel.name : 'Todos os funis') + '</span>' +
+        '</div>' +
+        '<div style="font-size:12px;color:#82867F;">Gatilho: ' + escapeHtml(triggerLabel) + '</div>' +
+        '<div style="font-size:12px;color:#82867F;margin-top:2px;">Passos: ' + escapeHtml(stepsSummary) + '</div>';
+
+      var actions = document.createElement('div');
+      actions.style.cssText = 'display:flex;align-items:center;gap:10px;flex-shrink:0;';
+      actions.innerHTML =
+        '<button data-edit-flow="' + flow.id + '" style="font-size:11.5px;font-weight:600;color:#0C7D60;background:none;border:none;cursor:pointer;">Editar</button>' +
+        '<button data-delete-flow="' + flow.id + '" style="font-size:11.5px;font-weight:600;color:#B42318;background:none;border:none;cursor:pointer;">Excluir</button>';
+
+      row.appendChild(toggle);
+      row.appendChild(info);
+      row.appendChild(actions);
+      list.appendChild(row);
+    });
+
+    list.querySelectorAll('[data-edit-flow]').forEach(function (btn) {
+      btn.addEventListener('click', function () { openFlowCanvas(btn.getAttribute('data-edit-flow')); });
+    });
+    list.querySelectorAll('[data-delete-flow]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        if (!confirm('Excluir esse fluxo de automação? Essa ação não pode ser desfeita.')) return;
+        await api('/automation-flows/' + btn.getAttribute('data-delete-flow'), { method: 'DELETE' });
+        loadAutomationFlows();
+      });
+    });
+  }
+
+  document.getElementById('automacao-nova-btn').addEventListener('click', async function () {
+    var name = prompt('Nome do novo fluxo (ex: "Boas-vindas evento"):');
+    if (!name) return;
+    var created = await api('/automation-flows', {
+      method: 'POST',
+      body: JSON.stringify({ name: name, trigger_type: 'first_message', trigger_config: {}, steps: [] }),
+    });
+    openFlowCanvas(created.id);
+  });
+
+  document.getElementById('automacao-funnel-filter').addEventListener('change', function () {
+    loadAutomationFlows();
+  });
+
+  // ── Construtor visual de fluxo (estilo ManyChat) ──────────────────────────
+  var STEP_ICON = {
+    send_message: { bg: '#EEF2FF', stroke: '#4338CA', label: 'Enviar mensagem', path: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z' },
+    ask_question: { bg: '#FEF3E2', stroke: '#B45309', label: 'Perguntar e aguardar resposta', path: 'M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z' },
+    add_tag: { bg: '#F3EBFF', stroke: '#6D28D9', label: 'Adicionar tag', path: 'M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z' },
+    move_stage: { bg: '#E5F6EF', stroke: '#0C7D60', label: 'Mover para etapa', path: 'M22 3H2l8 9.46V19l4 2v-8.54Z' },
+  };
+
+  function flowBlockHtml(iconInfo, title, bodyHtml, extraButtonsHtml) {
+    return '<div style="width:300px;background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.05);">' +
+      '<div style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid #F0EEE7;">' +
+        '<div style="width:22px;height:22px;border-radius:6px;background:' + iconInfo.bg + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="' + iconInfo.stroke + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="' + iconInfo.path + '"></path></svg></div>' +
+        '<span style="font-size:10.5px;font-weight:700;color:#82867F;text-transform:uppercase;letter-spacing:.03em;flex-grow:1;">' + escapeHtml(title) + '</span>' +
+        (extraButtonsHtml || '') +
+      '</div>' +
+      '<div style="padding:12px 14px;cursor:pointer;" class="flow-block-body">' + bodyHtml + '</div>' +
+    '</div>';
+  }
+
+  function connectorHtml() {
+    return '<div style="width:2px;height:28px;background:#C7C4B8;"></div>';
+  }
+
+  function addStepButtonHtml() {
+    return '<button id="flow-add-step-btn" style="width:32px;height:32px;border-radius:50%;background:#FFFFFF;border:1.5px dashed #C7C4B8;color:#9A9D96;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:6px;">' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9D96" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>' +
+    '</button>';
+  }
+
+  function renderFlowCanvas() {
+    var flow = state.currentFlow;
+    var body = document.getElementById('flow-canvas-body');
+    var flowFunnel = state.funnels.find(function (f) { return f.id === flow.funnel_id; });
+
+    document.querySelector('#flow-canvas-name span').textContent = flow.name;
+    var toggle = document.getElementById('flow-canvas-toggle');
+    toggle.classList.toggle('on', !!flow.is_active);
+    toggle.setAttribute('aria-pressed', flow.is_active ? 'true' : 'false');
+
+    var triggerLabel = flow.trigger_type === 'keyword'
+      ? 'Mensagem contém a palavra-chave "' + (flow.trigger_config?.keyword || '') + '"'
+      : 'Nova conversa iniciada — primeira mensagem do lead';
+    var triggerSubtitle = flowFunnel ? 'Só neste funil: ' + flowFunnel.name : 'Vale para todos os funis';
+
+    var html = flowBlockHtml(
+      { bg: '#E5F6EF', stroke: '#0C7D60', path: 'M13 2 4 14h6l-1 8 9-12h-6l1-8Z' },
+      'Gatilho',
+      '<div id="flow-trigger-block" style="font-size:12.5px;color:#1F2421;margin-bottom:6px;">' + escapeHtml(triggerLabel) + '</div>' +
+      '<div style="font-size:11px;color:#9A9D96;line-height:1.4;">' + escapeHtml(triggerSubtitle) + '</div>'
+    );
+    html += connectorHtml();
+
+    flow.steps.forEach(function (step, i) {
+      var info = STEP_ICON[step.step_type] || STEP_ICON.send_message;
+      var bodyHtml = '';
+      if (step.step_type === 'send_message' || step.step_type === 'ask_question') {
+        bodyHtml = '<div style="background:#F5F4EF;border-radius:10px;padding:9px 11px;font-size:12.5px;color:#1F2421;line-height:1.4;">' + escapeHtml(step.config.text || '') + '</div>';
+      } else if (step.step_type === 'add_tag') {
+        bodyHtml = '<span style="font-size:11.5px;font-weight:600;background:#F5F4EF;border:1px solid #E4E1D8;color:#3A3D38;padding:4px 10px;border-radius:20px;">' + escapeHtml(step.config.tag || '') + '</span>';
+      } else if (step.step_type === 'move_stage') {
+        var stage = flowFunnel ? flowFunnel.stages.find(function (s) { return s.id === step.config.funnel_stage_id; }) : null;
+        bodyHtml = '<div style="font-size:12.5px;color:#1F2421;">Mover lead para <b>' + escapeHtml(stage ? stage.name : '(etapa removida)') + '</b></div>';
+      }
+      var deleteBtn = '<button data-remove-step="' + i + '" style="background:none;border:none;cursor:pointer;color:#ACAFA8;font-size:14px;line-height:1;flex-shrink:0;">×</button>';
+      html += '<div data-step-index="' + i + '">' + flowBlockHtml(info, info.label, bodyHtml, deleteBtn) + '</div>';
+      html += connectorHtml();
+    });
+
+    html += addStepButtonHtml();
+
+    body.innerHTML = html;
+
+    document.getElementById('flow-trigger-block').closest('.flow-block-body').addEventListener('click', editFlowTrigger);
+
+    body.querySelectorAll('[data-step-index]').forEach(function (el) {
+      var idx = parseInt(el.getAttribute('data-step-index'), 10);
+      el.querySelector('.flow-block-body').addEventListener('click', function () { editFlowStep(idx); });
+      el.querySelector('[data-remove-step]').addEventListener('click', function (e) {
+        e.stopPropagation();
+        flow.steps.splice(idx, 1);
+        saveCurrentFlow();
+      });
+    });
+
+    document.getElementById('flow-add-step-btn').addEventListener('click', addFlowStep);
+  }
+
+  async function saveCurrentFlow() {
+    var flow = state.currentFlow;
+    var updated = await api('/automation-flows/' + flow.id, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        name: flow.name,
+        funnel_id: flow.funnel_id,
+        trigger_type: flow.trigger_type,
+        trigger_config: flow.trigger_config,
+        steps: flow.steps.map(function (s) { return { step_type: s.step_type, config: s.config }; }),
+      }),
+    });
+    state.currentFlow = updated;
+    renderFlowCanvas();
+  }
+
+  function editFlowTrigger() {
+    var flow = state.currentFlow;
+    var funnelOptions = state.funnels.map(function (f, i) { return (i + 1) + '. ' + f.name; }).join('\n');
+    var funnelChoice = prompt(
+      'Esse fluxo vale pra qual funil? (deixe vazio pra "Todos os funis")\n' + funnelOptions + '\n\nDigite o número:',
+      flow.funnel_id ? String(state.funnels.findIndex(function (f) { return f.id === flow.funnel_id; }) + 1) : ''
+    );
+    if (funnelChoice === null) return;
+    var chosenFunnel = funnelChoice ? state.funnels[parseInt(funnelChoice, 10) - 1] : null;
+
+    var triggerChoice = prompt(
+      'Gatilho:\n1. Primeira mensagem do lead\n2. Mensagem contém uma palavra-chave\n\nDigite o número:',
+      flow.trigger_type === 'keyword' ? '2' : '1'
+    );
+    if (triggerChoice === null) return;
+    var triggerType = triggerChoice === '2' ? 'keyword' : 'first_message';
+
+    var keyword = flow.trigger_config?.keyword || '';
+    if (triggerType === 'keyword') {
+      keyword = prompt('Qual palavra-chave dispara esse fluxo? (ex: orçamento)', keyword);
+      if (!keyword) return;
+    }
+
+    flow.funnel_id = chosenFunnel ? chosenFunnel.id : null;
+    flow.trigger_type = triggerType;
+    flow.trigger_config = triggerType === 'keyword' ? { keyword: keyword } : {};
+    saveCurrentFlow();
+  }
+
+  function editFlowStep(index) {
+    var flow = state.currentFlow;
+    var step = flow.steps[index];
+    var flowFunnel = state.funnels.find(function (f) { return f.id === flow.funnel_id; });
+
+    if (step.step_type === 'send_message' || step.step_type === 'ask_question') {
+      var text = prompt('Texto da mensagem:', step.config.text || '');
+      if (text === null) return;
+      step.config.text = text;
+    } else if (step.step_type === 'add_tag') {
+      var tag = prompt('Nome da tag a adicionar:', step.config.tag || '');
+      if (tag === null) return;
+      step.config.tag = tag;
+    } else if (step.step_type === 'move_stage') {
+      if (!flowFunnel || !flowFunnel.stages.length) {
+        alert('Defina um funil específico no Gatilho antes de escolher a etapa.');
+        return;
+      }
+      var stageOptions = flowFunnel.stages.map(function (s, i) { return (i + 1) + '. ' + s.name; }).join('\n');
+      var current = flowFunnel.stages.findIndex(function (s) { return s.id === step.config.funnel_stage_id; });
+      var choice = prompt('Mover pra qual etapa?\n' + stageOptions + '\n\nDigite o número:', current >= 0 ? String(current + 1) : '');
+      if (!choice) return;
+      var stage = flowFunnel.stages[parseInt(choice, 10) - 1];
+      if (!stage) return;
+      step.config.funnel_stage_id = stage.id;
+    }
+    saveCurrentFlow();
+  }
+
+  function addFlowStep() {
+    var flow = state.currentFlow;
+    var choice = prompt('Adicionar qual tipo de passo?\n1. Enviar mensagem\n2. Perguntar e aguardar resposta\n3. Adicionar tag\n4. Mover para outra etapa\n\nDigite o número:');
+    if (!choice) return;
+
+    if (choice === '1' || choice === '2') {
+      var text = prompt('Texto da mensagem:');
+      if (!text) return;
+      flow.steps.push({ step_type: choice === '1' ? 'send_message' : 'ask_question', config: { text: text } });
+    } else if (choice === '3') {
+      var tag = prompt('Nome da tag:');
+      if (!tag) return;
+      flow.steps.push({ step_type: 'add_tag', config: { tag: tag } });
+    } else if (choice === '4') {
+      var flowFunnel = state.funnels.find(function (f) { return f.id === flow.funnel_id; });
+      if (!flowFunnel || !flowFunnel.stages.length) {
+        alert('Defina um funil específico no Gatilho antes de adicionar esse passo.');
+        return;
+      }
+      var stageOptions = flowFunnel.stages.map(function (s, i) { return (i + 1) + '. ' + s.name; }).join('\n');
+      var stageChoice = prompt('Mover pra qual etapa?\n' + stageOptions + '\n\nDigite o número:');
+      var stage = stageChoice ? flowFunnel.stages[parseInt(stageChoice, 10) - 1] : null;
+      if (!stage) return;
+      flow.steps.push({ step_type: 'move_stage', config: { funnel_stage_id: stage.id } });
+    } else {
+      return;
+    }
+    saveCurrentFlow();
+  }
+
+  async function openFlowCanvas(flowId) {
+    var flow;
+    try {
+      flow = await api('/automation-flows/' + flowId);
+    } catch (err) {
+      alert('Não foi possível carregar esse fluxo.');
+      return;
+    }
+    state.currentFlow = flow;
+    renderFlowCanvas();
+    window.__goto && window.__goto('automacao-flow');
+  }
+
+  document.getElementById('flow-canvas-name').addEventListener('click', function () {
+    var flow = state.currentFlow;
+    if (!flow) return;
+    var name = prompt('Nome do fluxo:', flow.name);
+    if (!name) return;
+    flow.name = name;
+    saveCurrentFlow();
+  });
+
+  document.getElementById('flow-canvas-toggle').addEventListener('click', async function () {
+    var flow = state.currentFlow;
+    if (!flow) return;
+    var newState = !this.classList.contains('on');
+    await api('/automation-flows/' + flow.id + '/active', { method: 'PATCH', body: JSON.stringify({ is_active: newState }) });
+    flow.is_active = newState;
+    this.classList.toggle('on', newState);
+  });
+
+  document.getElementById('flow-canvas-delete').addEventListener('click', async function () {
+    var flow = state.currentFlow;
+    if (!flow) return;
+    if (!confirm('Excluir o fluxo "' + flow.name + '"? Essa ação não pode ser desfeita.')) return;
+    await api('/automation-flows/' + flow.id, { method: 'DELETE' });
+    window.__goto && window.__goto('automacao');
+    loadAutomationFlows();
+  });
+
+  async function loadDashboard() {
+    var cardsEl = document.getElementById('dashboard-cards');
+    var recentEl = document.getElementById('dashboard-recent');
+    var summary, recent;
+    try {
+      summary = await api('/dashboard/summary');
+      recent = await api('/dashboard/recent-conversations');
+    } catch (err) {
+      cardsEl.innerHTML = '<div style="grid-column:span 4;color:#B42318;font-size:12.5px;">Não foi possível carregar o dashboard.</div>';
+      return;
+    }
+
+    var cards = [
+      { label: 'Contatos totais', value: summary.totalContacts },
+      { label: 'Conversas em aberto', value: summary.openConversations },
+      { label: 'Fechadas essa semana', value: summary.closedThisWeek },
+      { label: 'Automações ativas', value: summary.activeAutomations },
+    ];
+    cardsEl.innerHTML = '';
+    cards.forEach(function (c) {
+      var card = document.createElement('div');
+      card.style.cssText = 'background:#FFFFFF;border:1px solid #E7E5DF;border-radius:14px;padding:18px;';
+      card.innerHTML =
+        '<div style="font-size:12px;color:#82867F;margin-bottom:6px;">' + escapeHtml(c.label) + '</div>' +
+        '<div style="font-family:\'Sora\',sans-serif;font-weight:700;font-size:26px;color:#14181A;">' + c.value + '</div>';
+      cardsEl.appendChild(card);
+    });
+
+    recentEl.innerHTML = '';
+    if (!recent.length) {
+      recentEl.innerHTML = '<div style="font-size:12.5px;color:#9A9D96;">Nenhuma conversa ainda.</div>';
+      return;
+    }
+    recent.forEach(function (c) {
+      var row = document.createElement('a');
+      row.href = '#conversa';
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 14px;background:#FFFFFF;border:1px solid #E7E5DF;border-radius:10px;cursor:pointer;text-decoration:none;';
+      row.innerHTML =
+        '<div style="width:30px;height:30px;border-radius:50%;background:#E5F6EF;color:#0C7D60;display:flex;align-items:center;justify-content:center;font-family:\'Sora\',sans-serif;font-weight:700;font-size:11.5px;flex-shrink:0;">' + escapeHtml(c.avatar_initials || initials(c.contact_name)) + '</div>' +
+        '<div style="flex-grow:1;min-width:0;"><div style="font-weight:600;font-size:13px;color:#14181A;">' + escapeHtml(c.contact_name || 'Sem nome') + '</div><div style="font-size:11.5px;color:#82867F;">' + escapeHtml(c.phone_display || '') + '</div></div>' +
+        '<span style="font-size:11px;font-weight:600;color:#5B5F58;background:#EFEDE6;padding:3px 10px;border-radius:20px;">' + escapeHtml(c.stage_name || '--') + '</span>';
+      row.addEventListener('click', function (e) {
+        e.preventDefault();
+        openConversation(c.id);
+        window.__goto && window.__goto('conversa');
+      });
+      recentEl.appendChild(row);
+    });
+  }
+
+  function populateContatosFunnelFilter() {
+    var select = document.getElementById('contatos-funnel-filter');
+    var currentValue = select.value;
+    select.innerHTML = '<option value="">Todos os funis/campanhas</option>';
+    state.funnels.forEach(function (f) {
+      var opt = document.createElement('option');
+      opt.value = f.id;
+      opt.textContent = f.name;
+      select.appendChild(opt);
+    });
+    select.value = currentValue;
+  }
+
+  async function loadContacts(searchTerm) {
+    var listEl = document.getElementById('contatos-list');
+    var summaryEl = document.getElementById('contatos-summary');
+    var funnelId = document.getElementById('contatos-funnel-filter').value;
+    var contacts;
+    try {
+      var params = new URLSearchParams();
+      if (searchTerm) params.set('q', searchTerm);
+      if (funnelId) params.set('funnel_id', funnelId);
+      var qs = params.toString();
+      contacts = await api('/contacts' + (qs ? '?' + qs : ''));
+    } catch (err) {
+      listEl.innerHTML = '<div style="color:#B42318;font-size:12.5px;">Não foi possível carregar os contatos.</div>';
+      return;
+    }
+    summaryEl.textContent = contacts.length + (contacts.length === 1 ? ' contato' : ' contatos');
+    listEl.innerHTML = '';
+    if (!contacts.length) {
+      listEl.innerHTML = '<div style="font-size:12.5px;color:#9A9D96;">Nenhum contato encontrado.</div>';
+      return;
+    }
+    contacts.forEach(function (c) {
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:flex-start;gap:12px;padding:13px 16px;background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;cursor:pointer;';
+      row.addEventListener('click', function () { openLeadDetail(c.id); });
+
+      var tagsHtml = (c.tags || []).map(function (tag) {
+        return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:2px 4px 2px 8px;border-radius:20px;background:#F5F4EF;color:#5B5F58;margin-right:4px;margin-top:4px;">' +
+          escapeHtml(tag) +
+          '<button data-remove-tag="' + c.id + '" data-tag-value="' + escapeHtml(tag) + '" style="background:none;border:none;cursor:pointer;color:#ACAFA8;font-size:11px;line-height:1;padding:0 2px;">×</button>' +
+        '</span>';
+      }).join('') + '<button data-add-tag="' + c.id + '" style="font-size:10.5px;font-weight:600;color:#0C7D60;background:none;border:1px dashed #D8D5CC;border-radius:20px;padding:2px 8px;cursor:pointer;margin-top:4px;">+ tag</button>';
+
+      row.innerHTML =
+        '<div style="width:34px;height:34px;border-radius:50%;background:#E5F6EF;color:#0C7D60;display:flex;align-items:center;justify-content:center;font-family:\'Sora\',sans-serif;font-weight:700;font-size:12px;flex-shrink:0;">' + escapeHtml(c.avatar_initials || initials(c.name)) + '</div>' +
+        '<div style="flex-grow:1;min-width:0;">' +
+          '<div style="display:flex;align-items:center;gap:8px;">' +
+            '<span style="font-weight:600;font-size:13.5px;color:#14181A;">' + escapeHtml(c.name || 'Sem nome') + '</span>' +
+            (c.source ? '<span style="font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;background:#EEF2FF;color:#4338CA;">' + escapeHtml(c.source) + '</span>' : '') +
+          '</div>' +
+          '<div style="font-size:12px;color:#82867F;margin-top:2px;">' + escapeHtml(c.phone_display || '') + (c.email ? ' · ' + escapeHtml(c.email) : '') + '</div>' +
+          '<div style="display:flex;flex-wrap:wrap;align-items:center;margin-top:2px;">' + tagsHtml + '</div>' +
+        '</div>' +
+        '<span style="font-size:11px;color:#ACAFA8;white-space:nowrap;flex-shrink:0;">desde ' + new Date(c.created_at).toLocaleDateString('pt-BR') + '</span>';
+      listEl.appendChild(row);
+    });
+
+    listEl.querySelectorAll('[data-add-tag]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var contactId = btn.getAttribute('data-add-tag');
+        var contact = contacts.find(function (c) { return String(c.id) === contactId; });
+        openTagPicker(contactId, contact ? contact.tags : [], function () {
+          loadContacts(document.getElementById('contatos-search').value.trim());
+        });
+      });
+    });
+
+    listEl.querySelectorAll('[data-remove-tag]').forEach(function (btn) {
+      btn.addEventListener('click', async function (e) {
+        e.stopPropagation();
+        await api('/contacts/' + btn.getAttribute('data-remove-tag') + '/tags/' + encodeURIComponent(btn.getAttribute('data-tag-value')), { method: 'DELETE' });
+        loadContacts(document.getElementById('contatos-search').value.trim());
+      });
+    });
+  }
+
+  document.getElementById('contatos-search').addEventListener('input', function (e) {
+    loadContacts(e.target.value.trim());
+  });
+
+  document.getElementById('contatos-funnel-filter').addEventListener('change', function () {
+    loadContacts(document.getElementById('contatos-search').value.trim());
+  });
+
+  document.getElementById('contatos-novo-btn').addEventListener('click', async function () {
+    var phone = prompt('Telefone do lead (com DDI e DDD, só números, ex: 5511999998888):');
+    if (!phone) return;
+    var name = prompt('Nome do lead (opcional):') || '';
+    var email = prompt('E-mail do lead (opcional):') || '';
+    try {
+      await api('/contacts', { method: 'POST', body: JSON.stringify({ wa_id: phone.replace(/\D/g, ''), name: name, email: email }) });
+      loadContacts();
+    } catch (err) {
+      alert('Não foi possível criar: ' + err.message);
+    }
+  });
+
+  async function openLeadDetail(contactId) {
+    var overlay = document.getElementById('lead-modal-overlay');
+    var body = document.getElementById('lead-modal-body');
+    overlay.style.display = 'flex';
+    body.innerHTML = 'Carregando...';
+
+    var lead, history;
+    try {
+      lead = await api('/contacts/' + contactId);
+      history = await api('/contacts/' + contactId + '/history');
+    } catch (err) {
+      body.innerHTML = '<div style="color:#B42318;font-size:12.5px;">Não foi possível carregar este lead.</div>';
+      return;
+    }
+
+    var tagsHtml = (lead.tags || []).map(function (tag) {
+      return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:2px 4px 2px 8px;border-radius:20px;background:#EEF2FF;color:#4338CA;margin-right:4px;margin-top:4px;">' +
+        escapeHtml(tag) +
+        '<button data-modal-remove-tag="' + escapeHtml(tag) + '" style="background:none;border:none;cursor:pointer;color:#4338CA;opacity:.6;font-size:11px;line-height:1;padding:0 2px;">×</button>' +
+      '</span>';
+    }).join('') + '<button id="modal-add-tag" style="font-size:10.5px;font-weight:600;color:#0C7D60;background:none;border:1px dashed #D8D5CC;border-radius:20px;padding:2px 8px;cursor:pointer;margin-top:4px;">+ tag</button>';
+
+    var conversationsHtml = (lead.conversations || []).map(function (c) {
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F0EFEA;font-size:12.5px;">' +
+        '<span style="color:#3A3D38;">' + escapeHtml(c.funnel_name || 'Sem funil') + '</span>' +
+        '<span style="font-size:11px;font-weight:600;color:#5B5F58;background:#EFEDE6;padding:2px 8px;border-radius:20px;">' + escapeHtml(c.stage_name || '--') + '</span>' +
+      '</div>';
+    }).join('') || '<div style="font-size:12.5px;color:#9A9D96;">Nenhuma conversa ainda.</div>';
+
+    var historyHtml = (history || []).map(function (h) {
+      return '<div style="display:flex;gap:8px;padding:6px 0;">' +
+        '<span style="width:6px;height:6px;border-radius:50%;background:#D8D5CC;display:inline-block;margin-top:6px;flex-shrink:0;"></span>' +
+        '<div><div style="font-size:12px;color:#3A3D38;line-height:1.4;">' + escapeHtml(h.description) + '</div>' +
+        '<div style="font-size:10.5px;color:#ACAFA8;">' + new Date(h.created_at).toLocaleString('pt-BR') + '</div></div>' +
+      '</div>';
+    }).join('') || '<div style="font-size:12.5px;color:#9A9D96;">Nenhuma atividade registrada ainda.</div>';
+
+    body.innerHTML =
+      '<div style="display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:20px;">' +
+        '<div style="width:56px;height:56px;border-radius:50%;background:#E5F6EF;color:#0C7D60;display:flex;align-items:center;justify-content:center;font-family:\'Sora\',sans-serif;font-weight:700;font-size:18px;margin-bottom:10px;">' + escapeHtml(lead.avatar_initials || initials(lead.name)) + '</div>' +
+        '<div id="modal-lead-name" title="Clique para editar" style="font-family:\'Sora\',sans-serif;font-weight:700;font-size:16px;color:#14181A;cursor:pointer;">' + escapeHtml(lead.name || 'Sem nome') + '</div>' +
+        '<div style="font-size:12.5px;color:#82867F;margin-top:2px;">' + escapeHtml(lead.phone_display || '') + '</div>' +
+        '<div id="modal-lead-email" title="Clique para editar" style="font-size:12px;color:' + (lead.email ? '#5B5F58' : '#9A9D96') + ';cursor:pointer;margin-top:2px;">' + escapeHtml(lead.email || '+ adicionar e-mail') + '</div>' +
+      '</div>' +
+      '<div style="margin-bottom:18px;">' + tagsHtml + '</div>' +
+      '<div style="margin-bottom:18px;">' +
+        '<div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Presença em funis</div>' +
+        conversationsHtml +
+      '</div>' +
+      '<div style="margin-bottom:18px;">' +
+        '<div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Notas internas</div>' +
+        '<textarea id="modal-lead-notes" placeholder="Adicionar nota sobre este lead..." style="width:100%;background:#F5F4EF;border:1px solid #E4E1D8;border-radius:10px;padding:11px 12px;font-size:12.5px;color:#3A3D38;min-height:56px;resize:vertical;font-family:\'Work Sans\',sans-serif;box-sizing:border-box;">' + escapeHtml(lead.notes || '') + '</textarea>' +
+      '</div>' +
+      '<div>' +
+        '<div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Histórico</div>' +
+        '<div style="max-height:220px;overflow-y:auto;">' + historyHtml + '</div>' +
+      '</div>';
+
+    document.getElementById('modal-lead-name').addEventListener('click', async function () {
+      var name = prompt('Nome do lead:', lead.name || '');
+      if (name === null) return;
+      await api('/contacts/' + contactId, { method: 'PATCH', body: JSON.stringify({ name: name }) });
+      openLeadDetail(contactId);
+      loadContacts(document.getElementById('contatos-search').value.trim());
+    });
+    document.getElementById('modal-lead-email').addEventListener('click', async function () {
+      var email = prompt('E-mail do lead:', lead.email || '');
+      if (email === null) return;
+      await api('/contacts/' + contactId, { method: 'PATCH', body: JSON.stringify({ email: email }) });
+      openLeadDetail(contactId);
+      loadContacts(document.getElementById('contatos-search').value.trim());
+    });
+    document.getElementById('modal-lead-notes').addEventListener('blur', async function () {
+      await api('/contacts/' + contactId, { method: 'PATCH', body: JSON.stringify({ notes: this.value }) });
+    });
+    document.getElementById('modal-add-tag').addEventListener('click', function () {
+      openTagPicker(contactId, lead.tags, function () {
+        openLeadDetail(contactId);
+        loadContacts(document.getElementById('contatos-search').value.trim());
+      });
+    });
+    body.querySelectorAll('[data-modal-remove-tag]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        await api('/contacts/' + contactId + '/tags/' + encodeURIComponent(btn.getAttribute('data-modal-remove-tag')), { method: 'DELETE' });
+        openLeadDetail(contactId);
+        loadContacts(document.getElementById('contatos-search').value.trim());
+      });
+    });
+  }
+
+  document.getElementById('lead-modal-close').addEventListener('click', function () {
+    document.getElementById('lead-modal-overlay').style.display = 'none';
+  });
+  document.getElementById('lead-modal-overlay').addEventListener('click', function (e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+
+  var lastKnownWhatsappDigits = '';
+
+  async function loadConfig() {
+    var statusEl = document.getElementById('config-whatsapp-status');
+    try {
+      var status = await api('/settings/whatsapp-status');
+      var manualDigits = (status.manualPhoneNumber || '').replace(/\D/g, '');
+      lastKnownWhatsappDigits = (status.phoneNumber || '').replace(/\D/g, '') || manualDigits;
+
+      var manualFieldHtml =
+        '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #EFEDE6;">' +
+          '<div style="font-size:11px;color:#82867F;margin-bottom:6px;">Número público do WhatsApp (pra gerar os links das campanhas, mesmo antes da API oficial estar 100% conectada):</div>' +
+          '<div style="display:flex;gap:8px;">' +
+            '<input id="config-manual-number" placeholder="Ex: 5511999998888" value="' + escapeHtml(status.manualPhoneNumber || '') + '" style="flex-grow:1;border:1px solid #E4E1D8;border-radius:8px;padding:8px 12px;font-size:12.5px;color:#14181A;font-family:\'Work Sans\',sans-serif;"/>' +
+            '<button id="config-manual-number-save" style="font-size:12px;font-weight:600;color:#FFFFFF;background:#12A37D;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;">Salvar</button>' +
+          '</div>' +
+        '</div>';
+
+      if (status.connected) {
+        statusEl.innerHTML = '<div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:50%;background:#12A37D;display:inline-block;"></span><b style="color:#14181A;">Conectado</b></div>' +
+          '<div style="margin-top:6px;color:#5B5F58;">Número: ' + escapeHtml(status.phoneNumber || '--') + ' · Nome verificado: ' + escapeHtml(status.verifiedName || '--') + '</div>';
+      } else if (status.configured) {
+        statusEl.innerHTML = '<div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:50%;background:#B42318;display:inline-block;"></span><b style="color:#14181A;">Erro de conexão</b></div>' +
+          '<div style="margin-top:6px;color:#B42318;">' + escapeHtml(status.message || '') + '</div>' + manualFieldHtml;
+      } else {
+        statusEl.innerHTML = '<div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:50%;background:#D97706;display:inline-block;"></span><b style="color:#14181A;">API oficial não configurada</b></div>' +
+          '<div style="margin-top:6px;color:#5B5F58;">Preencha WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID e WHATSAPP_BUSINESS_ACCOUNT_ID no .env do servidor pra enviar/receber mensagens de verdade.</div>' + manualFieldHtml;
+      }
+
+      var manualSaveBtn = document.getElementById('config-manual-number-save');
+      if (manualSaveBtn) {
+        manualSaveBtn.addEventListener('click', async function () {
+          var val = document.getElementById('config-manual-number').value.replace(/\D/g, '');
+          await api('/settings/whatsapp-number', { method: 'PUT', body: JSON.stringify({ phone_number: val }) });
+          loadConfig();
+        });
+      }
+    } catch (err) {
+      statusEl.textContent = 'Não foi possível verificar.';
+    }
+  }
+
+  async function loadFunnelsSection() {
+    var whatsappDigits = lastKnownWhatsappDigits;
+    try {
+      var status = await api('/settings/whatsapp-status');
+      var manualDigits = (status.manualPhoneNumber || '').replace(/\D/g, '');
+      whatsappDigits = (status.phoneNumber || '').replace(/\D/g, '') || manualDigits;
+    } catch (err) {}
+
+    var listEl = document.getElementById('funis-list');
+    var funnels;
+    try {
+      funnels = await api('/funnels');
+    } catch (err) {
+      listEl.innerHTML = '<div style="color:#B42318;font-size:12.5px;">Não foi possível carregar os funis.</div>';
+      return;
+    }
+    listEl.innerHTML = '';
+    funnels.forEach(function (f) {
+      var card = document.createElement('div');
+      card.style.cssText = 'background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;padding:14px 16px;';
+      var stagesHtml = f.stages.map(function (s, i) {
+        var isFirst = i === 0;
+        var isLast = i === f.stages.length - 1;
+        return '<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:8px;background:#F5F4EF;margin-bottom:4px;">' +
+          '<div style="display:flex;flex-direction:column;gap:1px;">' +
+            '<button data-move-stage="' + s.id + '" data-direction="up" ' + (isFirst ? 'disabled' : '') + ' style="background:none;border:none;padding:0;line-height:1;font-size:10px;cursor:' + (isFirst ? 'default' : 'pointer') + ';color:' + (isFirst ? '#D8D5CC' : '#5B5F58') + ';">▲</button>' +
+            '<button data-move-stage="' + s.id + '" data-direction="down" ' + (isLast ? 'disabled' : '') + ' style="background:none;border:none;padding:0;line-height:1;font-size:10px;cursor:' + (isLast ? 'default' : 'pointer') + ';color:' + (isLast ? '#D8D5CC' : '#5B5F58') + ';">▼</button>' +
+          '</div>' +
+          '<span data-rename-stage="' + s.id + '" data-stage-name="' + escapeHtml(s.name) + '" style="flex-grow:1;cursor:pointer;font-size:12.5px;font-weight:600;color:#3A3D38;">' + escapeHtml(s.name) + '</span>' +
+          '<button data-delete-stage="' + s.id + '" title="Remover etapa" style="background:none;border:none;cursor:pointer;color:#ACAFA8;font-size:14px;line-height:1;padding:0 4px;">×</button>' +
+        '</div>';
+      }).join('');
+
+      var campaignHtml = '';
+      if (f.entry_keyword) {
+        var waLink = whatsappDigits
+          ? 'https://wa.me/' + whatsappDigits + '?text=' + encodeURIComponent(f.entry_keyword)
+          : null;
+        campaignHtml =
+          '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #EFEDE6;">' +
+            '<div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;">Link de captação desta campanha</div>' +
+            (waLink
+              ? '<div style="display:flex;align-items:center;gap:8px;"><code style="font-size:11.5px;background:#F5F4EF;padding:4px 8px;border-radius:6px;color:#3A3D38;word-break:break-all;flex-grow:1;">' + escapeHtml(waLink) + '</code>' +
+                '<button data-copy-link="' + escapeHtml(waLink) + '" style="font-size:11px;font-weight:600;color:#0C7D60;background:none;border:1px solid #E4E1D8;border-radius:6px;padding:4px 8px;cursor:pointer;flex-shrink:0;">Copiar</button></div>'
+              : '<div style="font-size:11.5px;color:#D97706;">Configure o WhatsApp (Conexão acima) pra gerar o link completo. Palavra-chave: <code>' + escapeHtml(f.entry_keyword) + '</code></div>') +
+            '<div style="font-size:11px;color:#82867F;margin-top:6px;">Leads que chegarem com essa mensagem caem automaticamente neste funil.</div>' +
+            '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;">' +
+              '<div style="font-size:11.5px;color:#5B5F58;flex-grow:1;">' + (f.welcome_message ? escapeHtml(f.welcome_message) : '<span style="color:#ACAFA8;">Sem boas-vindas específica configurada.</span>') + '</div>' +
+              '<button data-edit-welcome="' + f.id + '" style="font-size:11px;font-weight:600;color:#0C7D60;background:none;border:none;cursor:pointer;flex-shrink:0;">Editar</button>' +
+            '</div>' +
+          '</div>';
+      }
+
+      var tagsHtml = (f.default_tags || []).map(function (tag) {
+        return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:2px 4px 2px 8px;border-radius:20px;background:#EEF2FF;color:#4338CA;margin-right:4px;margin-top:4px;">' +
+          escapeHtml(tag) +
+          '<button data-remove-funnel-tag="' + f.id + '" data-tag-value="' + escapeHtml(tag) + '" style="background:none;border:none;cursor:pointer;color:#4338CA;opacity:.6;font-size:11px;line-height:1;padding:0 2px;">×</button>' +
+        '</span>';
+      }).join('') + '<button data-add-funnel-tag="' + f.id + '" style="font-size:10.5px;font-weight:600;color:#0C7D60;background:none;border:1px dashed #D8D5CC;border-radius:20px;padding:2px 8px;cursor:pointer;margin-top:4px;">+ tag automática</button>';
+
+      card.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+          '<span style="font-family:\'Sora\',sans-serif;font-weight:700;font-size:14px;color:#14181A;">' + escapeHtml(f.name) + (f.is_default ? ' <span style="font-size:10px;font-weight:600;color:#0C7D60;">(padrão)</span>' : '') + '</span>' +
+          '<div style="display:flex;align-items:center;gap:14px;">' +
+            '<button data-open-kanban="' + f.id + '" style="font-size:11.5px;font-weight:600;color:#0C7D60;background:none;border:none;cursor:pointer;">Ver Kanban →</button>' +
+            '<button data-add-stage="' + f.id + '" style="font-size:11.5px;font-weight:600;color:#0C7D60;background:none;border:none;cursor:pointer;">+ Etapa</button>' +
+            (f.is_default ? '' : '<button data-delete-funnel="' + f.id + '" style="font-size:11.5px;font-weight:600;color:#B42318;background:none;border:none;cursor:pointer;">Excluir</button>') +
+          '</div>' +
+        '</div>' +
+        '<div>' + (stagesHtml || '<span style="font-size:12px;color:#9A9D96;">Sem etapas ainda.</span>') + '</div>' +
+        '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #EFEDE6;">' +
+          '<div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;">Tags automáticas (aplicadas a todo lead que entra aqui)</div>' +
+          '<div style="display:flex;flex-wrap:wrap;align-items:center;">' + tagsHtml + '</div>' +
+        '</div>' +
+        campaignHtml;
+      listEl.appendChild(card);
+    });
+
+    listEl.querySelectorAll('[data-delete-funnel]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        var funnelId = btn.getAttribute('data-delete-funnel');
+        var funnel = funnels.find(function (f) { return String(f.id) === funnelId; });
+        if (!confirm('Excluir o funil "' + (funnel ? funnel.name : '') + '"? As conversas nele ficarão sem funil atribuído. Essa ação não pode ser desfeita.')) return;
+        await api('/funnels/' + funnelId, { method: 'DELETE' });
+        loadFunnelsSection();
+        loadKanban();
+      });
+    });
+
+    listEl.querySelectorAll('[data-add-funnel-tag]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        var tag = prompt('Nome da tag automática (aplicada a todo lead que entrar neste funil):');
+        if (!tag) return;
+        await api('/funnels/' + btn.getAttribute('data-add-funnel-tag') + '/default-tags', { method: 'POST', body: JSON.stringify({ tag: tag }) });
+        loadFunnelsSection();
+        loadTags();
+      });
+    });
+
+    listEl.querySelectorAll('[data-remove-funnel-tag]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        await api('/funnels/' + btn.getAttribute('data-remove-funnel-tag') + '/default-tags/' + encodeURIComponent(btn.getAttribute('data-tag-value')), { method: 'DELETE' });
+        loadFunnelsSection();
+      });
+    });
+
+    listEl.querySelectorAll('[data-open-kanban]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        window.__openKanbanForFunnel && window.__openKanbanForFunnel(btn.getAttribute('data-open-kanban'));
+      });
+    });
+
+    listEl.querySelectorAll('[data-copy-link]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        navigator.clipboard.writeText(btn.getAttribute('data-copy-link')).then(function () {
+          btn.textContent = 'Copiado!';
+          setTimeout(function () { btn.textContent = 'Copiar'; }, 1500);
+        });
+      });
+    });
+
+    listEl.querySelectorAll('[data-edit-welcome]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        var funnelId = btn.getAttribute('data-edit-welcome');
+        var current = funnels.find(function (f) { return String(f.id) === funnelId; });
+        var text = prompt('Mensagem de boas-vindas desta campanha (deixe vazio pra remover):', current?.welcome_message || '');
+        if (text === null) return;
+        await api('/funnels/' + funnelId, { method: 'PATCH', body: JSON.stringify({ welcome_message: text }) });
+        loadFunnelsSection();
+      });
+    });
+
+    listEl.querySelectorAll('[data-add-stage]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        var name = prompt('Nome da nova etapa:');
+        if (!name) return;
+        await api('/funnels/' + btn.getAttribute('data-add-stage') + '/stages', { method: 'POST', body: JSON.stringify({ name: name }) });
+        loadFunnelsSection();
+        loadKanban();
+      });
+    });
+
+    listEl.querySelectorAll('[data-rename-stage]').forEach(function (el) {
+      el.addEventListener('click', async function () {
+        var stageId = el.getAttribute('data-rename-stage');
+        var current = el.getAttribute('data-stage-name');
+        var name = prompt('Renomear etapa:', current);
+        if (!name || name === current) return;
+        await api('/stages/' + stageId, { method: 'PATCH', body: JSON.stringify({ name: name }) });
+        loadFunnelsSection();
+        loadKanban();
+      });
+    });
+
+    listEl.querySelectorAll('[data-delete-stage]').forEach(function (btn) {
+      btn.addEventListener('click', async function (e) {
+        e.stopPropagation();
+        if (!confirm('Remover essa etapa? As conversas nela ficarão sem etapa definida.')) return;
+        await api('/stages/' + btn.getAttribute('data-delete-stage'), { method: 'DELETE' });
+        loadFunnelsSection();
+        loadKanban();
+      });
+    });
+
+    listEl.querySelectorAll('[data-move-stage]').forEach(function (btn) {
+      btn.addEventListener('click', async function (e) {
+        e.stopPropagation();
+        if (btn.disabled) return;
+        await api('/stages/' + btn.getAttribute('data-move-stage') + '/move', {
+          method: 'PATCH',
+          body: JSON.stringify({ direction: btn.getAttribute('data-direction') }),
+        });
+        loadFunnelsSection();
+        loadKanban();
+      });
+    });
+  }
+
+  document.getElementById('funis-novo-funil-btn').addEventListener('click', async function () {
+    var name = prompt('Nome do novo funil (ex: "Evento SP 2026"):');
+    if (!name) return;
+    var welcome = prompt('Mensagem de boas-vindas pra quem entrar por esse funil (opcional, pode deixar vazio):') || undefined;
+    var tagsRaw = prompt('Tags automáticas pra todo lead que entrar aqui (separe por vírgula, opcional):') || '';
+    var defaultTags = tagsRaw.split(',').map(function (t) { return t.trim(); }).filter(Boolean);
+    await api('/funnels', { method: 'POST', body: JSON.stringify({ name: name, welcome_message: welcome, default_tags: defaultTags }) });
+    loadFunnelsSection();
+    loadKanban();
+    loadTags();
+  });
+
+  async function loadTags() {
+    var listEl = document.getElementById('tags-list');
+    var tags;
+    try {
+      tags = await api('/tags');
+    } catch (err) {
+      listEl.innerHTML = '<div style="color:#B42318;font-size:12.5px;">Não foi possível carregar as tags.</div>';
+      return;
+    }
+    listEl.innerHTML = '';
+    if (!tags.length) {
+      listEl.innerHTML = '<div style="font-size:12.5px;color:#9A9D96;">Nenhuma tag cadastrada ainda.</div>';
+      return;
+    }
+    tags.forEach(function (tag) {
+      var chip = document.createElement('span');
+      chip.style.cssText = 'display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 6px 5px 12px;border-radius:20px;background:#F5F4EF;color:#3A3D38;';
+      chip.innerHTML = escapeHtml(tag.name) +
+        '<button data-delete-tag="' + tag.id + '" style="background:none;border:none;cursor:pointer;color:#ACAFA8;font-size:13px;line-height:1;padding:0 4px;">×</button>';
+      listEl.appendChild(chip);
+    });
+    listEl.querySelectorAll('[data-delete-tag]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        if (!confirm('Remover essa tag do catálogo? (Não remove de leads que já usam ela)')) return;
+        await api('/tags/' + btn.getAttribute('data-delete-tag'), { method: 'DELETE' });
+        loadTags();
+      });
+    });
+  }
+
+  document.getElementById('tags-novo-btn').addEventListener('click', async function () {
+    var name = prompt('Nome da nova tag:');
+    if (!name) return;
+    await api('/tags', { method: 'POST', body: JSON.stringify({ name: name }) });
+    loadTags();
+  });
+
+  window.__onGoto = function (screenId) {
+    if (screenId === 'dashboard') loadDashboard();
+    if (screenId === 'contatos') loadContacts(document.getElementById('contatos-search').value.trim());
+    if (screenId === 'config') loadConfig();
+    if (screenId === 'funis') { loadFunnelsSection(); loadTags(); }
+    if (screenId === 'automacao') loadAutomationFlows();
+  };
+
+  window.addEventListener('DOMContentLoaded', function () {
+    loadKanban();
+    loadAutomationFlows();
+    loadDashboard();
+    loadContacts();
+    loadConfig();
+    loadFunnelsSection();
+    loadTags();
+    connectRealtime();
+  });
+})();
+</script>
+
+</body></html>
