@@ -31,9 +31,9 @@ Enquanto isso não for feito, uma correção de código que já apliquei na Fase
 
 ## Campos do webhook assinados
 
-Não foi possível confirmar pela API quais campos (`messages`, `message_template_status_update` etc.) estão marcados como assinados no painel da Meta — isso só é visível no Meta for Developers (WhatsApp → Configuração → Webhooks → Gerenciar). O código hoje só processa `value.messages` e `value.statuses`; qualquer outro campo assinado seria recebido mas ignorado silenciosamente.
+**Confirmado por Cris em 2026-10-04**: o campo `messages` está marcado/inscrito no painel (WhatsApp → Configuração → Webhooks → Gerenciar). É o único campo necessário até aqui — o código hoje só processa `value.messages` e `value.statuses`.
 
-**Ação recomendada:** confirmar no painel que pelo menos `messages` está marcado. Os demais campos (ex: status de template) passam a importar a partir da Fase 2 deste roadmap.
+**Pendente para a Fase 2:** marcar também `message_template_status_update` nesse mesmo painel, quando o gerenciamento de templates (seção 2.6 do roadmap) for implementado — sem isso, atualizações de status de template aprovado/rejeitado pela Meta não chegam ao sistema.
 
 ## Bug corrigido na Fase 0
 
