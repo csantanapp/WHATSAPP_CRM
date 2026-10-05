@@ -458,8 +458,11 @@ apiRouter.post('/automation-flows', asyncHandler(async (req, res) => {
 }));
 
 apiRouter.patch('/automation-flows/:id', asyncHandler(async (req, res) => {
-  const { name, funnel_id, trigger_type, trigger_config, steps } = req.body;
-  await updateFlow(req.params.id, { name, funnelId: funnel_id, triggerType: trigger_type, triggerConfig: trigger_config });
+  const { name, funnel_id, trigger_type, trigger_config, trigger_position_x, trigger_position_y, steps } = req.body;
+  await updateFlow(req.params.id, {
+    name, funnelId: funnel_id, triggerType: trigger_type, triggerConfig: trigger_config,
+    triggerPositionX: trigger_position_x, triggerPositionY: trigger_position_y,
+  });
   if (steps) await replaceFlowSteps(req.params.id, steps);
   res.json(await getFlowWithSteps(req.params.id));
 }));

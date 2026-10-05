@@ -31,5 +31,9 @@ export async function completeMock({ system, messages, feature }) {
     };
   }
 
+  if (feature === 'classify_automation') {
+    return { text: JSON.stringify({ result: false }), tokensIn: lastUserMessage.length, tokensOut: 10 };
+  }
+
   return { text: '[mock] resposta genérica', tokensIn: 0, tokensOut: 0 };
 }

@@ -577,29 +577,90 @@ button{font-family:'Inter',sans-serif;}
 
           <div style="flex-grow:1;display:flex;flex-direction:column;min-width:0;">
 
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid #E7E5DF;flex-shrink:0;">
-              <div style="display:flex;align-items:center;gap:16px;">
-                <a href="#automacao" data-goto="automacao" style="display:flex;align-items:center;gap:6px;color:#5B5F58;font-size:13px;font-weight:500;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid #E7E5DF;flex-shrink:0;flex-wrap:wrap;gap:10px;">
+              <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                <a href="#automacao" data-goto="automacao" style="display:flex;align-items:center;gap:6px;color:#5B5F58;font-size:13px;font-weight:500;flex-shrink:0;">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5B5F58" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"></path></svg>
-                  Automações
                 </a>
-                <div style="width:1px;height:22px;background:#E7E5DF;"></div>
-                <div id="flow-canvas-name" title="Clique para renomear" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                <div id="flow-canvas-name" title="Clique para renomear" style="display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0;">
                   <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:15px;color:#14181A;">--</span>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9D96" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>
                 </div>
-                <button id="flow-canvas-toggle" class="switch" style="flex-shrink:0;"><span class="knob"></span></button>
+                <span id="flow-draft-badge" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#F5F4EF;color:#82867F;flex-shrink:0;">Rascunho</span>
+                <button id="flow-trigger-summary-btn" style="display:flex;align-items:center;gap:6px;background:#FBEAE3;border:none;border-radius:20px;padding:6px 12px;font-size:11.5px;font-weight:600;color:#D85A26;cursor:pointer;white-space:nowrap;">Gatilho: --</button>
               </div>
-              <div style="display:flex;align-items:center;gap:10px;">
-                <button id="flow-canvas-delete" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#B42318;border:1px solid #E4E1D8;border-radius:10px;padding:9px 14px;font-weight:600;font-size:12.5px;cursor:pointer;">Excluir fluxo</button>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <button id="flow-organize-btn" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#5B5F58;border:1px solid #E4E1D8;border-radius:9px;padding:8px 12px;font-weight:600;font-size:12px;cursor:pointer;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5B5F58" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"></circle><circle cx="18" cy="18" r="2.5"></circle><path d="M8.2 7.5 15.8 16.5"></path></svg>
+                  Organizar
+                </button>
+                <button id="flow-discard-btn" style="background:#FFFFFF;color:#5B5F58;border:1px solid #E4E1D8;border-radius:9px;padding:8px 12px;font-weight:600;font-size:12px;cursor:pointer;">Descartar</button>
+                <button id="flow-save-btn" style="background:#FFFFFF;color:#3A3D38;border:1px solid #E4E1D8;border-radius:9px;padding:8px 14px;font-weight:600;font-size:12px;cursor:pointer;">Salvar</button>
+                <button id="flow-deactivate-btn" style="background:#FFFFFF;color:#B42318;border:1px solid #E4E1D8;border-radius:9px;padding:8px 14px;font-weight:600;font-size:12px;cursor:pointer;">Desativar</button>
+                <button id="flow-publish-btn" style="background:#15803D;color:#FFFFFF;border:none;border-radius:9px;padding:8px 16px;font-weight:700;font-size:12px;cursor:pointer;">Publicar</button>
+                <button id="flow-canvas-delete" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#B42318;border:1px solid #E4E1D8;border-radius:9px;padding:8px 12px;font-weight:600;font-size:12px;cursor:pointer;">Excluir</button>
               </div>
             </div>
 
-            <div style="position:relative;flex-grow:1;overflow-y:auto;background:#EDEBE3;background-image:radial-gradient(#D3D0C6 1.5px, transparent 1.5px);background-size:22px 22px;">
-              <div id="flow-canvas-body" style="display:flex;flex-direction:column;align-items:center;padding:40px 20px 80px;">Carregando...</div>
+            <div style="flex-grow:1;display:flex;min-height:0;">
+              <div style="width:188px;flex-shrink:0;border-right:1px solid #E7E5DF;background:#FBFAF7;padding:16px 12px;overflow-y:auto;">
+                <div style="font-size:10.5px;font-weight:700;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Adicionar nó</div>
+                <div style="display:flex;flex-direction:column;gap:6px;" id="flow-palette">
+                  <button class="flow-palette-btn" data-add-node="trigger">▶&nbsp;&nbsp;Gatilho</button>
+                  <button class="flow-palette-btn" data-add-node="wait">🕒&nbsp;&nbsp;Aguardar</button>
+                  <button class="flow-palette-btn" data-add-node="condition">𝗬&nbsp;&nbsp;Condição</button>
+                  <button class="flow-palette-btn" data-add-node="classify_ai">🧠&nbsp;&nbsp;Classificar (IA)</button>
+                  <button class="flow-palette-btn" data-add-node="send_message">💬&nbsp;&nbsp;Resposta (texto)</button>
+                  <button class="flow-palette-btn" data-add-node="repeat">🔁&nbsp;&nbsp;Repetir</button>
+                  <button class="flow-palette-btn" data-add-node="action">⚡&nbsp;&nbsp;Ação</button>
+                  <button class="flow-palette-btn" data-add-node="create_task">🔔&nbsp;&nbsp;Lembrete interno</button>
+                  <button class="flow-palette-btn" data-add-node="move_stage">🚩&nbsp;&nbsp;Mover lead no funil</button>
+                  <button class="flow-palette-btn" data-add-node="tag">🏷️&nbsp;&nbsp;Editar tag do lead</button>
+                  <button class="flow-palette-btn" data-add-node="end">🏁&nbsp;&nbsp;Fim</button>
+                </div>
+              </div>
+
+              <div id="flow-canvas-viewport" style="position:relative;flex-grow:1;overflow:hidden;background:#EDEBE3;background-image:radial-gradient(#D3D0C6 1.5px, transparent 1.5px);background-size:22px 22px;cursor:grab;">
+                <div id="flow-canvas-content" style="position:absolute;top:0;left:0;transform-origin:0 0;">
+                  <svg id="flow-canvas-svg" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none;"></svg>
+                </div>
+                <div style="position:absolute;bottom:16px;left:16px;display:flex;flex-direction:column;gap:4px;background:#FFFFFF;border:1px solid #E7E5DF;border-radius:10px;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                  <button id="flow-zoom-in" title="Aumentar zoom" style="width:30px;height:30px;border:none;background:none;cursor:pointer;font-size:15px;color:#3A3D38;">+</button>
+                  <button id="flow-zoom-out" title="Diminuir zoom" style="width:30px;height:30px;border:none;background:none;cursor:pointer;font-size:15px;color:#3A3D38;">−</button>
+                  <button id="flow-zoom-reset" title="Centralizar" style="width:30px;height:30px;border:none;background:none;cursor:pointer;font-size:12px;color:#3A3D38;">⤢</button>
+                </div>
+              </div>
             </div>
           </div>
         </section>
+
+        <div id="flow-node-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(20,24,26,0.45);z-index:60;align-items:center;justify-content:center;">
+          <div style="background:#FFFFFF;border-radius:16px;width:440px;max-height:85vh;overflow-y:auto;padding:24px;position:relative;">
+            <button id="flow-node-modal-close" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:#9A9D96;font-size:18px;line-height:1;">×</button>
+            <div id="flow-node-modal-title" style="font-family:'Inter',sans-serif;font-weight:700;font-size:16px;color:#14181A;margin-bottom:16px;"></div>
+            <div id="flow-node-modal-body" style="display:flex;flex-direction:column;gap:14px;"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;">
+              <button id="flow-node-modal-delete" style="background:none;border:none;color:#B42318;font-size:12.5px;font-weight:600;cursor:pointer;">Excluir nó</button>
+              <button id="flow-node-modal-save" style="background:#EB6D37;color:#FFFFFF;border:none;border-radius:9px;padding:10px 20px;font-weight:700;font-size:13px;cursor:pointer;">Salvar nó</button>
+            </div>
+          </div>
+        </div>
+
+        <style>
+          .flow-palette-btn{display:flex;align-items:center;text-align:left;background:#FFFFFF;border:1px solid #E7E5DF;border-radius:9px;padding:9px 10px;font-size:12px;font-weight:600;color:#3A3D38;cursor:pointer;font-family:'Inter',sans-serif;}
+          .flow-palette-btn:hover{border-color:#D85A26;color:#D85A26;}
+          .flow-node{position:absolute;width:220px;background:#FFFFFF;border:1.5px solid #E7E5DF;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.06);cursor:grab;user-select:none;}
+          .flow-node.selected{border-color:#D85A26;box-shadow:0 0 0 3px rgba(216,90,38,0.15);}
+          .flow-node-header{display:flex;align-items:center;gap:7px;padding:9px 10px;border-bottom:1px solid #F0EEE7;}
+          .flow-node-body{padding:9px 10px;font-size:12px;color:#1F2421;line-height:1.4;min-height:16px;}
+          .flow-node-label{font-size:10px;font-weight:700;color:#82867F;text-transform:uppercase;letter-spacing:.03em;}
+          .flow-node-handle{position:absolute;width:12px;height:12px;border-radius:50%;background:#FFFFFF;border:2px solid #9A9D96;right:-7px;cursor:crosshair;}
+          .flow-node-handle:hover{border-color:#D85A26;background:#D85A26;}
+          .flow-node-handle-label{position:absolute;right:16px;font-size:9.5px;font-weight:700;color:#82867F;white-space:nowrap;}
+          .flow-node.is-end{border-color:#F3B6AE;}
+          .flow-node-delete-x{position:absolute;top:-9px;right:-9px;width:18px;height:18px;border-radius:50%;background:#FFFFFF;border:1px solid #E4E1D8;color:#B42318;font-size:12px;line-height:16px;text-align:center;cursor:pointer;display:none;}
+          .flow-node:hover .flow-node-delete-x{display:block;}
+        </style>
 
         <section class="screen" id="screen-config">
           <div class="sidebar">
@@ -1433,9 +1494,18 @@ button{font-family:'Inter',sans-serif;}
     send_message: 'Enviar mensagem',
     ask_question: 'Perguntar e aguardar resposta',
     add_tag: 'Adicionar tag',
+    remove_tag: 'Remover tag',
     move_stage: 'Mover para outra etapa',
     delay: 'Aguardar um tempo',
+    wait: 'Aguardar',
     condition: 'Condição',
+    classify_ai: 'Classificar (IA)',
+    assign_user: 'Atribuir atendente',
+    assign_round_robin: 'Distribuir (round robin)',
+    close_conversation: 'Fechar conversa',
+    create_task: 'Lembrete interno',
+    repeat: 'Repetir',
+    end: 'Fim',
   };
 
   function populateAutomacaoFunnelFilter() {
@@ -1547,195 +1617,724 @@ button{font-family:'Inter',sans-serif;}
     loadAutomationFlows();
   });
 
-  // ── Construtor visual de fluxo (estilo ManyChat) ──────────────────────────
-  var STEP_ICON = {
-    send_message: { bg: '#EEF2FF', stroke: '#4338CA', label: 'Enviar mensagem', path: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z' },
-    ask_question: { bg: '#FEF3E2', stroke: '#B45309', label: 'Perguntar e aguardar resposta', path: 'M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z' },
-    add_tag: { bg: '#F3EBFF', stroke: '#6D28D9', label: 'Adicionar tag', path: 'M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z' },
-    move_stage: { bg: '#FBEAE3', stroke: '#D85A26', label: 'Mover para etapa', path: 'M22 3H2l8 9.46V19l4 2v-8.54Z' },
+  // ── Construtor visual de automação (canvas: nós soltos, conectados por linha, arrastar/zoom/pan) ──
+
+  var FLOW_NODE_META = {
+    trigger: { bg: '#FBEAE3', stroke: '#D85A26', icon: '▶', label: 'Gatilho' },
+    send_message: { bg: '#EEF2FF', stroke: '#4338CA', icon: '💬', label: 'Resposta (texto)' },
+    ask_question: { bg: '#EEF2FF', stroke: '#4338CA', icon: '💬', label: 'Resposta (texto)' },
+    wait: { bg: '#FEF3E2', stroke: '#B45309', icon: '🕒', label: 'Aguardar' },
+    condition: { bg: '#FDECC8', stroke: '#92400E', icon: '𝗬', label: 'Condição' },
+    classify_ai: { bg: '#E6F4EA', stroke: '#15803D', icon: '🧠', label: 'Classificar (IA)' },
+    add_tag: { bg: '#F3EBFF', stroke: '#6D28D9', icon: '🏷️', label: 'Adicionar tag' },
+    remove_tag: { bg: '#F3EBFF', stroke: '#6D28D9', icon: '🏷️', label: 'Remover tag' },
+    move_stage: { bg: '#FBEAE3', stroke: '#D85A26', icon: '🚩', label: 'Mover lead no funil' },
+    assign_user: { bg: '#E0F2FE', stroke: '#0369A1', icon: '⚡', label: 'Atribuir atendente' },
+    assign_round_robin: { bg: '#E0F2FE', stroke: '#0369A1', icon: '⚡', label: 'Distribuir (round robin)' },
+    close_conversation: { bg: '#E0F2FE', stroke: '#0369A1', icon: '⚡', label: 'Fechar conversa' },
+    create_task: { bg: '#FFF1E6', stroke: '#C2410C', icon: '🔔', label: 'Lembrete interno' },
+    repeat: { bg: '#F1F0EA', stroke: '#5B5F58', icon: '🔁', label: 'Repetir' },
+    end: { bg: '#FBEAE3', stroke: '#B42318', icon: '🏁', label: 'Fim' },
   };
 
-  function flowBlockHtml(iconInfo, title, bodyHtml, extraButtonsHtml) {
-    return '<div style="width:300px;background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.05);">' +
-      '<div style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid #F0EEE7;">' +
-        '<div style="width:22px;height:22px;border-radius:6px;background:' + iconInfo.bg + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="' + iconInfo.stroke + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="' + iconInfo.path + '"></path></svg></div>' +
-        '<span style="font-size:10.5px;font-weight:700;color:#82867F;text-transform:uppercase;letter-spacing:.03em;flex-grow:1;">' + escapeHtml(title) + '</span>' +
-        (extraButtonsHtml || '') +
-      '</div>' +
-      '<div style="padding:12px 14px;cursor:pointer;" class="flow-block-body">' + bodyHtml + '</div>' +
-    '</div>';
+  var flowCanvas = {
+    flow: null,
+    nodes: [],       // {client_id, kind:'trigger'|'step', step_type, config, x, y, next_step_id, next_step_id_true, next_step_id_false}
+    scale: 1, panX: 40, panY: 40,
+    dirty: false,
+    dragNode: null,
+    panning: null,
+    connecting: null,
+    selectedId: null,
+    nodeSeq: 1,
+  };
+
+  function flowNewClientId() { return 'n' + (flowCanvas.nodeSeq++) + '_' + Date.now().toString(36); }
+
+  function flowNodeHandles(node) {
+    if (node.kind === 'trigger') return ['out'];
+    if (node.step_type === 'condition' || node.step_type === 'classify_ai') return ['true', 'false'];
+    if (node.step_type === 'end') return [];
+    return ['out'];
   }
 
-  function connectorHtml() {
-    return '<div style="width:2px;height:28px;background:#C7C4B8;"></div>';
+  function flowNodeHeight(node) {
+    return flowNodeHandles(node).length > 1 ? 86 : 70;
   }
 
-  function addStepButtonHtml() {
-    return '<button id="flow-add-step-btn" style="width:32px;height:32px;border-radius:50%;background:#FFFFFF;border:1.5px dashed #C7C4B8;color:#9A9D96;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:6px;">' +
-      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9D96" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>' +
-    '</button>';
+  function flowNodeSummary(node) {
+    var c = node.config || {};
+    switch (node.step_type) {
+      case 'send_message': return escapeHtml((c.text || '(sem texto)').slice(0, 70));
+      case 'ask_question': return escapeHtml((c.text || '(sem texto)').slice(0, 70)) + ' <span style="color:#9A9D96;">· aguarda resposta</span>';
+      case 'wait': return 'Esperar ' + (c.minutes || 0) + ' min';
+      case 'condition': return 'Se ' + (c.check === 'stage_equals' ? 'etapa atual é...' : 'tag "' + escapeHtml(c.tag || '') + '"');
+      case 'classify_ai': return escapeHtml((c.question || '(sem pergunta)').slice(0, 70));
+      case 'add_tag': return 'Adicionar <b>' + escapeHtml(c.tag || '--') + '</b>';
+      case 'remove_tag': return 'Remover <b>' + escapeHtml(c.tag || '--') + '</b>';
+      case 'move_stage': return flowStageLabel(c.funnel_stage_id);
+      case 'assign_user': return flowUserLabel(c.user_id);
+      case 'assign_round_robin': return 'Próximo da fila (round robin)';
+      case 'close_conversation': return 'Fecha a conversa';
+      case 'create_task': return escapeHtml(c.title || 'Follow-up') + (c.due_in_hours ? ' · em ' + c.due_in_hours + 'h' : '');
+      case 'repeat': return 'Volta pra um nó anterior';
+      case 'end': return escapeHtml(c.label || 'Fim do fluxo');
+      default: return '';
+    }
   }
 
-  function renderFlowCanvas() {
-    var flow = state.currentFlow;
-    var body = document.getElementById('flow-canvas-body');
-    var flowFunnel = state.funnels.find(function (f) { return f.id === flow.funnel_id; });
+  function flowStageLabel(stageId) {
+    var flow = flowCanvas.flow;
+    var funnel = state.funnels.find(function (f) { return f.id === flow.funnel_id; });
+    var stage = funnel ? funnel.stages.find(function (s) { return s.id === stageId; }) : null;
+    return stage ? 'Mover para <b>' + escapeHtml(stage.name) + '</b>' : '(escolher etapa)';
+  }
+  function flowUserLabel(userId) {
+    var u = (state.flowUsers || []).find(function (u) { return u.id === userId; });
+    return u ? 'Atribuir a <b>' + escapeHtml(u.name) + '</b>' : '(escolher atendente)';
+  }
 
-    document.querySelector('#flow-canvas-name span').textContent = flow.name;
-    var toggle = document.getElementById('flow-canvas-toggle');
-    toggle.classList.toggle('on', !!flow.is_active);
-    toggle.setAttribute('aria-pressed', flow.is_active ? 'true' : 'false');
+  function flowNodeById(id) {
+    return flowCanvas.nodes.find(function (n) { return n.client_id === id; });
+  }
 
-    var triggerLabel = flow.trigger_type === 'keyword'
-      ? 'Mensagem contém a palavra-chave "' + (flow.trigger_config?.keyword || '') + '"'
-      : 'Nova conversa iniciada — primeira mensagem do lead';
-    var triggerSubtitle = flowFunnel ? 'Só neste funil: ' + flowFunnel.name : 'Vale para todos os funis';
+  function flowRenderAll() {
+    var content = document.getElementById('flow-canvas-content');
+    content.style.transform = 'translate(' + flowCanvas.panX + 'px,' + flowCanvas.panY + 'px) scale(' + flowCanvas.scale + ')';
 
-    var html = flowBlockHtml(
-      { bg: '#FBEAE3', stroke: '#D85A26', path: 'M13 2 4 14h6l-1 8 9-12h-6l1-8Z' },
-      'Gatilho',
-      '<div id="flow-trigger-block" style="font-size:12.5px;color:#1F2421;margin-bottom:6px;">' + escapeHtml(triggerLabel) + '</div>' +
-      '<div style="font-size:11px;color:#9A9D96;line-height:1.4;">' + escapeHtml(triggerSubtitle) + '</div>'
-    );
-    html += connectorHtml();
+    content.querySelectorAll('.flow-node').forEach(function (el) { el.remove(); });
 
-    flow.steps.forEach(function (step, i) {
-      var info = STEP_ICON[step.step_type] || STEP_ICON.send_message;
-      var bodyHtml = '';
-      if (step.step_type === 'send_message' || step.step_type === 'ask_question') {
-        bodyHtml = '<div style="background:#F5F4EF;border-radius:10px;padding:9px 11px;font-size:12.5px;color:#1F2421;line-height:1.4;">' + escapeHtml(step.config.text || '') + '</div>';
-      } else if (step.step_type === 'add_tag') {
-        bodyHtml = '<span style="font-size:11.5px;font-weight:600;background:#F5F4EF;border:1px solid #E4E1D8;color:#3A3D38;padding:4px 10px;border-radius:20px;">' + escapeHtml(step.config.tag || '') + '</span>';
-      } else if (step.step_type === 'move_stage') {
-        var stage = flowFunnel ? flowFunnel.stages.find(function (s) { return s.id === step.config.funnel_stage_id; }) : null;
-        bodyHtml = '<div style="font-size:12.5px;color:#1F2421;">Mover lead para <b>' + escapeHtml(stage ? stage.name : '(etapa removida)') + '</b></div>';
+    flowCanvas.nodes.forEach(function (node) {
+      var meta = FLOW_NODE_META[node.kind === 'trigger' ? 'trigger' : node.step_type] || FLOW_NODE_META.send_message;
+      var handles = flowNodeHandles(node);
+      var height = flowNodeHeight(node);
+      var el = document.createElement('div');
+      el.className = 'flow-node' + (node.client_id === flowCanvas.selectedId ? ' selected' : '') + (node.step_type === 'end' ? ' is-end' : '');
+      el.style.left = node.x + 'px';
+      el.style.top = node.y + 'px';
+      el.style.minHeight = height + 'px';
+      el.setAttribute('data-node-id', node.client_id);
+
+      var deleteX = node.kind === 'trigger' ? '' : '<div class="flow-node-delete-x" data-del-node="' + node.client_id + '">×</div>';
+
+      var handlesHtml = '';
+      if (handles.length === 1) {
+        handlesHtml = '<div class="flow-node-handle" style="top:50%;transform:translateY(-50%);" data-handle="out" data-node="' + node.client_id + '"></div>';
+      } else if (handles.length === 2) {
+        var trueLabel = (node.config && node.config.true_label) || 'Sim';
+        var falseLabel = (node.config && node.config.false_label) || 'Não';
+        handlesHtml =
+          '<div class="flow-node-handle-label" style="top:34px;">' + escapeHtml(trueLabel) + '</div>' +
+          '<div class="flow-node-handle" style="top:34px;" data-handle="true" data-node="' + node.client_id + '"></div>' +
+          '<div class="flow-node-handle-label" style="top:62px;">' + escapeHtml(falseLabel) + '</div>' +
+          '<div class="flow-node-handle" style="top:62px;" data-handle="false" data-node="' + node.client_id + '"></div>';
       }
-      var deleteBtn = '<button data-remove-step="' + i + '" style="background:none;border:none;cursor:pointer;color:#ACAFA8;font-size:14px;line-height:1;flex-shrink:0;">×</button>';
-      html += '<div data-step-index="' + i + '">' + flowBlockHtml(info, info.label, bodyHtml, deleteBtn) + '</div>';
-      html += connectorHtml();
+
+      el.innerHTML =
+        deleteX +
+        '<div class="flow-node-header" style="background:' + meta.bg + ';border-top-left-radius:11px;border-top-right-radius:11px;">' +
+          '<span style="font-size:13px;">' + meta.icon + '</span>' +
+          '<span class="flow-node-label" style="color:' + meta.stroke + ';">' + meta.label + '</span>' +
+        '</div>' +
+        '<div class="flow-node-body">' + flowNodeSummary(node) + '</div>' +
+        handlesHtml;
+
+      content.appendChild(el);
     });
 
-    html += addStepButtonHtml();
+    flowRenderEdges();
 
-    body.innerHTML = html;
-
-    document.getElementById('flow-trigger-block').closest('.flow-block-body').addEventListener('click', editFlowTrigger);
-
-    body.querySelectorAll('[data-step-index]').forEach(function (el) {
-      var idx = parseInt(el.getAttribute('data-step-index'), 10);
-      el.querySelector('.flow-block-body').addEventListener('click', function () { editFlowStep(idx); });
-      el.querySelector('[data-remove-step]').addEventListener('click', function (e) {
+    content.querySelectorAll('.flow-node').forEach(function (el) {
+      el.addEventListener('mousedown', flowOnNodeMouseDown);
+      el.addEventListener('click', function (e) {
+        if (flowCanvas.dragMoved) return;
+        var id = el.getAttribute('data-node-id');
+        var node = flowNodeById(id);
+        if (node) flowOpenNodeModal(node);
+      });
+    });
+    content.querySelectorAll('[data-del-node]').forEach(function (btn) {
+      btn.addEventListener('mousedown', function (e) { e.stopPropagation(); });
+      btn.addEventListener('click', function (e) {
         e.stopPropagation();
-        flow.steps.splice(idx, 1);
-        saveCurrentFlow();
+        flowDeleteNode(btn.getAttribute('data-del-node'));
+      });
+    });
+    content.querySelectorAll('.flow-node-handle').forEach(function (h) {
+      h.addEventListener('mousedown', flowOnHandleMouseDown);
+    });
+  }
+
+  function flowEdgeList() {
+    var edges = [];
+    flowCanvas.nodes.forEach(function (node) {
+      var handles = flowNodeHandles(node);
+      if (handles.indexOf('out') !== -1 && node.next_step_id) {
+        edges.push({ from: node.client_id, to: node.next_step_id, handleOffset: flowNodeHeight(node) / 2 });
+      }
+      if (handles.indexOf('true') !== -1 && node.next_step_id_true) {
+        edges.push({ from: node.client_id, to: node.next_step_id_true, handleOffset: 34 });
+      }
+      if (handles.indexOf('false') !== -1 && node.next_step_id_false) {
+        edges.push({ from: node.client_id, to: node.next_step_id_false, handleOffset: 62 });
+      }
+    });
+    return edges;
+  }
+
+  function flowEdgePath(x1, y1, x2, y2) {
+    var dx = Math.max(40, Math.abs(x2 - x1) / 2);
+    return 'M ' + x1 + ' ' + y1 + ' C ' + (x1 + dx) + ' ' + y1 + ', ' + (x2 - dx) + ' ' + y2 + ', ' + x2 + ' ' + y2;
+  }
+
+  function flowRenderEdges() {
+    var svg = document.getElementById('flow-canvas-svg');
+    var maxX = 400, maxY = 400;
+    var paths = flowEdgeList().map(function (edge) {
+      var fromNode = flowNodeById(edge.from);
+      var toNode = flowNodeById(edge.to);
+      if (!fromNode || !toNode) return '';
+      var x1 = fromNode.x + 220, y1 = fromNode.y + edge.handleOffset;
+      var x2 = toNode.x, y2 = toNode.y + flowNodeHeight(toNode) / 2;
+      maxX = Math.max(maxX, x1 + 50, x2 + 50);
+      maxY = Math.max(maxY, y1 + 50, y2 + 50);
+      return '<path d="' + flowEdgePath(x1, y1, x2, y2) + '" stroke="#C7C4B8" stroke-width="2" fill="none" marker-end="url(#flow-arrow)"></path>';
+    }).join('');
+    svg.setAttribute('width', maxX);
+    svg.setAttribute('height', maxY);
+    svg.innerHTML =
+      '<defs><marker id="flow-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#C7C4B8"></path></marker></defs>' +
+      paths;
+
+    if (flowCanvas.connecting) {
+      var from = flowNodeById(flowCanvas.connecting.fromId);
+      if (from) {
+        var offset = flowCanvas.connecting.handle === 'true' ? 34 : (flowCanvas.connecting.handle === 'false' ? 62 : flowNodeHeight(from) / 2);
+        var x1 = from.x + 220, y1 = from.y + offset;
+        svg.innerHTML += '<path d="' + flowEdgePath(x1, y1, flowCanvas.connecting.x, flowCanvas.connecting.y) + '" stroke="#D85A26" stroke-width="2" stroke-dasharray="5,4" fill="none"></path>';
+      }
+    }
+  }
+
+  function flowScreenToCanvas(clientX, clientY) {
+    var viewport = document.getElementById('flow-canvas-viewport');
+    var rect = viewport.getBoundingClientRect();
+    return {
+      x: (clientX - rect.left - flowCanvas.panX) / flowCanvas.scale,
+      y: (clientY - rect.top - flowCanvas.panY) / flowCanvas.scale,
+    };
+  }
+
+  function flowOnNodeMouseDown(e) {
+    if (e.target.closest('.flow-node-handle') || e.target.closest('.flow-node-delete-x')) return;
+    e.stopPropagation();
+    var el = e.currentTarget;
+    var id = el.getAttribute('data-node-id');
+    var node = flowNodeById(id);
+    if (!node) return;
+    var startCanvas = flowScreenToCanvas(e.clientX, e.clientY);
+    flowCanvas.dragNode = { id: id, offsetX: startCanvas.x - node.x, offsetY: startCanvas.y - node.y };
+    flowCanvas.dragMoved = false;
+    flowCanvas.selectedId = id;
+  }
+
+  function flowOnHandleMouseDown(e) {
+    e.stopPropagation();
+    var handle = e.currentTarget.getAttribute('data-handle');
+    var nodeId = e.currentTarget.getAttribute('data-node');
+    var pos = flowScreenToCanvas(e.clientX, e.clientY);
+    flowCanvas.connecting = { fromId: nodeId, handle: handle, x: pos.x, y: pos.y };
+  }
+
+  (function flowSetupGlobalMouse() {
+    document.addEventListener('mousemove', function (e) {
+      if (!document.getElementById('screen-automacao-flow') || !document.getElementById('screen-automacao-flow').classList.contains('active')) return;
+
+      if (flowCanvas.dragNode) {
+        var pos = flowScreenToCanvas(e.clientX, e.clientY);
+        var node = flowNodeById(flowCanvas.dragNode.id);
+        if (node) {
+          node.x = Math.round(pos.x - flowCanvas.dragNode.offsetX);
+          node.y = Math.round(pos.y - flowCanvas.dragNode.offsetY);
+          flowCanvas.dragMoved = true;
+          flowCanvas.dirty = true;
+          flowRenderAll();
+        }
+      } else if (flowCanvas.connecting) {
+        var pos2 = flowScreenToCanvas(e.clientX, e.clientY);
+        flowCanvas.connecting.x = pos2.x;
+        flowCanvas.connecting.y = pos2.y;
+        flowRenderEdges();
+      } else if (flowCanvas.panning) {
+        flowCanvas.panX = flowCanvas.panning.startPanX + (e.clientX - flowCanvas.panning.startX);
+        flowCanvas.panY = flowCanvas.panning.startPanY + (e.clientY - flowCanvas.panning.startY);
+        document.getElementById('flow-canvas-content').style.transform =
+          'translate(' + flowCanvas.panX + 'px,' + flowCanvas.panY + 'px) scale(' + flowCanvas.scale + ')';
+      }
+    });
+
+    document.addEventListener('mouseup', function (e) {
+      if (flowCanvas.dragNode) {
+        flowCanvas.dragNode = null;
+        flowUpdateDirtyUI();
+      }
+      if (flowCanvas.connecting) {
+        var targetEl = e.target.closest('.flow-node');
+        var fromId = flowCanvas.connecting.fromId;
+        var handle = flowCanvas.connecting.handle;
+        if (targetEl) {
+          var targetId = targetEl.getAttribute('data-node-id');
+          var targetNode = flowNodeById(targetId);
+          if (targetId !== fromId && targetNode && targetNode.kind !== 'trigger') {
+            var fromNode = flowNodeById(fromId);
+            if (handle === 'true') fromNode.next_step_id_true = targetId;
+            else if (handle === 'false') fromNode.next_step_id_false = targetId;
+            else fromNode.next_step_id = targetId;
+            flowCanvas.dirty = true;
+          }
+        }
+        flowCanvas.connecting = null;
+        flowRenderAll();
+        flowUpdateDirtyUI();
+      }
+      if (flowCanvas.panning) {
+        flowCanvas.panning = null;
+        document.getElementById('flow-canvas-viewport').style.cursor = 'grab';
+      }
+    });
+  })();
+
+  document.getElementById('flow-canvas-viewport').addEventListener('mousedown', function (e) {
+    if (e.target.closest('.flow-node') || e.target.closest('.flow-node-handle')) return;
+    flowCanvas.panning = { startX: e.clientX, startY: e.clientY, startPanX: flowCanvas.panX, startPanY: flowCanvas.panY };
+    this.style.cursor = 'grabbing';
+    flowCanvas.selectedId = null;
+  });
+
+  document.getElementById('flow-zoom-in').addEventListener('click', function () {
+    flowCanvas.scale = Math.min(2, flowCanvas.scale * 1.15);
+    flowRenderAll();
+  });
+  document.getElementById('flow-zoom-out').addEventListener('click', function () {
+    flowCanvas.scale = Math.max(0.3, flowCanvas.scale / 1.15);
+    flowRenderAll();
+  });
+  document.getElementById('flow-zoom-reset').addEventListener('click', function () {
+    flowCanvas.scale = 1; flowCanvas.panX = 40; flowCanvas.panY = 40;
+    flowRenderAll();
+  });
+
+  function flowDeleteNode(clientId) {
+    if (!confirm('Excluir esse nó? Conexões que apontam pra ele vão ficar soltas.')) return;
+    flowCanvas.nodes = flowCanvas.nodes.filter(function (n) { return n.client_id !== clientId; });
+    flowCanvas.nodes.forEach(function (n) {
+      if (n.next_step_id === clientId) n.next_step_id = null;
+      if (n.next_step_id_true === clientId) n.next_step_id_true = null;
+      if (n.next_step_id_false === clientId) n.next_step_id_false = null;
+    });
+    flowCanvas.dirty = true;
+    flowRenderAll();
+    flowUpdateDirtyUI();
+  }
+
+  function flowAddNode(stepType, config) {
+    var viewport = document.getElementById('flow-canvas-viewport');
+    var rect = viewport.getBoundingClientRect();
+    var center = flowScreenToCanvas(rect.left + rect.width / 2 + (Math.random() * 60 - 30), rect.top + rect.height / 2 + (Math.random() * 60 - 30));
+    var node = {
+      client_id: flowNewClientId(),
+      kind: 'step',
+      step_type: stepType,
+      config: config || {},
+      x: Math.round(center.x - 110),
+      y: Math.round(center.y - 35),
+      next_step_id: null, next_step_id_true: null, next_step_id_false: null,
+    };
+    flowCanvas.nodes.push(node);
+    flowCanvas.dirty = true;
+    flowRenderAll();
+    flowUpdateDirtyUI();
+    flowOpenNodeModal(node);
+  }
+
+  document.getElementById('flow-palette').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-add-node]');
+    if (!btn) return;
+    var kind = btn.getAttribute('data-add-node');
+    if (kind === 'trigger') {
+      var triggerNode = flowCanvas.nodes.find(function (n) { return n.kind === 'trigger'; });
+      if (triggerNode) flowOpenNodeModal(triggerNode);
+      return;
+    }
+    if (kind === 'action') { flowAddNode('assign_round_robin', {}); return; }
+    if (kind === 'tag') { flowAddNode('add_tag', {}); return; }
+    if (kind === 'wait') { flowAddNode('wait', { minutes: 60 }); return; }
+    if (kind === 'condition') { flowAddNode('condition', { check: 'tag_exists', true_label: 'Sim', false_label: 'Não' }); return; }
+    if (kind === 'classify_ai') { flowAddNode('classify_ai', { true_label: 'Sim', false_label: 'Não' }); return; }
+    if (kind === 'send_message') { flowAddNode('send_message', { text: '' }); return; }
+    if (kind === 'repeat') { flowAddNode('repeat', {}); return; }
+    if (kind === 'create_task') { flowAddNode('create_task', { title: 'Follow-up' }); return; }
+    if (kind === 'move_stage') { flowAddNode('move_stage', {}); return; }
+    if (kind === 'end') { flowAddNode('end', { label: 'Convertido' }); return; }
+  });
+
+  // ── Modal de edição de nó ──
+  function flowFieldHtml(id, labelText, inputHtml) {
+    return '<label style="display:flex;flex-direction:column;gap:5px;">' +
+      '<span style="font-size:11.5px;font-weight:600;color:#5B5F58;">' + escapeHtml(labelText) + '</span>' + inputHtml + '</label>';
+  }
+  function flowTextareaHtml(id, value) {
+    return '<textarea id="' + id + '" style="width:100%;background:#F5F4EF;border:1px solid #E4E1D8;border-radius:9px;padding:10px 12px;font-size:13px;color:#14181A;min-height:70px;resize:vertical;font-family:\'Inter\',sans-serif;box-sizing:border-box;">' + escapeHtml(value || '') + '</textarea>';
+  }
+  function flowInputHtml(id, value, type) {
+    return '<input id="' + id + '" type="' + (type || 'text') + '" value="' + escapeHtml(value == null ? '' : String(value)) + '" style="width:100%;background:#F5F4EF;border:1px solid #E4E1D8;border-radius:9px;padding:9px 12px;font-size:13px;color:#14181A;box-sizing:border-box;font-family:\'Inter\',sans-serif;"/>';
+  }
+  function flowSelectHtml(id, options, selected) {
+    return '<select id="' + id + '" style="width:100%;background:#F5F4EF;border:1px solid #E4E1D8;border-radius:9px;padding:9px 12px;font-size:13px;color:#14181A;box-sizing:border-box;font-family:\'Inter\',sans-serif;">' +
+      options.map(function (o) { return '<option value="' + escapeHtml(o.value) + '"' + (String(o.value) === String(selected) ? ' selected' : '') + '>' + escapeHtml(o.label) + '</option>'; }).join('') +
+      '</select>';
+  }
+
+  var flowModalEditing = null;
+
+  async function flowOpenNodeModal(node) {
+    flowModalEditing = node;
+    var overlay = document.getElementById('flow-node-modal-overlay');
+    var title = document.getElementById('flow-node-modal-title');
+    var body = document.getElementById('flow-node-modal-body');
+    var deleteBtn = document.getElementById('flow-node-modal-delete');
+    deleteBtn.style.display = node.kind === 'trigger' ? 'none' : 'block';
+
+    if (node.kind === 'trigger') {
+      title.textContent = 'Gatilho';
+      var funnelOpts = [{ value: '', label: 'Todos os funis' }].concat(state.funnels.map(function (f) { return { value: f.id, label: f.name }; }));
+      body.innerHTML =
+        flowFieldHtml('f-trigger-type', 'Tipo de gatilho', flowSelectHtml('f-trigger-type', [
+          { value: 'first_message', label: 'Primeira mensagem do lead' },
+          { value: 'keyword', label: 'Mensagem contém palavra-chave' },
+        ], flowCanvas.flow.trigger_type)) +
+        '<div id="f-keyword-wrap" style="display:' + (flowCanvas.flow.trigger_type === 'keyword' ? 'block' : 'none') + ';">' +
+          flowFieldHtml('f-keyword', 'Palavra-chave', flowInputHtml('f-keyword', (flowCanvas.flow.trigger_config || {}).keyword || '')) +
+        '</div>' +
+        flowFieldHtml('f-funnel', 'Restringir a um funil', flowSelectHtml('f-funnel', funnelOpts, flowCanvas.flow.funnel_id || ''));
+      document.getElementById('f-trigger-type').addEventListener('change', function () {
+        document.getElementById('f-keyword-wrap').style.display = this.value === 'keyword' ? 'block' : 'none';
+      });
+      overlay.style.display = 'flex';
+      return;
+    }
+
+    var c = node.config || {};
+    var flowFunnel = state.funnels.find(function (f) { return f.id === flowCanvas.flow.funnel_id; });
+
+    if (node.step_type === 'send_message' || node.step_type === 'ask_question') {
+      title.textContent = 'Resposta (texto)';
+      body.innerHTML =
+        flowFieldHtml('f-text', 'Mensagem', flowTextareaHtml('f-text', c.text)) +
+        '<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#5B5F58;">' +
+          '<input type="checkbox" id="f-wait-reply" ' + (node.step_type === 'ask_question' ? 'checked' : '') + '/> Pausar o fluxo esperando a resposta do lead' +
+        '</label>';
+    } else if (node.step_type === 'wait') {
+      title.textContent = 'Aguardar';
+      body.innerHTML = flowFieldHtml('f-minutes', 'Minutos de espera', flowInputHtml('f-minutes', c.minutes || 60, 'number'));
+    } else if (node.step_type === 'condition') {
+      title.textContent = 'Condição';
+      body.innerHTML =
+        flowFieldHtml('f-check', 'Critério', flowSelectHtml('f-check', [
+          { value: 'tag_exists', label: 'Contato tem a tag' },
+          { value: 'stage_equals', label: 'Etapa atual é' },
+        ], c.check || 'tag_exists')) +
+        '<div id="f-tag-wrap" style="display:' + (c.check === 'stage_equals' ? 'none' : 'block') + ';">' + flowFieldHtml('f-tag', 'Tag', flowInputHtml('f-tag', c.tag)) + '</div>' +
+        '<div id="f-stage-wrap" style="display:' + (c.check === 'stage_equals' ? 'block' : 'none') + ';">' +
+          flowFieldHtml('f-stage', 'Etapa', flowSelectHtml('f-stage', (flowFunnel ? flowFunnel.stages : []).map(function (s) { return { value: s.id, label: s.name }; }), c.funnel_stage_id)) +
+        '</div>' +
+        flowFieldHtml('f-true-label', 'Rótulo do ramo "verdadeiro"', flowInputHtml('f-true-label', c.true_label || 'Sim')) +
+        flowFieldHtml('f-false-label', 'Rótulo do ramo "falso"', flowInputHtml('f-false-label', c.false_label || 'Não'));
+      document.getElementById('f-check').addEventListener('change', function () {
+        var isStage = this.value === 'stage_equals';
+        document.getElementById('f-tag-wrap').style.display = isStage ? 'none' : 'block';
+        document.getElementById('f-stage-wrap').style.display = isStage ? 'block' : 'none';
+      });
+    } else if (node.step_type === 'classify_ai') {
+      title.textContent = 'Classificar (IA)';
+      body.innerHTML =
+        flowFieldHtml('f-question', 'O que a IA deve avaliar? (pergunta de sim/não)', flowTextareaHtml('f-question', c.question)) +
+        flowFieldHtml('f-true-label', 'Rótulo do ramo "sim"', flowInputHtml('f-true-label', c.true_label || 'Sim')) +
+        flowFieldHtml('f-false-label', 'Rótulo do ramo "não"', flowInputHtml('f-false-label', c.false_label || 'Não')) +
+        '<div style="font-size:11.5px;color:#9A9D96;">Sem uma chave de IA real configurada em Configurações, esse nó roda em modo mock e sempre segue o ramo "' + escapeHtml(c.false_label || 'Não') + '".</div>';
+    } else if (node.step_type === 'add_tag' || node.step_type === 'remove_tag') {
+      title.textContent = 'Editar tag do lead';
+      body.innerHTML =
+        flowFieldHtml('f-tag-action', 'Ação', flowSelectHtml('f-tag-action', [
+          { value: 'add_tag', label: 'Adicionar tag' },
+          { value: 'remove_tag', label: 'Remover tag' },
+        ], node.step_type)) +
+        flowFieldHtml('f-tag', 'Nome da tag', flowInputHtml('f-tag', c.tag));
+    } else if (node.step_type === 'move_stage') {
+      title.textContent = 'Mover lead no funil';
+      if (!flowFunnel) {
+        body.innerHTML = '<div style="font-size:12.5px;color:#B45309;">Defina um funil específico no nó Gatilho antes de escolher a etapa.</div>';
+      } else {
+        body.innerHTML = flowFieldHtml('f-stage', 'Nova etapa', flowSelectHtml('f-stage', flowFunnel.stages.map(function (s) { return { value: s.id, label: s.name }; }), c.funnel_stage_id));
+      }
+    } else if (node.step_type === 'assign_user' || node.step_type === 'assign_round_robin' || node.step_type === 'close_conversation') {
+      title.textContent = 'Ação';
+      var users = state.flowUsers || [];
+      body.innerHTML =
+        flowFieldHtml('f-action-kind', 'Qual ação?', flowSelectHtml('f-action-kind', [
+          { value: 'assign_round_robin', label: 'Distribuir pro próximo atendente da fila' },
+          { value: 'assign_user', label: 'Atribuir a um atendente específico' },
+          { value: 'close_conversation', label: 'Fechar a conversa' },
+        ], node.step_type)) +
+        '<div id="f-user-wrap" style="display:' + (node.step_type === 'assign_user' ? 'block' : 'none') + ';">' +
+          flowFieldHtml('f-user', 'Atendente', flowSelectHtml('f-user', users.map(function (u) { return { value: u.id, label: u.name }; }), c.user_id)) +
+        '</div>';
+      document.getElementById('f-action-kind').addEventListener('change', function () {
+        document.getElementById('f-user-wrap').style.display = this.value === 'assign_user' ? 'block' : 'none';
+      });
+    } else if (node.step_type === 'create_task') {
+      title.textContent = 'Lembrete interno';
+      body.innerHTML =
+        flowFieldHtml('f-title', 'Título', flowInputHtml('f-title', c.title || 'Follow-up')) +
+        flowFieldHtml('f-description', 'Descrição (opcional)', flowTextareaHtml('f-description', c.description)) +
+        flowFieldHtml('f-due', 'Lembrar em quantas horas', flowInputHtml('f-due', c.due_in_hours || 24, 'number'));
+    } else if (node.step_type === 'repeat') {
+      title.textContent = 'Repetir';
+      body.innerHTML = '<div style="font-size:12.5px;color:#5B5F58;">Esse nó não precisa de configuração — arraste uma linha da sua bolinha de saída até um nó anterior do fluxo pra fazer ele repetir a partir dali.</div>';
+    } else if (node.step_type === 'end') {
+      title.textContent = 'Fim';
+      body.innerHTML = flowFieldHtml('f-label', 'Rótulo (o que aconteceu aqui)', flowInputHtml('f-label', c.label || 'Convertido'));
+    }
+
+    overlay.style.display = 'flex';
+  }
+
+  document.getElementById('flow-node-modal-close').addEventListener('click', function () {
+    document.getElementById('flow-node-modal-overlay').style.display = 'none';
+  });
+  document.getElementById('flow-node-modal-overlay').addEventListener('click', function (e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+  document.getElementById('flow-node-modal-delete').addEventListener('click', function () {
+    document.getElementById('flow-node-modal-overlay').style.display = 'none';
+    if (flowModalEditing) flowDeleteNode(flowModalEditing.client_id);
+  });
+
+  document.getElementById('flow-node-modal-save').addEventListener('click', function () {
+    var node = flowModalEditing;
+    if (!node) return;
+    var val = function (id) { var el = document.getElementById(id); return el ? el.value : undefined; };
+
+    if (node.kind === 'trigger') {
+      flowCanvas.flow.trigger_type = val('f-trigger-type');
+      flowCanvas.flow.trigger_config = flowCanvas.flow.trigger_type === 'keyword' ? { keyword: val('f-keyword') } : {};
+      flowCanvas.flow.funnel_id = val('f-funnel') ? parseInt(val('f-funnel'), 10) : null;
+    } else if (node.step_type === 'send_message' || node.step_type === 'ask_question') {
+      node.config = { text: val('f-text') };
+      node.step_type = document.getElementById('f-wait-reply').checked ? 'ask_question' : 'send_message';
+    } else if (node.step_type === 'wait') {
+      node.config = { minutes: parseInt(val('f-minutes'), 10) || 60 };
+    } else if (node.step_type === 'condition') {
+      var check = val('f-check');
+      node.config = {
+        check: check,
+        tag: check === 'tag_exists' ? val('f-tag') : undefined,
+        funnel_stage_id: check === 'stage_equals' ? parseInt(val('f-stage'), 10) : undefined,
+        true_label: val('f-true-label') || 'Sim',
+        false_label: val('f-false-label') || 'Não',
+      };
+    } else if (node.step_type === 'classify_ai') {
+      node.config = { question: val('f-question'), true_label: val('f-true-label') || 'Sim', false_label: val('f-false-label') || 'Não' };
+    } else if (node.step_type === 'add_tag' || node.step_type === 'remove_tag') {
+      node.step_type = val('f-tag-action');
+      node.config = { tag: val('f-tag') };
+    } else if (node.step_type === 'move_stage') {
+      node.config = { funnel_stage_id: val('f-stage') ? parseInt(val('f-stage'), 10) : null };
+    } else if (node.step_type === 'assign_user' || node.step_type === 'assign_round_robin' || node.step_type === 'close_conversation') {
+      node.step_type = val('f-action-kind');
+      node.config = node.step_type === 'assign_user' ? { user_id: val('f-user') ? parseInt(val('f-user'), 10) : null } : {};
+    } else if (node.step_type === 'create_task') {
+      node.config = { title: val('f-title'), description: val('f-description') || undefined, due_in_hours: parseInt(val('f-due'), 10) || 24 };
+    } else if (node.step_type === 'end') {
+      node.config = { label: val('f-label') || 'Fim' };
+    }
+
+    document.getElementById('flow-node-modal-overlay').style.display = 'none';
+    flowCanvas.dirty = true;
+    flowRenderAll();
+    flowUpdateHeader();
+    flowUpdateDirtyUI();
+  });
+
+  document.getElementById('flow-trigger-summary-btn').addEventListener('click', function () {
+    var triggerNode = flowCanvas.nodes.find(function (n) { return n.kind === 'trigger'; });
+    if (triggerNode) flowOpenNodeModal(triggerNode);
+  });
+
+  function flowUpdateHeader() {
+    document.querySelector('#flow-canvas-name span').textContent = flowCanvas.flow.name;
+    var badge = document.getElementById('flow-draft-badge');
+    badge.textContent = flowCanvas.flow.is_active ? 'Publicado' : 'Rascunho';
+    badge.style.background = flowCanvas.flow.is_active ? '#E8F3EC' : '#F5F4EF';
+    badge.style.color = flowCanvas.flow.is_active ? '#1A7F4D' : '#82867F';
+
+    var triggerLabel = flowCanvas.flow.trigger_type === 'keyword'
+      ? 'Palavra-chave "' + ((flowCanvas.flow.trigger_config || {}).keyword || '') + '"'
+      : 'Primeira mensagem do lead';
+    document.getElementById('flow-trigger-summary-btn').textContent = 'Gatilho: ' + triggerLabel;
+  }
+
+  function flowUpdateDirtyUI() {
+    var saveBtn = document.getElementById('flow-save-btn');
+    saveBtn.textContent = flowCanvas.dirty ? 'Salvar •' : 'Salvar';
+  }
+
+  // Layout automático simples: posiciona o gatilho à esquerda e organiza os
+  // demais nós em "camadas" por distância (BFS) a partir dele.
+  function flowAutoOrganize() {
+    var trigger = flowCanvas.nodes.find(function (n) { return n.kind === 'trigger'; });
+    var depthOf = {};
+    var visited = {};
+    var queue = [];
+    if (trigger && trigger.next_step_id) queue.push([trigger.next_step_id, 0]);
+
+    while (queue.length) {
+      var pair = queue.shift();
+      var id = pair[0], depth = pair[1];
+      if (visited[id]) continue;
+      visited[id] = true;
+      depthOf[id] = depth;
+      var node = flowNodeById(id);
+      if (!node) continue;
+      if (node.next_step_id) queue.push([node.next_step_id, depth + 1]);
+      if (node.next_step_id_true) queue.push([node.next_step_id_true, depth + 1]);
+      if (node.next_step_id_false) queue.push([node.next_step_id_false, depth + 1]);
+    }
+    flowCanvas.nodes.forEach(function (n) { if (n.kind !== 'trigger' && depthOf[n.client_id] === undefined) depthOf[n.client_id] = 0; });
+
+    var columns = {};
+    flowCanvas.nodes.forEach(function (n) {
+      if (n.kind === 'trigger') return;
+      var d = depthOf[n.client_id] || 0;
+      (columns[d] = columns[d] || []).push(n);
+    });
+
+    if (trigger) { trigger.x = 40; trigger.y = 160; }
+    Object.keys(columns).forEach(function (d) {
+      var col = columns[d];
+      col.forEach(function (n, i) {
+        n.x = 40 + 280 + parseInt(d, 10) * 280;
+        n.y = 40 + i * 120;
       });
     });
 
-    document.getElementById('flow-add-step-btn').addEventListener('click', addFlowStep);
+    flowCanvas.dirty = true;
+    flowRenderAll();
+    flowUpdateDirtyUI();
   }
+  document.getElementById('flow-organize-btn').addEventListener('click', flowAutoOrganize);
 
-  async function saveCurrentFlow() {
-    var flow = state.currentFlow;
-    var updated = await api('/automation-flows/' + flow.id, {
-      method: 'PATCH',
-      body: JSON.stringify({
-        name: flow.name,
-        funnel_id: flow.funnel_id,
-        trigger_type: flow.trigger_type,
-        trigger_config: flow.trigger_config,
-        steps: flow.steps.map(function (s) { return { step_type: s.step_type, config: s.config }; }),
+  async function flowBuildSavePayload() {
+    var trigger = flowCanvas.nodes.find(function (n) { return n.kind === 'trigger'; });
+    var others = flowCanvas.nodes.filter(function (n) { return n.kind !== 'trigger'; });
+    // steps[0] precisa ser o nó ligado diretamente ao gatilho (convenção do backend)
+    var ordered = [];
+    var entryId = trigger ? trigger.next_step_id : null;
+    if (entryId) {
+      var entry = others.find(function (n) { return n.client_id === entryId; });
+      if (entry) { ordered.push(entry); others = others.filter(function (n) { return n !== entry; }); }
+    }
+    ordered = ordered.concat(others);
+
+    return {
+      name: flowCanvas.flow.name,
+      funnel_id: flowCanvas.flow.funnel_id,
+      trigger_type: flowCanvas.flow.trigger_type,
+      trigger_config: flowCanvas.flow.trigger_config,
+      trigger_position_x: trigger ? trigger.x : 0,
+      trigger_position_y: trigger ? trigger.y : 0,
+      steps: ordered.map(function (n) {
+        return {
+          client_id: n.client_id, step_type: n.step_type, config: n.config,
+          position_x: n.x, position_y: n.y,
+          next_step_id: n.next_step_id, next_step_id_true: n.next_step_id_true, next_step_id_false: n.next_step_id_false,
+        };
       }),
+    };
+  }
+
+  async function flowSave(opts) {
+    opts = opts || {};
+    if (opts.activate === true) flowCanvas.flow.is_active = true;
+    if (opts.activate === false) flowCanvas.flow.is_active = false;
+    var payload = await flowBuildSavePayload();
+    var updated = await api('/automation-flows/' + flowCanvas.flow.id, { method: 'PATCH', body: JSON.stringify(payload) });
+    if (opts.activate !== undefined) {
+      await api('/automation-flows/' + flowCanvas.flow.id + '/active', { method: 'PATCH', body: JSON.stringify({ is_active: opts.activate }) });
+      updated.is_active = opts.activate;
+    }
+    flowCanvas.dirty = false;
+    await flowLoadIntoCanvas(updated);
+  }
+
+  document.getElementById('flow-save-btn').addEventListener('click', async function () {
+    try { await flowSave(); } catch (err) { alert('Não foi possível salvar: ' + err.message); }
+  });
+  document.getElementById('flow-publish-btn').addEventListener('click', async function () {
+    try { await flowSave({ activate: true }); } catch (err) { alert('Não foi possível publicar: ' + err.message); }
+  });
+  document.getElementById('flow-deactivate-btn').addEventListener('click', async function () {
+    try { await flowSave({ activate: false }); } catch (err) { alert('Não foi possível desativar: ' + err.message); }
+  });
+  document.getElementById('flow-discard-btn').addEventListener('click', async function () {
+    if (!flowCanvas.dirty || confirm('Descartar as alterações não salvas desse fluxo?')) {
+      var fresh = await api('/automation-flows/' + flowCanvas.flow.id);
+      await flowLoadIntoCanvas(fresh);
+    }
+  });
+
+  document.getElementById('flow-canvas-name').addEventListener('click', function () {
+    var name = prompt('Nome do fluxo:', flowCanvas.flow.name);
+    if (!name) return;
+    flowCanvas.flow.name = name;
+    flowCanvas.dirty = true;
+    flowUpdateHeader();
+    flowUpdateDirtyUI();
+  });
+
+  document.getElementById('flow-canvas-delete').addEventListener('click', async function () {
+    if (!confirm('Excluir o fluxo "' + flowCanvas.flow.name + '"? Essa ação não pode ser desfeita.')) return;
+    await api('/automation-flows/' + flowCanvas.flow.id, { method: 'DELETE' });
+    window.__goto && window.__goto('automacao');
+    loadAutomationFlows();
+  });
+
+  async function flowLoadIntoCanvas(flow) {
+    flowCanvas.flow = flow;
+    flowCanvas.nodes = [{
+      client_id: 'trigger', kind: 'trigger', step_type: 'trigger', config: {},
+      x: flow.trigger_position_x || 60, y: flow.trigger_position_y || 160,
+      next_step_id: flow.steps.length ? 's' + flow.steps[0].id : null,
+    }];
+    flow.steps.forEach(function (s) {
+      flowCanvas.nodes.push({
+        client_id: 's' + s.id, kind: 'step', step_type: s.step_type, config: s.config || {},
+        x: s.position_x || 0, y: s.position_y || 0,
+        next_step_id: s.next_step_id ? 's' + s.next_step_id : null,
+        next_step_id_true: s.next_step_id_true ? 's' + s.next_step_id_true : null,
+        next_step_id_false: s.next_step_id_false ? 's' + s.next_step_id_false : null,
+      });
     });
-    state.currentFlow = updated;
-    renderFlowCanvas();
-  }
+    flowCanvas.dirty = false;
+    flowCanvas.scale = 1; flowCanvas.panX = 60; flowCanvas.panY = 60;
 
-  function editFlowTrigger() {
-    var flow = state.currentFlow;
-    var funnelOptions = state.funnels.map(function (f, i) { return (i + 1) + '. ' + f.name; }).join('\n');
-    var funnelChoice = prompt(
-      'Esse fluxo vale pra qual funil? (deixe vazio pra "Todos os funis")\n' + funnelOptions + '\n\nDigite o número:',
-      flow.funnel_id ? String(state.funnels.findIndex(function (f) { return f.id === flow.funnel_id; }) + 1) : ''
-    );
-    if (funnelChoice === null) return;
-    var chosenFunnel = funnelChoice ? state.funnels[parseInt(funnelChoice, 10) - 1] : null;
-
-    var triggerChoice = prompt(
-      'Gatilho:\n1. Primeira mensagem do lead\n2. Mensagem contém uma palavra-chave\n\nDigite o número:',
-      flow.trigger_type === 'keyword' ? '2' : '1'
-    );
-    if (triggerChoice === null) return;
-    var triggerType = triggerChoice === '2' ? 'keyword' : 'first_message';
-
-    var keyword = flow.trigger_config?.keyword || '';
-    if (triggerType === 'keyword') {
-      keyword = prompt('Qual palavra-chave dispara esse fluxo? (ex: orçamento)', keyword);
-      if (!keyword) return;
+    if (!state.flowUsers) {
+      try { state.flowUsers = await api('/users'); } catch (e) { state.flowUsers = []; }
     }
 
-    flow.funnel_id = chosenFunnel ? chosenFunnel.id : null;
-    flow.trigger_type = triggerType;
-    flow.trigger_config = triggerType === 'keyword' ? { keyword: keyword } : {};
-    saveCurrentFlow();
-  }
-
-  function editFlowStep(index) {
-    var flow = state.currentFlow;
-    var step = flow.steps[index];
-    var flowFunnel = state.funnels.find(function (f) { return f.id === flow.funnel_id; });
-
-    if (step.step_type === 'send_message' || step.step_type === 'ask_question') {
-      var text = prompt('Texto da mensagem:', step.config.text || '');
-      if (text === null) return;
-      step.config.text = text;
-    } else if (step.step_type === 'add_tag') {
-      var tag = prompt('Nome da tag a adicionar:', step.config.tag || '');
-      if (tag === null) return;
-      step.config.tag = tag;
-    } else if (step.step_type === 'move_stage') {
-      if (!flowFunnel || !flowFunnel.stages.length) {
-        alert('Defina um funil específico no Gatilho antes de escolher a etapa.');
-        return;
-      }
-      var stageOptions = flowFunnel.stages.map(function (s, i) { return (i + 1) + '. ' + s.name; }).join('\n');
-      var current = flowFunnel.stages.findIndex(function (s) { return s.id === step.config.funnel_stage_id; });
-      var choice = prompt('Mover pra qual etapa?\n' + stageOptions + '\n\nDigite o número:', current >= 0 ? String(current + 1) : '');
-      if (!choice) return;
-      var stage = flowFunnel.stages[parseInt(choice, 10) - 1];
-      if (!stage) return;
-      step.config.funnel_stage_id = stage.id;
-    }
-    saveCurrentFlow();
-  }
-
-  function addFlowStep() {
-    var flow = state.currentFlow;
-    var choice = prompt('Adicionar qual tipo de passo?\n1. Enviar mensagem\n2. Perguntar e aguardar resposta\n3. Adicionar tag\n4. Mover para outra etapa\n\nDigite o número:');
-    if (!choice) return;
-
-    if (choice === '1' || choice === '2') {
-      var text = prompt('Texto da mensagem:');
-      if (!text) return;
-      flow.steps.push({ step_type: choice === '1' ? 'send_message' : 'ask_question', config: { text: text } });
-    } else if (choice === '3') {
-      var tag = prompt('Nome da tag:');
-      if (!tag) return;
-      flow.steps.push({ step_type: 'add_tag', config: { tag: tag } });
-    } else if (choice === '4') {
-      var flowFunnel = state.funnels.find(function (f) { return f.id === flow.funnel_id; });
-      if (!flowFunnel || !flowFunnel.stages.length) {
-        alert('Defina um funil específico no Gatilho antes de adicionar esse passo.');
-        return;
-      }
-      var stageOptions = flowFunnel.stages.map(function (s, i) { return (i + 1) + '. ' + s.name; }).join('\n');
-      var stageChoice = prompt('Mover pra qual etapa?\n' + stageOptions + '\n\nDigite o número:');
-      var stage = stageChoice ? flowFunnel.stages[parseInt(stageChoice, 10) - 1] : null;
-      if (!stage) return;
-      flow.steps.push({ step_type: 'move_stage', config: { funnel_stage_id: stage.id } });
-    } else {
-      return;
-    }
-    saveCurrentFlow();
+    flowUpdateHeader();
+    flowUpdateDirtyUI();
+    flowRenderAll();
   }
 
   async function openFlowCanvas(flowId) {
@@ -1746,37 +2345,9 @@ button{font-family:'Inter',sans-serif;}
       alert('Não foi possível carregar esse fluxo.');
       return;
     }
-    state.currentFlow = flow;
-    renderFlowCanvas();
+    await flowLoadIntoCanvas(flow);
     window.__goto && window.__goto('automacao-flow');
   }
-
-  document.getElementById('flow-canvas-name').addEventListener('click', function () {
-    var flow = state.currentFlow;
-    if (!flow) return;
-    var name = prompt('Nome do fluxo:', flow.name);
-    if (!name) return;
-    flow.name = name;
-    saveCurrentFlow();
-  });
-
-  document.getElementById('flow-canvas-toggle').addEventListener('click', async function () {
-    var flow = state.currentFlow;
-    if (!flow) return;
-    var newState = !this.classList.contains('on');
-    await api('/automation-flows/' + flow.id + '/active', { method: 'PATCH', body: JSON.stringify({ is_active: newState }) });
-    flow.is_active = newState;
-    this.classList.toggle('on', newState);
-  });
-
-  document.getElementById('flow-canvas-delete').addEventListener('click', async function () {
-    var flow = state.currentFlow;
-    if (!flow) return;
-    if (!confirm('Excluir o fluxo "' + flow.name + '"? Essa ação não pode ser desfeita.')) return;
-    await api('/automation-flows/' + flow.id, { method: 'DELETE' });
-    window.__goto && window.__goto('automacao');
-    loadAutomationFlows();
-  });
 
   async function loadDashboard() {
     var cardsEl = document.getElementById('dashboard-cards');

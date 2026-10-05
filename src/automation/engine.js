@@ -8,6 +8,7 @@ import { pickNextRoundRobinUser } from '../services/distribution.js';
 import { scheduleJob } from '../jobs/scheduledJobs.js';
 import { broadcast } from '../realtime.js';
 import { logger } from '../logger.js';
+import { classifyForAutomation } from '../services/ai/AIService.js';
 
 async function isFirstMessageOfConversation(conversationId) {
   const result = await query(
@@ -81,9 +82,18 @@ async function runFlowFromStep({ flow, conversation, contact, step, run }) {
 }
 
 async function executeSteps({ flow, conversation, contact, run, cursor }) {
+  let iterations = 0;
   while (cursor.current) {
+    iterations += 1;
+    if (iterations > 50) {
+      // Protege contra ciclo infinito criado por um nó "Repetir" sem saída —
+      // para a run em vez de travar o worker pra sempre.
+      logger.error('automation_loop_guard_triggered', { flowId: flow.id, runId: run.id, stepId: cursor.current.id });
+      await updateRun(run.id, { currentStepId: cursor.current.id, status: 'stopped' });
+      return;
+    }
     const current = cursor.current;
-    let nextOverride; // usado pelo 'condition' pra escolher o ramo certo
+    let nextOverride; // usado pelo 'condition'/'classify_ai' pra escolher o ramo certo
 
     switch (current.step_type) {
       case 'send_message': {
@@ -154,6 +164,18 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
       }
       case 'condition': {
         const result = await evaluateCondition(current.config, { contact, conversation });
+        nextOverride = result ? current.next_step_id_true : current.next_step_id_false;
+        break;
+      }
+      case 'classify_ai': {
+        const transcriptResult = await query(
+          `SELECT direction, body FROM messages WHERE conversation_id = $1 AND kind = 'message' ORDER BY created_at DESC LIMIT 20`,
+          [conversation.id]
+        );
+        const transcript = transcriptResult.rows.reverse()
+          .map((m) => (m.direction === 'inbound' ? 'Cliente: ' : 'Atendente: ') + (m.body || '[mídia]'))
+          .join('\n');
+        const result = await classifyForAutomation(flow.tenant_id, { question: current.config?.question || '', transcript });
         nextOverride = result ? current.next_step_id_true : current.next_step_id_false;
         break;
       }

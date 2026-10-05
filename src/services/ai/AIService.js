@@ -152,6 +152,21 @@ export async function generateDailyRadar(tenantId, radarData) {
   return parsed;
 }
 
+// Classificação binária usada pelo nó "Classificar (IA)" do construtor de
+// automações — pergunta sim/não sobre o estado da conversa (ex: "o cliente
+// quer marcar um horário?"). Degrada pro mock (sempre "false") se a IA falhar.
+export async function classifyForAutomation(tenantId, { question, transcript }) {
+  const result = await complete({
+    tenantId,
+    feature: 'classify_automation',
+    system: loadPrompt('classificar'),
+    messages: [{ role: 'user', content: `Pergunta de classificação: ${question}\n\nHistórico da conversa:\n${transcript}` }],
+  });
+  if (!result) return false;
+  const parsed = parseJsonSafe(result.text);
+  return !!(parsed && parsed.result === true);
+}
+
 export async function getAiSettings(tenantId) {
   const settings = await getSettings(tenantId);
   // Nunca devolve a chave (nem criptografada) pro frontend — só se tem uma configurada.
