@@ -170,6 +170,12 @@ export async function renameFunnel(funnelId, name) {
   return result.rows[0];
 }
 
+export async function setDefaultFunnel(funnelId) {
+  await query('UPDATE funnels SET is_default = (id = $1)', [funnelId]);
+  const result = await query('SELECT * FROM funnels WHERE id = $1', [funnelId]);
+  return result.rows[0];
+}
+
 export async function deleteFunnel(funnelId) {
   const result = await query('SELECT is_default FROM funnels WHERE id = $1', [funnelId]);
   if (result.rows[0]?.is_default) {

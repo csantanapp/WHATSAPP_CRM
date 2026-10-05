@@ -81,6 +81,7 @@ import {
   moveStage,
   renameFunnel,
   deleteFunnel,
+  setDefaultFunnel,
   updateFunnelEntry,
   addDefaultTagToFunnel,
   removeDefaultTagFromFunnel,
@@ -186,6 +187,10 @@ apiRouter.patch('/funnels/:id', asyncHandler(async (req, res) => {
 apiRouter.delete('/funnels/:id', asyncHandler(async (req, res) => {
   await deleteFunnel(req.params.id);
   res.status(204).end();
+}));
+
+apiRouter.post('/funnels/:id/set-default', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
+  res.json(await setDefaultFunnel(req.params.id));
 }));
 
 apiRouter.post('/funnels/:id/stages', asyncHandler(async (req, res) => {

@@ -3456,6 +3456,7 @@ button{font-family:'Inter',sans-serif;}
           '<div style="display:flex;align-items:center;gap:14px;">' +
             '<button data-open-kanban="' + f.id + '" style="font-size:11.5px;font-weight:600;color:#D85A26;background:none;border:none;cursor:pointer;">Ver Kanban →</button>' +
             '<button data-add-stage="' + f.id + '" style="font-size:11.5px;font-weight:600;color:#D85A26;background:none;border:none;cursor:pointer;">+ Etapa</button>' +
+            (f.is_default ? '' : '<button data-set-default-funnel="' + f.id + '" style="font-size:11.5px;font-weight:600;color:#5B5F58;background:none;border:none;cursor:pointer;">Tornar padrão</button>') +
             (f.is_default ? '' : '<button data-delete-funnel="' + f.id + '" style="font-size:11.5px;font-weight:600;color:#B42318;background:none;border:none;cursor:pointer;">Excluir</button>') +
           '</div>' +
         '</div>' +
@@ -3466,6 +3467,20 @@ button{font-family:'Inter',sans-serif;}
         '</div>' +
         campaignHtml;
       listEl.appendChild(card);
+    });
+
+    listEl.querySelectorAll('[data-set-default-funnel]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        var funnelId = btn.getAttribute('data-set-default-funnel');
+        var funnel = funnels.find(function (f) { return String(f.id) === funnelId; });
+        if (!confirm('Tornar "' + (funnel ? funnel.name : '') + '" o funil padrão? Todo lead novo (sem palavra-chave de campanha) vai entrar nele a partir de agora.')) return;
+        try {
+          await api('/funnels/' + funnelId + '/set-default', { method: 'POST' });
+          loadFunnelsSection();
+        } catch (err) {
+          alert('Não foi possível definir como padrão: ' + err.message);
+        }
+      });
     });
 
     listEl.querySelectorAll('[data-delete-funnel]').forEach(function (btn) {
