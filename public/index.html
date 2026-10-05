@@ -1937,12 +1937,12 @@ button{font-family:'Inter',sans-serif;}
       id: 'fora-expediente',
       icon: '🌙',
       title: 'Fora do expediente / fim de semana',
-      description: 'Enquanto a empresa está fechada (fora do horário configurado), avisa o lead e cria um lembrete pra retomar no próximo expediente.',
+      description: 'Enquanto a empresa está fechada, avisa o lead, espera ~1400 min (quase 1 dia) e manda um segundo estímulo pra reengajar antes de criar o lembrete pro time.',
       trigger_type: 'first_message',
       trigger_config: {},
       steps: [
         {
-          client_id: 'cond', step_type: 'condition', x: 40, y: 160,
+          client_id: 'cond', step_type: 'condition', x: 40, y: 220,
           config: {
             check: 'business_hours',
             business_hours: { weekdays: [1, 2, 3, 4, 5], start: '09:00', end: '18:00', tz: 'America/Sao_Paulo' },
@@ -1950,18 +1950,28 @@ button{font-family:'Inter',sans-serif;}
           },
           next_step_id_true: 'open_end', next_step_id_false: 'msg',
         },
-        { client_id: 'open_end', step_type: 'end', x: 360, y: 40, config: { label: 'Dentro do horário — segue o atendimento normal' } },
+        { client_id: 'open_end', step_type: 'end', x: 360, y: 60, config: { label: 'Dentro do horário — segue o atendimento normal' } },
         {
-          client_id: 'msg', step_type: 'send_message', x: 360, y: 220,
+          client_id: 'msg', step_type: 'send_message', x: 360, y: 280,
           config: { text: 'Oi! No momento estamos fora do nosso horário de atendimento (seg a sex, 9h às 18h). Recebemos sua mensagem e vamos te responder assim que reabrirmos. 🙂' },
+          next_step_id: 'wait',
+        },
+        {
+          client_id: 'wait', step_type: 'wait', x: 620, y: 280,
+          config: { minutes: 1400 },
+          next_step_id: 'reengage',
+        },
+        {
+          client_id: 'reengage', step_type: 'send_message', x: 880, y: 280,
+          config: { text: 'Oi novamente! 👋 Vi que você mandou mensagem fora do nosso horário — ainda tem interesse? É só responder que já te atendemos. 😊' },
           next_step_id: 'task',
         },
         {
-          client_id: 'task', step_type: 'create_task', x: 620, y: 220,
-          config: { title: 'Retomar contato fora do expediente', description: 'Mensagem recebida fora do horário comercial — retomar no próximo expediente.', due_in_hours: 16 },
+          client_id: 'task', step_type: 'create_task', x: 1140, y: 280,
+          config: { title: 'Retomar contato fora do expediente', description: 'Mensagem recebida fora do horário comercial (já reengajado automaticamente) — retomar no próximo expediente.', due_in_hours: 16 },
           next_step_id: 'end',
         },
-        { client_id: 'end', step_type: 'end', x: 880, y: 220, config: { label: 'Fora do expediente' } },
+        { client_id: 'end', step_type: 'end', x: 1400, y: 280, config: { label: 'Fora do expediente' } },
       ],
     },
     {
