@@ -79,6 +79,7 @@ button{font-family:'Inter',sans-serif;}
     <div class="topbar-title">CRM WhatsApp <span>· Tractom</span></div>
     <nav class="quicknav">
       <button class="qn-btn" data-goto="inbox">Inbox</button>
+      <button class="qn-btn" data-goto="radar">Radar</button>
       <button class="qn-btn" data-goto="dashboard">Dashboard</button>
       <button class="qn-btn active" data-goto="kanban">Kanban</button>
       <button class="qn-btn" data-goto="contatos">Contatos</button>
@@ -103,7 +104,7 @@ button{font-family:'Inter',sans-serif;}
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
-              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button><button class="nav-icon clickable" data-goto="radar" aria-label="Radar"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"></path><path d="M4 6l.01.01"></path><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"></path><path d="M16.24 7.76A6 6 0 1 0 8.23 16.72"></path><circle cx="12" cy="12" r="2"></circle><path d="M13.41 10.59 16 8"></path></svg></button>
               <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg></button>
               <button class="nav-icon on clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#F0875C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -151,7 +152,7 @@ button{font-family:'Inter',sans-serif;}
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
-              <button class="nav-icon on clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#F0875C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
+              <button class="nav-icon on clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#F0875C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button><button class="nav-icon clickable" data-goto="radar" aria-label="Radar"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"></path><path d="M4 6l.01.01"></path><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"></path><path d="M16.24 7.76A6 6 0 1 0 8.23 16.72"></path><circle cx="12" cy="12" r="2"></circle><path d="M13.41 10.59 16 8"></path></svg></button>
               <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg></button>
               <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -296,11 +297,44 @@ button{font-family:'Inter',sans-serif;}
           </div>
         </section>
 
+        <section class="screen" id="screen-radar">
+          <div class="sidebar">
+            <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
+            <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button><button class="nav-icon on clickable" data-goto="radar" aria-label="Radar"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#F0875C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"></path><path d="M4 6l.01.01"></path><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"></path><path d="M16.24 7.76A6 6 0 1 0 8.23 16.72"></path><circle cx="12" cy="12" r="2"></circle><path d="M13.41 10.59 16 8"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
+              <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="automacao" aria-label="Automações"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="funis" aria-label="Funis"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54Z"></path></svg></button>
+            </div>
+            <div class="spacer"></div>
+            <button class="nav-icon clickable" data-goto="config" aria-label="Configurações"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.14.6.6 1.09 1.19 1.29.24.08.49.13.75.13H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1 1.55Z"></path></svg></button>
+          </div>
+
+          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;overflow-y:auto;">
+            <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:22px;color:#14181A;margin-bottom:4px;">Radar de risco</div>
+            <div style="font-size:13px;color:#82867F;margin-bottom:22px;max-width:720px;">Demandas abertas que esfriaram e precisam de você. Se já existe um retorno agendado, aparece como "em voo"; sem próximo passo, é risco de perder o cliente.</div>
+
+            <div id="radar-summary-box" style="background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;padding:18px 20px;margin-bottom:16px;">
+              <div id="radar-summary-title" style="font-family:'Inter',sans-serif;font-weight:700;font-size:14.5px;color:#14181A;margin-bottom:2px;">Carregando...</div>
+              <div style="font-size:12px;color:#82867F;margin-bottom:12px;">Ninguém marcou o que acontece a seguir. Cada uma é alguém esperando sem que nada esteja combinado.</div>
+              <div id="radar-summary-list" style="display:flex;flex-direction:column;"></div>
+            </div>
+
+            <div id="radar-tabs" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;"></div>
+
+            <div id="radar-list" style="display:flex;flex-direction:column;gap:0;background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;overflow:hidden;">
+              <div style="padding:20px;font-size:12.5px;color:#9A9D96;">Carregando...</div>
+            </div>
+          </div>
+        </section>
+
         <section class="screen" id="screen-dashboard">
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
-              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button><button class="nav-icon clickable" data-goto="radar" aria-label="Radar"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"></path><path d="M4 6l.01.01"></path><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"></path><path d="M16.24 7.76A6 6 0 1 0 8.23 16.72"></path><circle cx="12" cy="12" r="2"></circle><path d="M13.41 10.59 16 8"></path></svg></button>
               <button class="nav-icon on clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#F0875C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg></button>
               <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -357,7 +391,7 @@ button{font-family:'Inter',sans-serif;}
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
-              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button><button class="nav-icon clickable" data-goto="radar" aria-label="Radar"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"></path><path d="M4 6l.01.01"></path><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"></path><path d="M16.24 7.76A6 6 0 1 0 8.23 16.72"></path><circle cx="12" cy="12" r="2"></circle><path d="M13.41 10.59 16 8"></path></svg></button>
               <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg></button>
               <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon on clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#F0875C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -459,7 +493,7 @@ button{font-family:'Inter',sans-serif;}
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
-              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button><button class="nav-icon clickable" data-goto="radar" aria-label="Radar"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"></path><path d="M4 6l.01.01"></path><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"></path><path d="M16.24 7.76A6 6 0 1 0 8.23 16.72"></path><circle cx="12" cy="12" r="2"></circle><path d="M13.41 10.59 16 8"></path></svg></button>
               <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg></button>
               <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -532,7 +566,7 @@ button{font-family:'Inter',sans-serif;}
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
-              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button><button class="nav-icon clickable" data-goto="radar" aria-label="Radar"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"></path><path d="M4 6l.01.01"></path><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"></path><path d="M16.24 7.76A6 6 0 1 0 8.23 16.72"></path><circle cx="12" cy="12" r="2"></circle><path d="M13.41 10.59 16 8"></path></svg></button>
               <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg></button>
               <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -573,7 +607,7 @@ button{font-family:'Inter',sans-serif;}
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
-              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button><button class="nav-icon clickable" data-goto="radar" aria-label="Radar"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"></path><path d="M4 6l.01.01"></path><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"></path><path d="M16.24 7.76A6 6 0 1 0 8.23 16.72"></path><circle cx="12" cy="12" r="2"></circle><path d="M13.41 10.59 16 8"></path></svg></button>
               <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg></button>
               <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -605,7 +639,7 @@ button{font-family:'Inter',sans-serif;}
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
-              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button><button class="nav-icon clickable" data-goto="radar" aria-label="Radar"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"></path><path d="M4 6l.01.01"></path><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"></path><path d="M16.24 7.76A6 6 0 1 0 8.23 16.72"></path><circle cx="12" cy="12" r="2"></circle><path d="M13.41 10.59 16 8"></path></svg></button>
               <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg></button>
               <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -2757,6 +2791,145 @@ button{font-family:'Inter',sans-serif;}
     });
   })();
 
+  var radarState = { data: null, activeFilter: null };
+
+  var RADAR_CATEGORY_LABELS = { critico: 'Crítico', em_risco: 'Em risco', em_voo: 'Em voo' };
+  var RADAR_CATEGORY_COLORS = {
+    critico: { bg: '#FBEAE3', fg: '#C3302A' },
+    em_risco: { bg: '#FEF3E2', fg: '#B4690E' },
+    em_voo: { bg: '#EAF1FB', fg: '#2563A8' },
+  };
+
+  function radarFormatStalled(hours) {
+    if (hours >= 24) return Math.floor(hours / 24) + 'd';
+    return Math.round(hours) + 'h';
+  }
+
+  function radarBadge(category) {
+    var c = RADAR_CATEGORY_COLORS[category];
+    return '<span style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:' + c.bg + ';color:' + c.fg + ';flex-shrink:0;">' + RADAR_CATEGORY_LABELS[category] + '</span>';
+  }
+
+  async function loadRadar() {
+    var summaryTitleEl = document.getElementById('radar-summary-title');
+    var summaryListEl = document.getElementById('radar-summary-list');
+    var tabsEl = document.getElementById('radar-tabs');
+    var listEl = document.getElementById('radar-list');
+    var data;
+    try {
+      data = await api('/radar/risk');
+    } catch (err) {
+      listEl.innerHTML = '<div style="padding:20px;font-size:12.5px;color:#B42318;">Não foi possível carregar o radar.</div>';
+      return;
+    }
+    radarState.data = data;
+
+    var semProximoPasso = data.items.filter(function (i) { return i.category !== 'em_voo'; });
+    semProximoPasso.sort(function (a, b) { return b.hours_stalled - a.hours_stalled; });
+
+    summaryTitleEl.textContent = semProximoPasso.length + (semProximoPasso.length === 1 ? ' demanda aberta sem próximo passo' : ' demandas abertas sem próximo passo');
+    summaryListEl.innerHTML = '';
+    semProximoPasso.slice(0, 8).forEach(function (i) {
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:12.5px;border-bottom:1px solid #F0EFEA;';
+      row.innerHTML =
+        '<span style="color:#3A3D38;">' + escapeHtml(i.contact_name || 'Contato sem nome') + '</span>' +
+        '<span style="color:#9A9D96;font-size:11.5px;">aberta há ' + radarFormatStalled(i.hours_stalled) + '</span>';
+      summaryListEl.appendChild(row);
+    });
+    if (!semProximoPasso.length) {
+      summaryListEl.innerHTML = '<div style="font-size:12.5px;color:#9A9D96;padding:6px 0;">Nenhuma demanda sem próximo passo. 🎉</div>';
+    }
+
+    var tabDefs = [
+      { key: 'critico', count: data.counts.critico },
+      { key: 'em_risco', count: data.counts.em_risco },
+      { key: 'em_voo', count: data.counts.em_voo },
+    ];
+    tabsEl.innerHTML = '';
+    tabDefs.forEach(function (t) {
+      var c = RADAR_CATEGORY_COLORS[t.key];
+      var active = radarState.activeFilter === t.key;
+      var btn = document.createElement('button');
+      btn.style.cssText = 'appearance:none;border:none;border-radius:20px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;' +
+        (active ? 'background:' + c.fg + ';color:#FFFFFF;' : 'background:' + c.bg + ';color:' + c.fg + ';');
+      btn.textContent = t.count + ' ' + RADAR_CATEGORY_LABELS[t.key].toLowerCase();
+      btn.addEventListener('click', function () {
+        radarState.activeFilter = active ? null : t.key;
+        renderRadarList();
+      });
+      tabsEl.appendChild(btn);
+    });
+
+    renderRadarList();
+  }
+
+  function renderRadarList() {
+    var listEl = document.getElementById('radar-list');
+    var data = radarState.data;
+    if (!data) return;
+
+    var items = data.items.slice();
+    if (radarState.activeFilter) {
+      items = items.filter(function (i) { return i.category === radarState.activeFilter; });
+    }
+
+    listEl.innerHTML = '';
+    if (!items.length) {
+      listEl.innerHTML = '<div style="padding:20px;font-size:12.5px;color:#9A9D96;">Nenhuma demanda nessa categoria.</div>';
+      return;
+    }
+
+    items.forEach(function (i) {
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid #F0EFEA;';
+
+      var donoText = i.assigned_user_name ? ('Com ' + escapeHtml(i.assigned_user_name)) : 'Sem dono';
+      var warningHtml = i.category !== 'em_voo'
+        ? '<div style="font-size:11.5px;color:#B4690E;margin-top:3px;">⚠ Sem próximo passo agendado</div>'
+        : '<div style="font-size:11.5px;color:#2563A8;margin-top:3px;">✓ Próximo passo agendado</div>';
+
+      row.innerHTML =
+        radarBadge(i.category) +
+        '<div style="flex-grow:1;min-width:0;">' +
+          '<div style="font-weight:700;font-size:13.5px;color:#14181A;">' + escapeHtml(i.contact_name || 'Contato sem nome') + '</div>' +
+          '<div style="font-size:12px;color:#82867F;margin-top:2px;">' + escapeHtml(i.phone_display || '') + ' · parado há ' + radarFormatStalled(i.hours_stalled) + ' · ' + donoText + '</div>' +
+          warningHtml +
+        '</div>';
+
+      if (!i.assigned_user_id) {
+        var assumirBtn = document.createElement('button');
+        assumirBtn.textContent = 'Assumir';
+        assumirBtn.style.cssText = 'background:#FFFFFF;border:1px solid #E4E1D8;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#3A3D38;cursor:pointer;flex-shrink:0;';
+        assumirBtn.addEventListener('click', async function (e) {
+          e.stopPropagation();
+          await api('/conversations/' + i.id + '/assign', { method: 'PATCH', body: JSON.stringify({}) });
+          loadRadar();
+        });
+        row.appendChild(assumirBtn);
+      }
+
+      var arrowBtn = document.createElement('button');
+      arrowBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#82867F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>';
+      arrowBtn.style.cssText = 'background:none;border:none;cursor:pointer;padding:6px;flex-shrink:0;';
+      arrowBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        openConversation(i.id);
+        window.__goto && window.__goto('inbox');
+      });
+      row.appendChild(arrowBtn);
+
+      row.style.cursor = 'pointer';
+      row.addEventListener('click', function () {
+        openConversation(i.id);
+        window.__goto && window.__goto('inbox');
+      });
+
+      listEl.appendChild(row);
+    });
+  }
+
+
   window.__onGoto = function (screenId) {
     if (screenId === 'dashboard') loadDashboard();
     if (screenId === 'contatos') loadContacts(document.getElementById('contatos-search').value.trim());
@@ -2764,6 +2937,7 @@ button{font-family:'Inter',sans-serif;}
     if (screenId === 'funis') { loadFunnelsSection(); loadTags(); }
     if (screenId === 'automacao') loadAutomationFlows();
     if (screenId === 'inbox') loadInbox();
+    if (screenId === 'radar') loadRadar();
   };
 
   window.addEventListener('DOMContentLoaded', function () {

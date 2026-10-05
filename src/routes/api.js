@@ -52,6 +52,7 @@ import { runTriggersForTagAdded, runTriggersForStageEntered } from '../automatio
 import { getDistributionRule, upsertDistributionRule } from '../services/distribution.js';
 import { summarizeConversation, getLatestInsight, getAiSettings, updateAiSettings, AI_PROVIDERS } from '../services/ai/AIService.js';
 import { runRadarNow } from '../jobs/dailyRadarJob.js';
+import { getRiskRadarConversations } from '../repositories/radar.js';
 import multer from 'multer';
 import { readFile } from 'node:fs/promises';
 import { mediaFilePath, saveMediaFile } from '../services/mediaStorage.js';
@@ -391,6 +392,10 @@ apiRouter.get('/ai/radar/latest', asyncHandler(async (req, res) => {
 apiRouter.post('/ai/radar/run', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
   const result = await runRadarNow(req.tenantId);
   res.status(201).json(result);
+}));
+
+apiRouter.get('/radar/risk', asyncHandler(async (req, res) => {
+  res.json(await getRiskRadarConversations(req.tenantId, req.user));
 }));
 
 apiRouter.patch('/conversations/:id/priority', asyncHandler(async (req, res) => {
