@@ -3,9 +3,8 @@
 
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5';
 
-export async function completeAnthropic({ system, messages }) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error('ANTHROPIC_API_KEY não configurada');
+export async function completeAnthropic({ system, messages, apiKey }) {
+  if (!apiKey) throw new Error('Chave da Anthropic não configurada');
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',

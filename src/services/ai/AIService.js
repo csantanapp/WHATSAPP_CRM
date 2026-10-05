@@ -5,6 +5,7 @@ import { query } from '../../db/pool.js';
 import { completeMock } from './providers/mock.js';
 import { completeAnthropic } from './providers/anthropic.js';
 import { logger } from '../../logger.js';
+import { encryptSecret, decryptSecret } from '../crypto.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -43,11 +44,22 @@ async function complete({ tenantId, feature, system, messages }) {
     return null;
   }
 
-  const provider = settings.provider === 'anthropic' && process.env.ANTHROPIC_API_KEY ? 'anthropic' : 'mock';
+  var apiKey = null;
+  if (settings.provider === 'anthropic') {
+    if (settings.api_key_encrypted) {
+      try {
+        apiKey = decryptSecret(settings.api_key_encrypted);
+      } catch (err) {
+        logger.error('ai_key_decrypt_failed', { tenantId, message: err.message });
+      }
+    }
+    if (!apiKey) apiKey = process.env.ANTHROPIC_API_KEY || null; // fallback pro .env, se alguém preferir configurar lá
+  }
+  const provider = settings.provider === 'anthropic' && apiKey ? 'anthropic' : 'mock';
 
   try {
     const fn = provider === 'anthropic' ? completeAnthropic : completeMock;
-    const result = await fn({ system, messages, feature });
+    const result = await fn({ system, messages, feature, apiKey });
     await logUsage(tenantId, feature, provider, result.tokensIn, result.tokensOut);
     return { ...result, provider };
   } catch (err) {
@@ -126,21 +138,27 @@ export async function generateDailyRadar(tenantId, radarData) {
 }
 
 export async function getAiSettings(tenantId) {
-  return getSettings(tenantId);
+  const settings = await getSettings(tenantId);
+  // Nunca devolve a chave (nem criptografada) pro frontend — só se tem uma configurada.
+  const { api_key_encrypted, ...rest } = settings;
+  return { ...rest, has_api_key: !!api_key_encrypted };
 }
 
-export async function updateAiSettings(tenantId, { provider, summarizeEnabled, radarEnabled, monthlyLimit }) {
+export async function updateAiSettings(tenantId, { provider, summarizeEnabled, radarEnabled, monthlyLimit, apiKey }) {
+  const apiKeyEncrypted = apiKey ? encryptSecret(apiKey) : null;
   const result = await query(
-    `INSERT INTO ai_settings (tenant_id, provider, summarize_enabled, radar_enabled, monthly_limit)
-     VALUES ($1, COALESCE($2, 'mock'), COALESCE($3, true), COALESCE($4, true), COALESCE($5, 1000))
+    `INSERT INTO ai_settings (tenant_id, provider, summarize_enabled, radar_enabled, monthly_limit, api_key_encrypted)
+     VALUES ($1, COALESCE($2, 'mock'), COALESCE($3, true), COALESCE($4, true), COALESCE($5, 1000), $6)
      ON CONFLICT (tenant_id) DO UPDATE SET
        provider = COALESCE($2, ai_settings.provider),
        summarize_enabled = COALESCE($3, ai_settings.summarize_enabled),
        radar_enabled = COALESCE($4, ai_settings.radar_enabled),
        monthly_limit = COALESCE($5, ai_settings.monthly_limit),
+       api_key_encrypted = COALESCE($6, ai_settings.api_key_encrypted),
        updated_at = now()
      RETURNING *`,
-    [tenantId, provider ?? null, summarizeEnabled ?? null, radarEnabled ?? null, monthlyLimit ?? null]
+    [tenantId, provider ?? null, summarizeEnabled ?? null, radarEnabled ?? null, monthlyLimit ?? null, apiKeyEncrypted]
   );
-  return result.rows[0];
+  const { api_key_encrypted, ...rest } = result.rows[0];
+  return { ...rest, has_api_key: !!api_key_encrypted };
 }

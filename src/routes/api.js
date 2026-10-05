@@ -357,10 +357,14 @@ apiRouter.get('/ai/settings', requireRole('admin'), asyncHandler(async (req, res
 }));
 
 apiRouter.put('/ai/settings', requireRole('admin'), asyncHandler(async (req, res) => {
-  const { provider, summarize_enabled, radar_enabled, monthly_limit } = req.body;
-  res.json(await updateAiSettings(req.tenantId, {
-    provider, summarizeEnabled: summarize_enabled, radarEnabled: radar_enabled, monthlyLimit: monthly_limit,
-  }));
+  const { provider, summarize_enabled, radar_enabled, monthly_limit, api_key } = req.body;
+  try {
+    res.json(await updateAiSettings(req.tenantId, {
+      provider, summarizeEnabled: summarize_enabled, radarEnabled: radar_enabled, monthlyLimit: monthly_limit, apiKey: api_key,
+    }));
+  } catch (err) {
+    res.status(500).json({ error: { code: 'save_failed', message: err.message } });
+  }
 }));
 
 apiRouter.get('/ai/radar/latest', asyncHandler(async (req, res) => {
