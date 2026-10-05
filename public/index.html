@@ -350,6 +350,13 @@ button{font-family:'Inter',sans-serif;}
                 </div>
                 <div>
                   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;">Resumo (IA)</div>
+                    <button id="resumo-gerar-btn" style="background:none;border:none;color:#D85A26;font-size:11px;font-weight:700;cursor:pointer;padding:0;">Gerar resumo</button>
+                  </div>
+                  <div id="resumo-box" style="background:#F5F4EF;border:1px solid #E4E1D8;border-radius:10px;padding:12px;font-size:12px;color:#82867F;display:none;"></div>
+                </div>
+                <div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
                     <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;">Oportunidade</div>
                     <button id="oportunidade-nova-btn" style="background:none;border:none;color:#D85A26;font-size:11px;font-weight:700;cursor:pointer;padding:0;">+ nova</button>
                   </div>
@@ -495,6 +502,15 @@ button{font-family:'Inter',sans-serif;}
 
             <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Conexão com o WhatsApp</div>
             <div id="config-whatsapp-status" style="background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#9A9D96;">Verificando...</div>
+
+            <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Assistente de IA</div>
+            <div id="config-ia-box" style="background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#9A9D96;">Carregando...</div>
+
+            <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Radar diário</div>
+            <div id="config-radar-box" style="background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#9A9D96;">Carregando...</div>
+
+            <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Distribuição automática</div>
+            <div id="config-distribuicao-box" style="background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#9A9D96;">Carregando...</div>
           </div>
         </section>
 
@@ -880,6 +896,7 @@ button{font-family:'Inter',sans-serif;}
     janelaEl.style.color = conv.window_open ? '#15803D' : '#B91C1C';
     renderPriorityButton();
     loadOpportunityBox(conv.contact_id);
+    loadResumoBox();
 
     var notesEl = document.getElementById('painel-notas');
     if (document.activeElement !== notesEl) notesEl.value = conv.contact_notes || '';
@@ -1165,6 +1182,54 @@ button{font-family:'Inter',sans-serif;}
     });
   }
 
+  var TEMPERATURA_COR = { quente: '#DC2626', morno: '#D97706', frio: '#2563EB' };
+
+  async function loadResumoBox() {
+    var box = document.getElementById('resumo-box');
+    try {
+      var insight = await api('/conversations/' + state.currentConversationId + '/insight');
+    } catch (err) {
+      box.style.display = 'none';
+      return;
+    }
+    renderResumoBox(insight);
+  }
+
+  function renderResumoBox(insight) {
+    var box = document.getElementById('resumo-box');
+    if (!insight) {
+      box.style.display = 'none';
+      return;
+    }
+    box.style.display = 'block';
+    var temp = insight.temperature || '--';
+    var cor = TEMPERATURA_COR[temp] || '#82867F';
+    box.innerHTML =
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">' +
+        '<span style="width:7px;height:7px;border-radius:50%;background:' + cor + ';display:inline-block;"></span>' +
+        '<span style="font-weight:700;color:' + cor + ';text-transform:capitalize;">' + escapeHtml(temp) + '</span>' +
+        '<span style="margin-left:auto;font-size:10px;color:#B6B9B2;">Gerado por IA</span>' +
+      '</div>' +
+      '<div style="color:#3A3D38;margin-bottom:6px;">' + escapeHtml(insight.summary || '') + '</div>' +
+      (insight.next_step && insight.next_step !== '—' ? '<div style="font-weight:600;color:#14181A;">Próximo passo: <span style="font-weight:400;">' + escapeHtml(insight.next_step) + '</span></div>' : '');
+  }
+
+  document.getElementById('resumo-gerar-btn').addEventListener('click', async function () {
+    if (!state.currentConversationId) return;
+    var btn = this;
+    btn.textContent = 'Gerando...';
+    btn.disabled = true;
+    try {
+      var insight = await api('/conversations/' + state.currentConversationId + '/summarize', { method: 'POST' });
+      renderResumoBox(insight);
+    } catch (err) {
+      alert('Não foi possível gerar o resumo: ' + err.message);
+    } finally {
+      btn.textContent = 'Gerar resumo';
+      btn.disabled = false;
+    }
+  });
+
   document.getElementById('oportunidade-nova-btn').addEventListener('click', async function () {
     var conv = state.currentConversationDetail;
     if (!conv) return;
@@ -1178,6 +1243,7 @@ button{font-family:'Inter',sans-serif;}
         body: JSON.stringify({ contact_id: conv.contact_id, conversation_id: conv.id, title: title, value: value }),
       });
       loadOpportunityBox(conv.contact_id);
+    loadResumoBox();
     } catch (err) {
       alert('Não foi possível criar: ' + err.message);
     }
@@ -1906,6 +1972,100 @@ button{font-family:'Inter',sans-serif;}
     } catch (err) {
       statusEl.textContent = 'Não foi possível verificar.';
     }
+
+    loadIaSection();
+    loadRadarSection();
+    loadDistribuicaoSection();
+  }
+
+  async function loadIaSection() {
+    var box = document.getElementById('config-ia-box');
+    try {
+      var settings = await api('/ai/settings');
+    } catch (err) {
+      box.innerHTML = '<span style="color:#9A9D96;">Só administradores podem ver essa configuração.</span>';
+      return;
+    }
+    box.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">' +
+        '<span style="font-weight:700;color:#14181A;">Provedor:</span>' +
+        '<select id="ia-provider-select" style="border:1px solid #E4E1D8;border-radius:8px;padding:6px 10px;font-size:12.5px;">' +
+          '<option value="mock"' + (settings.provider === 'mock' ? ' selected' : '') + '>Mock (sem custo, teste)</option>' +
+          '<option value="anthropic"' + (settings.provider === 'anthropic' ? ' selected' : '') + '>Anthropic (real)</option>' +
+        '</select>' +
+      '</div>' +
+      '<div style="color:#5B5F58;">Limite mensal de chamadas: <b id="ia-limit-display">' + settings.monthly_limit + '</b> ' +
+        '<input id="ia-limit-input" type="number" value="' + settings.monthly_limit + '" style="width:80px;border:1px solid #E4E1D8;border-radius:6px;padding:4px 8px;margin-left:8px;"/> ' +
+        '<button id="ia-settings-save" style="font-size:12px;font-weight:600;color:#FFFFFF;background:#EB6D37;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;margin-left:6px;">Salvar</button>' +
+      '</div>' +
+      (settings.provider === 'anthropic' ? '<div style="margin-top:8px;color:#9A9D96;font-size:11.5px;">Usa ANTHROPIC_API_KEY do servidor — se não estiver configurada, cai pro mock automaticamente.</div>' : '');
+
+    document.getElementById('ia-settings-save').addEventListener('click', async function () {
+      var provider = document.getElementById('ia-provider-select').value;
+      var limit = parseInt(document.getElementById('ia-limit-input').value, 10);
+      await api('/ai/settings', { method: 'PUT', body: JSON.stringify({ provider: provider, monthly_limit: limit }) });
+      loadIaSection();
+    });
+  }
+
+  async function loadRadarSection() {
+    var box = document.getElementById('config-radar-box');
+    try {
+      var radar = await api('/ai/radar/latest');
+    } catch (err) {
+      box.innerHTML = '<span style="color:#9A9D96;">Não disponível.</span>';
+      return;
+    }
+    var priorities = (radar && radar.priorities) || [];
+    box.innerHTML =
+      (priorities.length
+        ? '<ul style="margin:0;padding-left:18px;color:#3A3D38;">' + priorities.map(function (p) { return '<li style="margin-bottom:4px;">' + escapeHtml(p) + '</li>'; }).join('') + '</ul>'
+        : '<span style="color:#9A9D96;">Nenhum radar gerado ainda.</span>') +
+      '<div style="margin-top:10px;"><button id="radar-rodar-btn" style="font-size:12px;font-weight:600;color:#D85A26;background:none;border:none;cursor:pointer;padding:0;">Rodar agora</button></div>';
+
+    document.getElementById('radar-rodar-btn').addEventListener('click', async function () {
+      this.textContent = 'Rodando...';
+      try {
+        await api('/ai/radar/run', { method: 'POST' });
+        loadRadarSection();
+      } catch (err) {
+        alert('Não foi possível rodar o radar: ' + err.message);
+      }
+    });
+  }
+
+  async function loadDistribuicaoSection() {
+    var box = document.getElementById('config-distribuicao-box');
+    try {
+      var rule = await api('/distribution-rule');
+      var users = await api('/users');
+    } catch (err) {
+      box.innerHTML = '<span style="color:#9A9D96;">Só administradores podem ver essa configuração.</span>';
+      return;
+    }
+    var participantIds = (rule.participant_user_ids || []).map(String);
+    box.innerHTML =
+      '<label style="display:flex;align-items:center;gap:6px;margin-bottom:10px;cursor:pointer;">' +
+        '<input type="checkbox" id="dist-ativo" ' + (rule.is_active ? 'checked' : '') + '/> Distribuição automática (round-robin) ativa' +
+      '</label>' +
+      '<div style="color:#5B5F58;margin-bottom:8px;">Participantes:</div>' +
+      '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">' +
+      users.filter(function (u) { return u.role !== 'admin' || participantIds.indexOf(String(u.id)) !== -1; }).map(function (u) {
+        return '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" class="dist-user" value="' + u.id + '" ' + (participantIds.indexOf(String(u.id)) !== -1 ? 'checked' : '') + '/> ' + escapeHtml(u.name) + '</label>';
+      }).join('') +
+      '</div>' +
+      '<button id="dist-save-btn" style="font-size:12px;font-weight:600;color:#FFFFFF;background:#EB6D37;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;">Salvar</button>';
+
+    document.getElementById('dist-save-btn').addEventListener('click', async function () {
+      var ids = Array.from(document.querySelectorAll('.dist-user:checked')).map(function (el) { return parseInt(el.value, 10); });
+      var active = document.getElementById('dist-ativo').checked;
+      try {
+        await api('/distribution-rule', { method: 'PUT', body: JSON.stringify({ mode: 'round_robin', participant_user_ids: ids, is_active: active }) });
+        loadDistribuicaoSection();
+      } catch (err) {
+        alert('Não foi possível salvar: ' + err.message);
+      }
+    });
   }
 
   async function loadFunnelsSection() {
