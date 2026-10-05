@@ -62,6 +62,7 @@ import { mediaFilePath, saveMediaFile } from '../services/mediaStorage.js';
 import { uploadMedia, sendMediaMessage } from '../whatsapp/client.js';
 import { requireRole } from '../middleware/auth.js';
 import { sendTextMessage, checkConnectionStatus, listMessageTemplates, sendTemplateMessage } from '../whatsapp/client.js';
+import { sendInstagramMessage, checkInstagramConnectionStatus } from '../instagram/client.js';
 import { broadcast } from '../realtime.js';
 import {
   listFlowsWithSteps,
@@ -228,6 +229,10 @@ apiRouter.get('/settings/whatsapp-status', asyncHandler(async (_req, res) => {
   res.json({ ...status, manualPhoneNumber: manualNumber });
 }));
 
+apiRouter.get('/settings/instagram-status', asyncHandler(async (_req, res) => {
+  res.json(await checkInstagramConnectionStatus());
+}));
+
 // Permite cadastrar o número público do WhatsApp manualmente (só pra gerar os
 // links wa.me das campanhas), sem precisar da API oficial da Meta já validada.
 apiRouter.put('/settings/whatsapp-number', asyncHandler(async (req, res) => {
@@ -288,12 +293,13 @@ apiRouter.post('/conversations/:id/messages', asyncHandler(async (req, res) => {
   const { text } = req.body;
 
   const convResult = await query(
-    `SELECT c.*, ct.wa_id FROM conversations c
+    `SELECT c.*, ct.wa_id, ct.ig_user_id, ct.channel AS contact_channel FROM conversations c
      JOIN contacts ct ON ct.id = c.contact_id WHERE c.id = $1`,
     [conversationId]
   );
   const conversation = convResult.rows[0];
   if (!conversation) return res.status(404).json({ error: 'Conversa não encontrada' });
+  const channel = conversation.contact_channel || 'whatsapp';
 
   // Janela de 24h: mensagem livre só é permitida se o contato escreveu nas
   // últimas 24h. Validado SEMPRE no backend — o frontend pode mostrar o aviso
@@ -301,15 +307,24 @@ apiRouter.post('/conversations/:id/messages', asyncHandler(async (req, res) => {
   const windowOpen = await isWindowOpen(conversationId);
   if (!windowOpen) {
     return res.status(422).json({
-      error: { code: 'WINDOW_CLOSED', message: 'A janela de 24h desse contato está fechada — envie um template aprovado pela Meta.' },
+      error: channel === 'instagram'
+        ? { code: 'WINDOW_CLOSED', message: 'A janela de 24h desse contato no Instagram está fechada — ele precisa escrever de novo antes que você possa responder.' }
+        : { code: 'WINDOW_CLOSED', message: 'A janela de 24h desse contato está fechada — envie um template aprovado pela Meta.' },
     });
   }
 
   try {
-    const sent = await sendTextMessage(conversation.wa_id, text);
+    var sent, waMessageId;
+    if (channel === 'instagram') {
+      sent = await sendInstagramMessage(conversation.ig_user_id, text);
+      waMessageId = sent?.message_id;
+    } else {
+      sent = await sendTextMessage(conversation.wa_id, text);
+      waMessageId = sent?.messages?.[0]?.id;
+    }
     const saved = await insertMessage({
       conversationId,
-      waMessageId: sent?.messages?.[0]?.id,
+      waMessageId,
       direction: 'outbound',
       senderType: 'agent',
       body: text,

@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { webhookRouter } from './whatsapp/webhook.js';
+import { instagramWebhookRouter } from './instagram/webhook.js';
 import { apiRouter } from './routes/api.js';
 import { healthRouter } from './routes/health.js';
 import { authRouter } from './routes/auth.js';
@@ -40,6 +41,7 @@ export function createApp() {
   );
 
   app.use('/webhook/whatsapp', webhookRateLimit, webhookRouter);
+  app.use('/webhook/instagram', webhookRateLimit, instagramWebhookRouter);
 
   // Sessão só é necessária a partir daqui (login e tudo que exige usuário).
   app.use(createSessionMiddleware());

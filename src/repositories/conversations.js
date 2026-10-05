@@ -181,6 +181,7 @@ export async function getConversationDetail(conversationId) {
   const result = await query(
     `SELECT c.*, ct.name AS contact_name, ct.email AS contact_email, ct.phone_display, ct.avatar_initials,
             ct.tags AS contact_tags, ct.source AS contact_source, ct.notes AS contact_notes, ct.wa_id,
+            ct.channel AS contact_channel, ct.ig_user_id,
             f.id AS funnel_id_full, f.name AS funnel_name, fs.name AS stage_name,
             u.name AS assigned_user_name,
             (c.last_inbound_at IS NOT NULL AND c.last_inbound_at > now() - interval '${WINDOW_HOURS} hours') AS window_open
@@ -218,7 +219,7 @@ export async function listConversationsByFunnel(funnelId, viewer) {
   }
 
   const result = await query(
-    `SELECT c.*, ct.name AS contact_name, ct.phone_display, ct.avatar_initials,
+    `SELECT c.*, ct.name AS contact_name, ct.phone_display, ct.avatar_initials, ct.channel AS contact_channel,
             u.name AS assigned_user_name
      FROM conversations c
      JOIN contacts ct ON ct.id = c.contact_id
@@ -270,7 +271,7 @@ export async function listInboxConversations(tenantId, viewer, filters = {}) {
   const { where, params } = buildInboxConditions(tenantId, viewer, filters);
   const result = await query(
     `SELECT c.id, c.status, c.is_priority, c.unread_count, c.assigned_user_id, c.last_message_at,
-            ct.name AS contact_name, ct.phone_display, ct.avatar_initials, ct.tags,
+            ct.name AS contact_name, ct.phone_display, ct.avatar_initials, ct.tags, ct.channel AS contact_channel,
             u.name AS assigned_user_name,
             (SELECT m.body FROM messages m WHERE m.conversation_id = c.id AND m.kind = 'message' ORDER BY m.created_at DESC LIMIT 1) AS last_message_body,
             (SELECT m.media_type FROM messages m WHERE m.conversation_id = c.id AND m.kind = 'message' ORDER BY m.created_at DESC LIMIT 1) AS last_message_media_type

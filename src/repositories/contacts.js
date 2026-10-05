@@ -113,3 +113,17 @@ export async function addTagToContact(contactId, tag) {
   }
   return result.rows[0] || (await getContactById(await getDefaultTenantId(), contactId));
 }
+
+export async function findOrCreateContactByIgUserId(igUserId, { name } = {}) {
+  const existing = await query('SELECT * FROM contacts WHERE ig_user_id = $1', [igUserId]);
+  if (existing.rows[0]) return existing.rows[0];
+
+  const tenantId = await getDefaultTenantId();
+  const display = name || ('Instagram ' + igUserId.slice(-6));
+  const inserted = await query(
+    `INSERT INTO contacts (tenant_id, ig_user_id, channel, name, phone_display, avatar_initials)
+     VALUES ($1, $2, 'instagram', $3, $4, $5) RETURNING *`,
+    [tenantId, igUserId, name || null, display, initialsOf(name, igUserId)]
+  );
+  return inserted.rows[0];
+}
