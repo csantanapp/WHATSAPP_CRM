@@ -226,7 +226,38 @@ async function evaluateCondition(config, { contact, conversation }) {
   if (check === 'stage_equals') {
     return conversation.funnel_stage_id === config.funnel_stage_id;
   }
+  if (check === 'business_hours') {
+    return isWithinBusinessHours(config.business_hours || {});
+  }
   return false;
+}
+
+// Usado pelo nó "Condição" com critério "Horário comercial" — mesma lógica
+// de fuso/dia da semana usada pelos Agentes de IA (src/automation/aiAgents.js).
+function isWithinBusinessHours(config) {
+  try {
+    const tz = config.tz || 'America/Sao_Paulo';
+    const now = new Date();
+    const weekdayStr = new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short' }).format(now);
+    const weekdayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    const weekday = weekdayMap[weekdayStr];
+    const weekdays = config.weekdays && config.weekdays.length ? config.weekdays : [1, 2, 3, 4, 5];
+    if (!weekdays.includes(weekday)) return false;
+
+    const parts = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(now);
+    const hh = parts.find((p) => p.type === 'hour').value;
+    const mm = parts.find((p) => p.type === 'minute').value;
+    const nowMinutes = parseInt(hh, 10) * 60 + parseInt(mm, 10);
+
+    const [startH, startM] = (config.start || '09:00').split(':').map(Number);
+    const [endH, endM] = (config.end || '18:00').split(':').map(Number);
+    const startMinutes = startH * 60 + startM;
+    const endMinutes = endH * 60 + endM;
+
+    return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
+  } catch {
+    return true;
+  }
 }
 
 export async function runTriggersForInboundMessage({ conversation, contact, message }) {
