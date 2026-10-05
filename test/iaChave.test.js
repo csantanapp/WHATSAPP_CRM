@@ -74,3 +74,11 @@ test('salvar configurações sem api_key não apaga a chave já salva', async ()
   const row = await query('SELECT api_key_encrypted FROM ai_settings WHERE tenant_id = $1', [tenantId]);
   assert.equal(decryptSecret(row.rows[0].api_key_encrypted), 'sk-ant-chave-persistente');
 });
+
+test('GET /ai/providers lista os 4 provedores reais disponiveis (max 5 com mock)', async () => {
+  const res = await agent.get('/api/ai/providers');
+  assert.equal(res.status, 200);
+  assert.equal(res.body.length, 4);
+  const ids = res.body.map((p) => p.id);
+  assert.deepEqual(ids.sort(), ['anthropic', 'google', 'mistral', 'openai']);
+});

@@ -4,10 +4,20 @@ import path from 'node:path';
 import { query } from '../../db/pool.js';
 import { completeMock } from './providers/mock.js';
 import { completeAnthropic } from './providers/anthropic.js';
+import { completeOpenAI } from './providers/openai.js';
+import { completeGoogle } from './providers/google.js';
+import { completeMistral } from './providers/mistral.js';
 import { logger } from '../../logger.js';
 import { encryptSecret, decryptSecret } from '../crypto.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export const AI_PROVIDERS = {
+  anthropic: { label: 'Anthropic (Claude)', fn: completeAnthropic, envFallback: 'ANTHROPIC_API_KEY' },
+  openai: { label: 'OpenAI (GPT)', fn: completeOpenAI, envFallback: 'OPENAI_API_KEY' },
+  google: { label: 'Google (Gemini)', fn: completeGoogle, envFallback: 'GOOGLE_API_KEY' },
+  mistral: { label: 'Mistral AI', fn: completeMistral, envFallback: 'MISTRAL_API_KEY' },
+};
 
 function loadPrompt(name) {
   return readFileSync(path.join(__dirname, 'prompts', `${name}.md`), 'utf8');
@@ -44,8 +54,9 @@ async function complete({ tenantId, feature, system, messages }) {
     return null;
   }
 
+  const providerDef = AI_PROVIDERS[settings.provider];
   var apiKey = null;
-  if (settings.provider === 'anthropic') {
+  if (providerDef) {
     if (settings.api_key_encrypted) {
       try {
         apiKey = decryptSecret(settings.api_key_encrypted);
@@ -53,12 +64,16 @@ async function complete({ tenantId, feature, system, messages }) {
         logger.error('ai_key_decrypt_failed', { tenantId, message: err.message });
       }
     }
-    if (!apiKey) apiKey = process.env.ANTHROPIC_API_KEY || null; // fallback pro .env, se alguém preferir configurar lá
+    // Fallback pro .env — útil se alguém preferir configurar lá em vez do painel.
+    // Atenção: a chave salva no painel é "uma só por tenant"; trocar de provedor
+    // sem colar uma chave nova reaproveita a antiga, o que falha (e degrada pro
+    // mock) até o usuário colar a chave certa do novo provedor escolhido.
+    if (!apiKey) apiKey = process.env[providerDef.envFallback] || null;
   }
-  const provider = settings.provider === 'anthropic' && apiKey ? 'anthropic' : 'mock';
+  const provider = providerDef && apiKey ? settings.provider : 'mock';
 
   try {
-    const fn = provider === 'anthropic' ? completeAnthropic : completeMock;
+    const fn = provider === 'mock' ? completeMock : providerDef.fn;
     const result = await fn({ system, messages, feature, apiKey });
     await logUsage(tenantId, feature, provider, result.tokensIn, result.tokensOut);
     return { ...result, provider };

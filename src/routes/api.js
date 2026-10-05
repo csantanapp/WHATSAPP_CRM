@@ -47,7 +47,7 @@ import {
 import { getSourceForConversation } from '../repositories/conversationSources.js';
 import { runTriggersForTagAdded, runTriggersForStageEntered } from '../automation/engine.js';
 import { getDistributionRule, upsertDistributionRule } from '../services/distribution.js';
-import { summarizeConversation, getLatestInsight, getAiSettings, updateAiSettings } from '../services/ai/AIService.js';
+import { summarizeConversation, getLatestInsight, getAiSettings, updateAiSettings, AI_PROVIDERS } from '../services/ai/AIService.js';
 import { runRadarNow } from '../jobs/dailyRadarJob.js';
 import multer from 'multer';
 import { readFile } from 'node:fs/promises';
@@ -350,6 +350,10 @@ apiRouter.post('/conversations/:id/summarize', asyncHandler(async (req, res) => 
 
 apiRouter.get('/conversations/:id/insight', asyncHandler(async (req, res) => {
   res.json(await getLatestInsight(req.params.id));
+}));
+
+apiRouter.get('/ai/providers', requireRole('admin'), asyncHandler(async (_req, res) => {
+  res.json(Object.entries(AI_PROVIDERS).map(([id, def]) => ({ id, label: def.label })));
 }));
 
 apiRouter.get('/ai/settings', requireRole('admin'), asyncHandler(async (req, res) => {
