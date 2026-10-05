@@ -51,12 +51,12 @@ body{
   max-width:1440px;margin:0 auto;padding:0 4px 18px;font-size:12.5px;color:var(--muted);
 }
 .stage-outer{width:100%;display:flex;justify-content:center;}
-.stage{position:relative;}
+.stage{position:relative;width:100%;}
 .frame{
-  width:1440px;height:900px;transform-origin:top left;overflow:hidden;
+  width:100%;height:100%;overflow:hidden;
   border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,0.28);background:#F5F4EF;
 }
-.screen{display:none;width:1440px;height:900px;background:#F5F4EF;color:#1F2421;}
+.screen{display:none;width:100%;height:100%;background:#F5F4EF;color:#1F2421;}
 .screen.active{display:flex;}
 .screen a{color:inherit;text-decoration:none;}
 .sidebar{width:84px;flex-shrink:0;background:#15191A;display:flex;flex-direction:column;align-items:center;padding:20px 0;transition:width .15s ease;overflow:hidden;}
@@ -932,12 +932,15 @@ button{font-family:'Inter',sans-serif;}
   }
 
   var frame = document.getElementById('frame');
+  var stageOuter = document.querySelector('.stage-outer');
   function layout(){
+    var topbar = document.querySelector('.topbar');
+    var topbarH = topbar ? topbar.getBoundingClientRect().height : 70;
     var availW = window.innerWidth - 32;
-    var scale = Math.min(1, availW / 1440);
-    frame.style.transform = 'scale(' + scale + ')';
-    frame.parentElement.style.width = (1440 * scale) + 'px';
-    frame.parentElement.style.height = (900 * scale) + 'px';
+    var availH = Math.max(560, window.innerHeight - topbarH - 40);
+    stageOuter.style.height = availH + 'px';
+    frame.parentElement.style.width = availW + 'px';
+    frame.parentElement.style.height = availH + 'px';
   }
   window.addEventListener('resize', layout);
   layout();
