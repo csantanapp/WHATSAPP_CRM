@@ -229,3 +229,73 @@ export async function listConversationsByFunnel(funnelId, viewer) {
   );
   return result.rows;
 }
+
+// Inbox: lista TODAS as conversas do tenant (sem depender de funil), com os
+// filtros estilo Front/Intercom — Fila (não atribuídas), Minhas, Todas,
+// Fechadas. Respeita a mesma regra de visibilidade do Kanban (atendente só
+// vê as suas + não atribuídas).
+function buildInboxConditions(tenantId, viewer, { tab = 'all', search, unreadOnly, tag } = {}) {
+  const conditions = ['c.tenant_id = $1'];
+  const params = [tenantId];
+
+  if (tab === 'queue') {
+    conditions.push('c.assigned_user_id IS NULL', "c.status != 'closed'");
+  } else if (tab === 'mine') {
+    params.push(viewer.id);
+    conditions.push(`c.assigned_user_id = $${params.length}`, "c.status != 'closed'");
+  } else if (tab === 'closed') {
+    conditions.push("c.status = 'closed'");
+  } else {
+    conditions.push("c.status != 'closed'");
+    if (viewer.role === 'atendente' && !viewer.isPlatformAdmin) {
+      params.push(viewer.id);
+      conditions.push(`(c.assigned_user_id = $${params.length} OR c.assigned_user_id IS NULL)`);
+    }
+  }
+
+  if (search) {
+    params.push(`%${search}%`);
+    conditions.push(`(ct.name ILIKE $${params.length} OR ct.phone_display ILIKE $${params.length} OR ct.wa_id ILIKE $${params.length})`);
+  }
+  if (unreadOnly) conditions.push('c.unread_count > 0');
+  if (tag) {
+    params.push(tag);
+    conditions.push(`$${params.length} = ANY(ct.tags)`);
+  }
+
+  return { where: conditions.join(' AND '), params };
+}
+
+export async function listInboxConversations(tenantId, viewer, filters = {}) {
+  const { where, params } = buildInboxConditions(tenantId, viewer, filters);
+  const result = await query(
+    `SELECT c.id, c.status, c.is_priority, c.unread_count, c.assigned_user_id, c.last_message_at,
+            ct.name AS contact_name, ct.phone_display, ct.avatar_initials, ct.tags,
+            u.name AS assigned_user_name,
+            (SELECT m.body FROM messages m WHERE m.conversation_id = c.id AND m.kind = 'message' ORDER BY m.created_at DESC LIMIT 1) AS last_message_body,
+            (SELECT m.media_type FROM messages m WHERE m.conversation_id = c.id AND m.kind = 'message' ORDER BY m.created_at DESC LIMIT 1) AS last_message_media_type
+     FROM conversations c
+     JOIN contacts ct ON ct.id = c.contact_id
+     LEFT JOIN users u ON u.id = c.assigned_user_id
+     WHERE ${where}
+     ORDER BY c.is_priority DESC, c.last_message_at DESC NULLS LAST
+     LIMIT 200`,
+    params
+  );
+  return result.rows;
+}
+
+export async function getInboxCounts(tenantId, viewer) {
+  const tabs = ['queue', 'mine', 'all', 'closed'];
+  const counts = await Promise.all(
+    tabs.map(async (tab) => {
+      const { where, params } = buildInboxConditions(tenantId, viewer, { tab });
+      const result = await query(
+        `SELECT count(*)::int AS count FROM conversations c JOIN contacts ct ON ct.id = c.contact_id WHERE ${where}`,
+        params
+      );
+      return result.rows[0].count;
+    })
+  );
+  return { queue: counts[0], mine: counts[1], all: counts[2], closed: counts[3] };
+}

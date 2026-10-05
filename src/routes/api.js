@@ -23,6 +23,8 @@ import {
   markFirstResponseIfNeeded,
   isWindowOpen,
   touchConversation,
+  listInboxConversations,
+  getInboxCounts,
 } from '../repositories/conversations.js';
 import { listMessagesByConversation, insertMessage, insertInternalNote } from '../repositories/messages.js';
 import { listQuickReplies, createQuickReply, updateQuickReply, deleteQuickReply } from '../repositories/quickReplies.js';
@@ -655,4 +657,20 @@ apiRouter.post('/conversations/:id/media', upload.single('file'), asyncHandler(a
   } catch (err) {
     res.status(502).json({ error: err.message });
   }
+}));
+
+// --- Inbox ---
+
+apiRouter.get('/inbox/conversations', asyncHandler(async (req, res) => {
+  const rows = await listInboxConversations(req.tenantId, req.user, {
+    tab: req.query.tab,
+    search: req.query.q,
+    unreadOnly: req.query.unread === 'true',
+    tag: req.query.tag,
+  });
+  res.json(rows);
+}));
+
+apiRouter.get('/inbox/counts', asyncHandler(async (req, res) => {
+  res.json(await getInboxCounts(req.tenantId, req.user));
 }));

@@ -78,6 +78,7 @@ button{font-family:'Inter',sans-serif;}
   <div class="topbar">
     <div class="topbar-title">CRM WhatsApp <span>· Tractom</span></div>
     <nav class="quicknav">
+      <button class="qn-btn" data-goto="inbox">Inbox</button>
       <button class="qn-btn" data-goto="dashboard">Dashboard</button>
       <button class="qn-btn active" data-goto="kanban">Kanban</button>
       <button class="qn-btn" data-goto="contatos">Contatos</button>
@@ -102,6 +103,7 @@ button{font-family:'Inter',sans-serif;}
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
               <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
               <button class="nav-icon on clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#F0875C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -145,10 +147,57 @@ button{font-family:'Inter',sans-serif;}
           </div>
         </section>
 
+        <section class="screen" id="screen-inbox">
+          <div class="sidebar">
+            <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
+            <div class="nav-icons">
+              <button class="nav-icon on clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#F0875C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
+              <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="automacao" aria-label="Automações"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path></svg></button>
+              <button class="nav-icon clickable" data-goto="funis" aria-label="Funis"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54Z"></path></svg></button>
+            </div>
+            <div class="spacer"></div>
+            <button class="nav-icon clickable" data-goto="config" aria-label="Configurações"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.14.6.6 1.09 1.19 1.29.24.08.49.13.75.13H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1 1.55Z"></path></svg></button>
+          </div>
+
+          <div style="width:360px;flex-shrink:0;border-right:1px solid #E7E5DF;display:flex;flex-direction:column;background:#FFFFFF;">
+            <div style="padding:20px 18px 14px;border-bottom:1px solid #EFEDE6;">
+              <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:19px;color:#14181A;margin-bottom:12px;">Inbox</div>
+              <div style="display:flex;align-items:center;gap:8px;background:#F5F4EF;border:1px solid #E4E1D8;border-radius:10px;padding:8px 12px;margin-bottom:10px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9D96" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                <input id="inbox-search" placeholder="Buscar conversa" style="border:none;outline:none;font-size:13px;color:#14181A;flex-grow:1;font-family:'Inter',sans-serif;background:transparent;"/>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
+                <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5B5F58;cursor:pointer;">
+                  <input type="checkbox" id="inbox-unread-toggle" style="cursor:pointer;"/> Não lidos
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#C3C0B6;cursor:not-allowed;" title="Em breve">
+                  <input type="checkbox" id="inbox-groups-toggle" disabled style="cursor:not-allowed;"/> Grupos
+                </label>
+                <select id="inbox-tag-filter" style="margin-left:auto;background:#F5F4EF;border:1px solid #E4E1D8;border-radius:8px;padding:5px 8px;font-size:11.5px;color:#5B5F58;font-family:'Inter',sans-serif;cursor:pointer;">
+                  <option value="">Todas as tags</option>
+                </select>
+              </div>
+              <div id="inbox-tabs" style="display:flex;align-items:center;gap:4px;overflow-x:auto;padding-bottom:2px;"></div>
+            </div>
+            <div id="inbox-list" style="flex-grow:1;overflow-y:auto;display:flex;flex-direction:column;">
+              <div style="padding:20px;font-size:12.5px;color:#9A9D96;">Carregando...</div>
+            </div>
+          </div>
+
+          <div style="flex-grow:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;background:#F5F4EF;">
+            <div style="font-size:14px;font-weight:600;color:#9A9D96;">Selecione uma conversa</div>
+            <div style="font-size:12.5px;color:#C3C0B6;">Ou navegue com J e K</div>
+          </div>
+        </section>
+
         <section class="screen" id="screen-dashboard">
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
               <button class="nav-icon on clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#F0875C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
               <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -205,6 +254,7 @@ button{font-family:'Inter',sans-serif;}
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
               <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
               <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon on clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#F0875C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -254,6 +304,7 @@ button{font-family:'Inter',sans-serif;}
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
               <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
               <button class="nav-icon on clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#F0875C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -375,6 +426,7 @@ button{font-family:'Inter',sans-serif;}
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
               <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
               <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -447,6 +499,7 @@ button{font-family:'Inter',sans-serif;}
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
               <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
               <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -487,6 +540,7 @@ button{font-family:'Inter',sans-serif;}
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
               <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
               <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -518,6 +572,7 @@ button{font-family:'Inter',sans-serif;}
           <div class="sidebar">
             <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B1210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></div>
             <div class="nav-icons">
+              <button class="nav-icon clickable" data-goto="inbox" aria-label="Inbox"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"></path></svg></button>
               <button class="nav-icon clickable" data-goto="dashboard" aria-label="Dashboard"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.36 7.58L4 20l1.08-4.44A8.5 8.5 0 1 1 21 11.5Z"></path></svg></button>
               <button class="nav-icon clickable" data-goto="kanban" aria-label="Kanban"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5.5" height="16" rx="1.6"></rect><rect x="9.8" y="4" width="5.5" height="10.5" rx="1.6"></rect><rect x="16.6" y="4" width="5.5" height="13.5" rx="1.6"></rect></svg></button>
               <button class="nav-icon clickable" data-goto="contatos" aria-label="Contatos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"></path></svg></button>
@@ -2339,12 +2394,148 @@ button{font-family:'Inter',sans-serif;}
     loadTags();
   });
 
+  var inboxState = { tab: 'queue', search: '', unread: false, tag: '', tagsLoaded: false };
+
+  function mediaPlaceholder(type) {
+    var map = { image: '[imagem]', video: '[vídeo]', audio: '[áudio]', document: '[documento]', sticker: '[sticker]' };
+    return map[type] || '[mídia]';
+  }
+
+  function relativeTime(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    var now = new Date();
+    var sameDay = d.toDateString() === now.toDateString();
+    if (sameDay) return formatTime(iso);
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  }
+
+  async function loadInboxTagOptions() {
+    if (inboxState.tagsLoaded) return;
+    try {
+      var tags = await api('/tags');
+      var sel = document.getElementById('inbox-tag-filter');
+      tags.forEach(function (t) {
+        var opt = document.createElement('option');
+        opt.value = t.name;
+        opt.textContent = t.name;
+        sel.appendChild(opt);
+      });
+      inboxState.tagsLoaded = true;
+    } catch (e) {}
+  }
+
+  async function loadInboxCounts() {
+    var counts;
+    try {
+      counts = await api('/inbox/counts');
+    } catch (e) {
+      return;
+    }
+    var tabsDef = [
+      { id: 'queue', label: 'Fila', count: counts.queue },
+      { id: 'mine', label: 'Minhas', count: counts.mine },
+      { id: 'all', label: 'Todas', count: counts.all },
+      { id: 'closed', label: 'Fechadas', count: counts.closed },
+    ];
+    var tabsEl = document.getElementById('inbox-tabs');
+    tabsEl.innerHTML = '';
+    tabsDef.forEach(function (t) {
+      var btn = document.createElement('button');
+      var active = inboxState.tab === t.id;
+      btn.style.cssText = 'flex-shrink:0;appearance:none;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;' +
+        (active ? 'background:#EB6D37;color:#FFFFFF;' : 'background:#F5F4EF;color:#5B5F58;');
+      btn.textContent = t.label + (typeof t.count === 'number' ? ' (' + t.count + ')' : '');
+      btn.addEventListener('click', function () {
+        inboxState.tab = t.id;
+        loadInboxCounts();
+        loadInboxList();
+      });
+      tabsEl.appendChild(btn);
+    });
+  }
+
+  async function loadInboxList() {
+    var listEl = document.getElementById('inbox-list');
+    var rows;
+    try {
+      rows = await api('/inbox/conversations?' + new URLSearchParams({
+        tab: inboxState.tab,
+        q: inboxState.search,
+        unread: inboxState.unread ? 'true' : 'false',
+        tag: inboxState.tag,
+      }).toString());
+    } catch (e) {
+      listEl.innerHTML = '<div style="padding:20px;font-size:12.5px;color:#B42318;">Não foi possível carregar o inbox.</div>';
+      return;
+    }
+
+    listEl.innerHTML = '';
+    if (!rows.length) {
+      listEl.innerHTML = '<div style="padding:20px;font-size:12.5px;color:#9A9D96;">Nenhuma conversa aqui.</div>';
+      return;
+    }
+
+    rows.forEach(function (c) {
+      var unread = c.unread_count > 0;
+      var preview = c.last_message_body || (c.last_message_media_type ? mediaPlaceholder(c.last_message_media_type) : 'Sem mensagens');
+      var row = document.createElement('a');
+      row.href = '#conversa';
+      row.style.cssText = 'display:flex;align-items:flex-start;gap:10px;padding:12px 18px;border-bottom:1px solid #F5F4EF;cursor:pointer;text-decoration:none;' + (unread ? 'background:#FFFBF7;' : '');
+      row.innerHTML =
+        '<div style="width:34px;height:34px;border-radius:50%;background:#FBEAE3;color:#D85A26;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">' + escapeHtml(c.avatar_initials || initials(c.contact_name)) + '</div>' +
+        '<div style="flex-grow:1;min-width:0;">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">' +
+            '<div style="font-weight:' + (unread ? '700' : '600') + ';font-size:13px;color:#14181A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(c.contact_name || c.phone_display || 'Sem nome') + '</div>' +
+            '<div style="font-size:11px;color:#9A9D96;flex-shrink:0;">' + relativeTime(c.last_message_at) + '</div>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px;">' +
+            '<div style="font-size:12px;color:' + (unread ? '#3A3D38' : '#82867F') + ';font-weight:' + (unread ? '600' : '400') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(preview) + '</div>' +
+            (unread ? '<span style="flex-shrink:0;background:#EB6D37;color:#FFFFFF;font-size:10.5px;font-weight:700;border-radius:999px;padding:1px 7px;">' + c.unread_count + '</span>' : '') +
+          '</div>' +
+        '</div>';
+      row.addEventListener('click', function (e) {
+        e.preventDefault();
+        openConversation(c.id);
+        window.__goto && window.__goto('conversa');
+      });
+      listEl.appendChild(row);
+    });
+  }
+
+  function loadInbox() {
+    loadInboxTagOptions();
+    loadInboxCounts();
+    loadInboxList();
+  }
+
+  (function () {
+    var searchInput = document.getElementById('inbox-search');
+    var debounceTimer;
+    searchInput.addEventListener('input', function () {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function () {
+        inboxState.search = searchInput.value.trim();
+        loadInboxList();
+      }, 250);
+    });
+    document.getElementById('inbox-unread-toggle').addEventListener('change', function (e) {
+      inboxState.unread = e.target.checked;
+      loadInboxList();
+    });
+    document.getElementById('inbox-tag-filter').addEventListener('change', function (e) {
+      inboxState.tag = e.target.value;
+      loadInboxList();
+    });
+  })();
+
   window.__onGoto = function (screenId) {
     if (screenId === 'dashboard') loadDashboard();
     if (screenId === 'contatos') loadContacts(document.getElementById('contatos-search').value.trim());
     if (screenId === 'config') loadConfig();
     if (screenId === 'funis') { loadFunnelsSection(); loadTags(); }
     if (screenId === 'automacao') loadAutomationFlows();
+    if (screenId === 'inbox') loadInbox();
   };
 
   window.addEventListener('DOMContentLoaded', function () {
