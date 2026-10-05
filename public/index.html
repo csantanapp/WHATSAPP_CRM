@@ -369,29 +369,72 @@ button{font-family:'Inter',sans-serif;}
           </div>
 
           <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;overflow-y:auto;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
               <div>
-                <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:22px;color:#14181A;">Gestão de Leads</div>
-                <div id="contatos-summary" style="font-size:13px;color:#82867F;margin-top:3px;">Carregando...</div>
+                <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:22px;color:#14181A;">Contatos</div>
+                <div id="contatos-summary" style="font-size:13px;color:#82867F;margin-top:3px;">Customer 360 — busque, filtre e gerencie contatos.</div>
               </div>
-              <button id="contatos-novo-btn" style="display:flex;align-items:center;gap:6px;background:#EB6D37;color:#FFFFFF;border:none;border-radius:10px;padding:10px 16px;font-weight:600;font-size:13px;cursor:pointer;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
-                Novo lead
-              </button>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button id="contatos-duplicados-btn" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#3A3D38;border:1px solid #E4E1D8;border-radius:10px;padding:10px 14px;font-weight:600;font-size:13px;cursor:pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B5F58" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M4 16V5a2 2 0 0 1 2-2h11"></path></svg>
+                  Duplicados
+                </button>
+                <button id="contatos-importar-btn" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#3A3D38;border:1px solid #E4E1D8;border-radius:10px;padding:10px 14px;font-weight:600;font-size:13px;cursor:pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B5F58" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"></path><path d="m7 10 5 5 5-5"></path><path d="M4 19h16"></path></svg>
+                  Importar CSV
+                </button>
+                <input type="file" id="contatos-csv-input" accept=".csv" style="display:none;"/>
+                <button id="contatos-novo-btn" style="display:flex;align-items:center;gap:6px;background:#EB6D37;color:#FFFFFF;border:none;border-radius:10px;padding:10px 16px;font-weight:600;font-size:13px;cursor:pointer;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+                  Novo contato
+                </button>
+              </div>
             </div>
 
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-              <select id="contatos-funnel-filter" style="background:#FFFFFF;border:1px solid #E4E1D8;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;color:#14181A;font-family:'Inter',sans-serif;cursor:pointer;">
-                <option value="">Todos os leads (geral)</option>
-              </select>
-              <div style="display:flex;align-items:center;gap:8px;background:#FFFFFF;border:1px solid #E4E1D8;border-radius:10px;padding:9px 14px;width:280px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+              <div style="display:flex;align-items:center;gap:8px;background:#FFFFFF;border:1px solid #E4E1D8;border-radius:10px;padding:9px 14px;width:300px;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9D96" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
-                <input id="contatos-search" placeholder="Buscar por nome, e-mail ou telefone" style="border:none;outline:none;font-size:13px;color:#14181A;flex-grow:1;font-family:'Inter',sans-serif;"/>
+                <input id="contatos-search" placeholder="Buscar por nome, email ou telefone" style="border:none;outline:none;font-size:13px;color:#14181A;flex-grow:1;font-family:'Inter',sans-serif;"/>
               </div>
+              <select id="contatos-tag-filter" style="background:#FFFFFF;border:1px solid #E4E1D8;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;color:#14181A;font-family:'Inter',sans-serif;cursor:pointer;">
+                <option value="">Tag: todas</option>
+              </select>
+              <select id="contatos-origem-filter" style="background:#FFFFFF;border:1px solid #E4E1D8;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;color:#14181A;font-family:'Inter',sans-serif;cursor:pointer;">
+                <option value="">Todas as origens</option>
+              </select>
+              <select id="contatos-page-size" style="background:#FFFFFF;border:1px solid #E4E1D8;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;color:#14181A;font-family:'Inter',sans-serif;cursor:pointer;margin-left:auto;">
+                <option value="25">25 por página</option>
+                <option value="10">10 por página</option>
+                <option value="50">50 por página</option>
+                <option value="100">100 por página</option>
+              </select>
             </div>
 
-            <div id="contatos-list" style="display:flex;flex-direction:column;gap:8px;">
-              <div style="font-size:12.5px;color:#9A9D96;">Carregando contatos...</div>
+            <div style="background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;overflow:hidden;">
+              <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead>
+                  <tr style="background:#FAFAF7;border-bottom:1px solid #E7E5DF;">
+                    <th data-sort="name" style="text-align:left;padding:11px 16px;font-size:11px;font-weight:700;color:#82867F;text-transform:uppercase;cursor:pointer;white-space:nowrap;">Nome <span data-sort-arrow="name"></span></th>
+                    <th data-sort="email" style="text-align:left;padding:11px 16px;font-size:11px;font-weight:700;color:#82867F;text-transform:uppercase;cursor:pointer;white-space:nowrap;">Email <span data-sort-arrow="email"></span></th>
+                    <th data-sort="phone_display" style="text-align:left;padding:11px 16px;font-size:11px;font-weight:700;color:#82867F;text-transform:uppercase;cursor:pointer;white-space:nowrap;">Telefone <span data-sort-arrow="phone_display"></span></th>
+                    <th style="text-align:left;padding:11px 16px;font-size:11px;font-weight:700;color:#82867F;text-transform:uppercase;white-space:nowrap;">Tags</th>
+                    <th data-sort="created_at" style="text-align:left;padding:11px 16px;font-size:11px;font-weight:700;color:#82867F;text-transform:uppercase;cursor:pointer;white-space:nowrap;">Última atividade <span data-sort-arrow="created_at"></span></th>
+                    <th style="text-align:left;padding:11px 16px;font-size:11px;font-weight:700;color:#82867F;text-transform:uppercase;white-space:nowrap;">Status</th>
+                    <th style="padding:11px 16px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="contatos-table-body">
+                  <tr><td colspan="7" style="padding:20px 16px;font-size:12.5px;color:#9A9D96;">Carregando contatos...</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
+              <div id="contatos-page-info" style="font-size:12px;color:#82867F;"></div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button id="contatos-prev-btn" style="background:#FFFFFF;border:1px solid #E4E1D8;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:#3A3D38;cursor:pointer;">← Anterior</button>
+                <button id="contatos-next-btn" style="background:#FFFFFF;border:1px solid #E4E1D8;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:#3A3D38;cursor:pointer;">Próxima →</button>
+              </div>
             </div>
           </div>
 
@@ -399,6 +442,15 @@ button{font-family:'Inter',sans-serif;}
             <div style="background:#FFFFFF;border-radius:16px;width:420px;max-height:80vh;overflow-y:auto;padding:24px;position:relative;">
               <button id="lead-modal-close" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:#9A9D96;font-size:18px;line-height:1;">×</button>
               <div id="lead-modal-body">Carregando...</div>
+            </div>
+          </div>
+
+          <div id="duplicados-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(20,24,26,0.4);z-index:50;align-items:center;justify-content:center;">
+            <div style="background:#FFFFFF;border-radius:16px;width:560px;max-height:80vh;overflow-y:auto;padding:24px;position:relative;">
+              <button id="duplicados-modal-close" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:#9A9D96;font-size:18px;line-height:1;">×</button>
+              <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:16px;color:#14181A;margin-bottom:4px;">Possíveis duplicados</div>
+              <div style="font-size:12.5px;color:#82867F;margin-bottom:16px;">Contatos com o mesmo telefone ou e-mail.</div>
+              <div id="duplicados-modal-body"></div>
             </div>
           </div>
         </section>
@@ -744,7 +796,6 @@ button{font-family:'Inter',sans-serif;}
       return;
     }
 
-    populateContatosFunnelFilter();
     populateAutomacaoFunnelFilter();
 
     if (!state.funnels.length) {
@@ -1774,92 +1825,199 @@ button{font-family:'Inter',sans-serif;}
     });
   }
 
-  function populateContatosFunnelFilter() {
-    var select = document.getElementById('contatos-funnel-filter');
+  state.contatosAll = [];
+  state.contatosSort = { key: 'created_at', dir: 'desc' };
+  state.contatosPage = 1;
+
+  async function populateContatosTagFilter() {
+    var select = document.getElementById('contatos-tag-filter');
     var currentValue = select.value;
-    select.innerHTML = '<option value="">Todos os funis/campanhas</option>';
-    state.funnels.forEach(function (f) {
+    var tags;
+    try {
+      tags = await api('/tags');
+    } catch (err) {
+      return;
+    }
+    select.innerHTML = '<option value="">Tag: todas</option>';
+    tags.forEach(function (t) {
       var opt = document.createElement('option');
-      opt.value = f.id;
-      opt.textContent = f.name;
+      opt.value = t.name;
+      opt.textContent = t.name;
+      select.appendChild(opt);
+    });
+    select.value = currentValue;
+  }
+
+  function populateContatosOrigemFilter(contacts) {
+    var select = document.getElementById('contatos-origem-filter');
+    var currentValue = select.value;
+    var origens = Array.from(new Set(contacts.map(function (c) { return c.source; }).filter(Boolean))).sort();
+    select.innerHTML = '<option value="">Todas as origens</option>';
+    origens.forEach(function (o) {
+      var opt = document.createElement('option');
+      opt.value = o;
+      opt.textContent = o;
       select.appendChild(opt);
     });
     select.value = currentValue;
   }
 
   async function loadContacts(searchTerm) {
-    var listEl = document.getElementById('contatos-list');
+    populateContatosTagFilter();
+    var tbody = document.getElementById('contatos-table-body');
     var summaryEl = document.getElementById('contatos-summary');
-    var funnelId = document.getElementById('contatos-funnel-filter').value;
     var contacts;
     try {
       var params = new URLSearchParams();
       if (searchTerm) params.set('q', searchTerm);
-      if (funnelId) params.set('funnel_id', funnelId);
-      var qs = params.toString();
-      contacts = await api('/contacts' + (qs ? '?' + qs : ''));
+      contacts = await api('/contacts' + (params.toString() ? '?' + params.toString() : ''));
     } catch (err) {
-      listEl.innerHTML = '<div style="color:#B42318;font-size:12.5px;">Não foi possível carregar os contatos.</div>';
+      tbody.innerHTML = '<tr><td colspan="7" style="padding:20px 16px;color:#B42318;font-size:12.5px;">Não foi possível carregar os contatos.</td></tr>';
       return;
     }
-    summaryEl.textContent = contacts.length + (contacts.length === 1 ? ' contato' : ' contatos');
-    listEl.innerHTML = '';
-    if (!contacts.length) {
-      listEl.innerHTML = '<div style="font-size:12.5px;color:#9A9D96;">Nenhum contato encontrado.</div>';
-      return;
-    }
-    contacts.forEach(function (c) {
-      var row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:flex-start;gap:12px;padding:13px 16px;background:#FFFFFF;border:1px solid #E7E5DF;border-radius:12px;cursor:pointer;';
-      row.addEventListener('click', function () { openLeadDetail(c.id); });
+    state.contatosAll = contacts;
+    populateContatosOrigemFilter(contacts);
+    summaryEl.textContent = contacts.length + (contacts.length === 1 ? ' contato encontrado' : ' contatos encontrados');
+    state.contatosPage = 1;
+    renderContatosTable();
+  }
 
-      var tagsHtml = (c.tags || []).map(function (tag) {
-        return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:2px 4px 2px 8px;border-radius:20px;background:#F5F4EF;color:#5B5F58;margin-right:4px;margin-top:4px;">' +
-          escapeHtml(tag) +
-          '<button data-remove-tag="' + c.id + '" data-tag-value="' + escapeHtml(tag) + '" style="background:none;border:none;cursor:pointer;color:#ACAFA8;font-size:11px;line-height:1;padding:0 2px;">×</button>' +
-        '</span>';
-      }).join('') + '<button data-add-tag="' + c.id + '" style="font-size:10.5px;font-weight:600;color:#D85A26;background:none;border:1px dashed #D8D5CC;border-radius:20px;padding:2px 8px;cursor:pointer;margin-top:4px;">+ tag</button>';
+  function renderContatosTable() {
+    var tbody = document.getElementById('contatos-table-body');
+    var tagFilter = document.getElementById('contatos-tag-filter').value;
+    var origemFilter = document.getElementById('contatos-origem-filter').value;
+    var pageSize = parseInt(document.getElementById('contatos-page-size').value, 10);
 
-      row.innerHTML =
-        '<div style="width:34px;height:34px;border-radius:50%;background:#FBEAE3;color:#D85A26;display:flex;align-items:center;justify-content:center;font-family:\'Sora\',sans-serif;font-weight:700;font-size:12px;flex-shrink:0;">' + escapeHtml(c.avatar_initials || initials(c.name)) + '</div>' +
-        '<div style="flex-grow:1;min-width:0;">' +
-          '<div style="display:flex;align-items:center;gap:8px;">' +
-            '<span style="font-weight:600;font-size:13.5px;color:#14181A;">' + escapeHtml(c.name || 'Sem nome') + '</span>' +
-            (c.source ? '<span style="font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;background:#EEF2FF;color:#4338CA;">' + escapeHtml(c.source) + '</span>' : '') +
-          '</div>' +
-          '<div style="font-size:12px;color:#82867F;margin-top:2px;">' + escapeHtml(c.phone_display || '') + (c.email ? ' · ' + escapeHtml(c.email) : '') + '</div>' +
-          '<div style="display:flex;flex-wrap:wrap;align-items:center;margin-top:2px;">' + tagsHtml + '</div>' +
-        '</div>' +
-        '<span style="font-size:11px;color:#ACAFA8;white-space:nowrap;flex-shrink:0;">desde ' + new Date(c.created_at).toLocaleDateString('pt-BR') + '</span>';
-      listEl.appendChild(row);
+    var filtered = state.contatosAll.filter(function (c) {
+      if (tagFilter && (!c.tags || c.tags.indexOf(tagFilter) === -1)) return false;
+      if (origemFilter && c.source !== origemFilter) return false;
+      return true;
     });
 
-    listEl.querySelectorAll('[data-add-tag]').forEach(function (btn) {
+    var sortKey = state.contatosSort.key;
+    var sortDir = state.contatosSort.dir;
+    filtered.sort(function (a, b) {
+      var va = a[sortKey] || '';
+      var vb = b[sortKey] || '';
+      if (sortKey === 'created_at') {
+        va = new Date(va).getTime() || 0;
+        vb = new Date(vb).getTime() || 0;
+      } else {
+        va = String(va).toLowerCase();
+        vb = String(vb).toLowerCase();
+      }
+      if (va < vb) return sortDir === 'asc' ? -1 : 1;
+      if (va > vb) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    document.querySelectorAll('[data-sort-arrow]').forEach(function (el) {
+      var key = el.getAttribute('data-sort-arrow');
+      el.textContent = key === sortKey ? (sortDir === 'asc' ? '↑' : '↓') : '';
+    });
+
+    var totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+    if (state.contatosPage > totalPages) state.contatosPage = totalPages;
+    var startIdx = (state.contatosPage - 1) * pageSize;
+    var pageItems = filtered.slice(startIdx, startIdx + pageSize);
+
+    document.getElementById('contatos-page-info').textContent =
+      filtered.length === 0 ? 'Nenhum contato' :
+      ('Mostrando ' + (startIdx + 1) + '–' + Math.min(startIdx + pageSize, filtered.length) + ' de ' + filtered.length + ' · página ' + state.contatosPage + ' de ' + totalPages);
+    document.getElementById('contatos-prev-btn').disabled = state.contatosPage <= 1;
+    document.getElementById('contatos-next-btn').disabled = state.contatosPage >= totalPages;
+
+    tbody.innerHTML = '';
+    if (!pageItems.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="padding:20px 16px;font-size:12.5px;color:#9A9D96;">Nenhum contato encontrado.</td></tr>';
+      return;
+    }
+
+    pageItems.forEach(function (c) {
+      var tr = document.createElement('tr');
+      tr.style.cssText = 'border-bottom:1px solid #F0EFEA;cursor:pointer;';
+      tr.addEventListener('mouseenter', function () { tr.style.background = '#FAFAF7'; });
+      tr.addEventListener('mouseleave', function () { tr.style.background = ''; });
+
+      var tagsHtml = (c.tags || []).slice(0, 2).map(function (tag) {
+        return '<span style="display:inline-block;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px;background:#F5F4EF;color:#5B5F58;margin-right:3px;">' + escapeHtml(tag) + '</span>';
+      }).join('') + (c.tags && c.tags.length > 2 ? '<span style="font-size:10.5px;color:#9A9D96;">+' + (c.tags.length - 2) + '</span>' : '');
+
+      tr.innerHTML =
+        '<td style="padding:11px 16px;"><div style="display:flex;align-items:center;gap:8px;"><div style="width:26px;height:26px;border-radius:50%;background:#FBEAE3;color:#D85A26;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10.5px;flex-shrink:0;">' + escapeHtml(c.avatar_initials || initials(c.name)) + '</div><span style="font-weight:600;color:#14181A;">' + escapeHtml(c.name || 'Sem nome') + '</span></div></td>' +
+        '<td style="padding:11px 16px;color:#5B5F58;">' + (c.email ? escapeHtml(c.email) : '<span style="color:#C3C0B6;">—</span>') + '</td>' +
+        '<td style="padding:11px 16px;color:#5B5F58;">' + escapeHtml(c.phone_display || '') + '</td>' +
+        '<td style="padding:11px 16px;">' + (tagsHtml || '<span style="color:#C3C0B6;">—</span>') + '</td>' +
+        '<td style="padding:11px 16px;color:#82867F;white-space:nowrap;">' + new Date(c.created_at).toLocaleDateString('pt-BR') + '</td>' +
+        '<td style="padding:11px 16px;"><span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:#E8F3EC;color:#1A7F4D;">Ativo</span></td>' +
+        '<td style="padding:11px 16px;text-align:right;white-space:nowrap;">' +
+          '<button data-edit-contact="' + c.id + '" title="Editar" style="background:none;border:none;cursor:pointer;color:#82867F;padding:4px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg></button>' +
+          '<button data-delete-contact="' + c.id + '" data-contact-name="' + escapeHtml(c.name || c.phone_display || '') + '" title="Excluir" style="background:none;border:none;cursor:pointer;color:#C3302A;padding:4px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg></button>' +
+        '</td>';
+
+      tr.addEventListener('click', function (e) {
+        if (e.target.closest('[data-edit-contact]') || e.target.closest('[data-delete-contact]')) return;
+        openLeadDetail(c.id);
+      });
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll('[data-edit-contact]').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
-        var contactId = btn.getAttribute('data-add-tag');
-        var contact = contacts.find(function (c) { return String(c.id) === contactId; });
-        openTagPicker(contactId, contact ? contact.tags : [], function () {
-          loadContacts(document.getElementById('contatos-search').value.trim());
-        });
+        openLeadDetail(btn.getAttribute('data-edit-contact'));
       });
     });
-
-    listEl.querySelectorAll('[data-remove-tag]').forEach(function (btn) {
+    tbody.querySelectorAll('[data-delete-contact]').forEach(function (btn) {
       btn.addEventListener('click', async function (e) {
         e.stopPropagation();
-        await api('/contacts/' + btn.getAttribute('data-remove-tag') + '/tags/' + encodeURIComponent(btn.getAttribute('data-tag-value')), { method: 'DELETE' });
-        loadContacts(document.getElementById('contatos-search').value.trim());
+        var name = btn.getAttribute('data-contact-name') || 'este contato';
+        if (!confirm('Excluir "' + name + '"? Isso apaga também as conversas e o histórico dele. Essa ação não pode ser desfeita.')) return;
+        try {
+          await api('/contacts/' + btn.getAttribute('data-delete-contact'), { method: 'DELETE' });
+          loadContacts(document.getElementById('contatos-search').value.trim());
+        } catch (err) {
+          alert('Não foi possível excluir: ' + err.message);
+        }
       });
     });
   }
+
+  document.querySelectorAll('[data-sort]').forEach(function (th) {
+    th.addEventListener('click', function () {
+      var key = th.getAttribute('data-sort');
+      if (state.contatosSort.key === key) {
+        state.contatosSort.dir = state.contatosSort.dir === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.contatosSort = { key: key, dir: 'asc' };
+      }
+      renderContatosTable();
+    });
+  });
+
+  document.getElementById('contatos-page-size').addEventListener('change', function () {
+    state.contatosPage = 1;
+    renderContatosTable();
+  });
+  document.getElementById('contatos-prev-btn').addEventListener('click', function () {
+    if (state.contatosPage > 1) { state.contatosPage -= 1; renderContatosTable(); }
+  });
+  document.getElementById('contatos-next-btn').addEventListener('click', function () {
+    state.contatosPage += 1;
+    renderContatosTable();
+  });
 
   document.getElementById('contatos-search').addEventListener('input', function (e) {
     loadContacts(e.target.value.trim());
   });
 
-  document.getElementById('contatos-funnel-filter').addEventListener('change', function () {
-    loadContacts(document.getElementById('contatos-search').value.trim());
+  document.getElementById('contatos-tag-filter').addEventListener('change', function () {
+    state.contatosPage = 1;
+    renderContatosTable();
+  });
+  document.getElementById('contatos-origem-filter').addEventListener('change', function () {
+    state.contatosPage = 1;
+    renderContatosTable();
   });
 
   document.getElementById('contatos-novo-btn').addEventListener('click', async function () {
@@ -1873,6 +2031,91 @@ button{font-family:'Inter',sans-serif;}
     } catch (err) {
       alert('Não foi possível criar: ' + err.message);
     }
+  });
+
+  document.getElementById('contatos-duplicados-btn').addEventListener('click', function () {
+    var overlay = document.getElementById('duplicados-modal-overlay');
+    var body = document.getElementById('duplicados-modal-body');
+    var groups = {};
+    state.contatosAll.forEach(function (c) {
+      [c.phone_display, c.email].filter(Boolean).forEach(function (key) {
+        key = key.trim().toLowerCase();
+        if (!key) return;
+        (groups[key] = groups[key] || []).push(c);
+      });
+    });
+    var dupeGroups = Object.keys(groups).map(function (k) { return groups[k]; }).filter(function (g) { return g.length > 1; });
+    var seen = new Set();
+    var uniqueGroups = [];
+    dupeGroups.forEach(function (g) {
+      var ids = g.map(function (c) { return c.id; }).sort().join(',');
+      if (seen.has(ids)) return;
+      seen.add(ids);
+      uniqueGroups.push(g);
+    });
+
+    if (!uniqueGroups.length) {
+      body.innerHTML = '<div style="font-size:12.5px;color:#9A9D96;">Nenhum contato duplicado encontrado.</div>';
+    } else {
+      body.innerHTML = uniqueGroups.map(function (g) {
+        return '<div style="border:1px solid #E7E5DF;border-radius:10px;padding:12px;margin-bottom:10px;">' +
+          g.map(function (c) {
+            return '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;font-size:12.5px;">' +
+              '<span>' + escapeHtml(c.name || 'Sem nome') + ' <span style="color:#9A9D96;">· ' + escapeHtml(c.phone_display || '') + (c.email ? ' · ' + escapeHtml(c.email) : '') + '</span></span>' +
+            '</div>';
+          }).join('') +
+        '</div>';
+      }).join('');
+    }
+    overlay.style.display = 'flex';
+  });
+  document.getElementById('duplicados-modal-close').addEventListener('click', function () {
+    document.getElementById('duplicados-modal-overlay').style.display = 'none';
+  });
+  document.getElementById('duplicados-modal-overlay').addEventListener('click', function (e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+
+  document.getElementById('contatos-importar-btn').addEventListener('click', function () {
+    document.getElementById('contatos-csv-input').click();
+  });
+  document.getElementById('contatos-csv-input').addEventListener('change', async function (e) {
+    var file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    var text = await file.text();
+    var lines = text.split(/\r?\n/).filter(function (l) { return l.trim(); });
+    if (!lines.length) return;
+    var header = lines[0].split(',').map(function (h) { return h.trim().toLowerCase(); });
+    var nameIdx = header.indexOf('name') !== -1 ? header.indexOf('name') : header.indexOf('nome');
+    var phoneIdx = header.indexOf('phone') !== -1 ? header.indexOf('phone') : (header.indexOf('telefone') !== -1 ? header.indexOf('telefone') : header.indexOf('wa_id'));
+    var emailIdx = header.indexOf('email');
+    if (phoneIdx === -1) {
+      alert('O CSV precisa ter uma coluna "telefone" (ou "phone"/"wa_id"). Colunas opcionais: "nome", "email".');
+      return;
+    }
+    var rows = lines.slice(1).map(function (l) { return l.split(','); });
+    var success = 0, failed = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var cols = rows[i];
+      var phone = (cols[phoneIdx] || '').replace(/\D/g, '');
+      if (!phone) { failed++; continue; }
+      try {
+        await api('/contacts', {
+          method: 'POST',
+          body: JSON.stringify({
+            wa_id: phone,
+            name: nameIdx !== -1 ? (cols[nameIdx] || '').trim() : '',
+            email: emailIdx !== -1 ? (cols[emailIdx] || '').trim() : '',
+          }),
+        });
+        success++;
+      } catch (err) {
+        failed++;
+      }
+    }
+    alert('Importação concluída: ' + success + ' criado(s), ' + failed + ' ignorado(s) (duplicado ou inválido).');
+    loadContacts();
   });
 
   async function openLeadDetail(contactId) {

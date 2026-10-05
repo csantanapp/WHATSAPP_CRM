@@ -84,6 +84,11 @@ export async function getContactById(tenantId, id) {
   return result.rows[0];
 }
 
+export async function deleteContact(tenantId, id) {
+  const result = await query('DELETE FROM contacts WHERE id = $1 AND tenant_id = $2 RETURNING id', [id, tenantId]);
+  return result.rows[0];
+}
+
 export async function getContactConversations(contactId) {
   const result = await query(
     `SELECT c.*, f.name AS funnel_name, fs.name AS stage_name

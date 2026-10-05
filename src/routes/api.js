@@ -6,6 +6,7 @@ import {
   getContactById,
   getContactConversations,
   updateContact,
+  deleteContact,
   addTagToContact,
   removeTagFromContact,
 } from '../repositories/contacts.js';
@@ -122,6 +123,12 @@ apiRouter.get('/contacts/:id/history', asyncHandler(async (req, res) => {
 
 apiRouter.patch('/contacts/:id', asyncHandler(async (req, res) => {
   res.json(await updateContact(req.params.id, req.body));
+}));
+
+apiRouter.delete('/contacts/:id', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
+  const deleted = await deleteContact(req.tenantId, req.params.id);
+  if (!deleted) return res.status(404).json({ error: 'Contato não encontrado' });
+  res.status(204).end();
 }));
 
 apiRouter.post('/contacts/:id/tags', asyncHandler(async (req, res) => {
