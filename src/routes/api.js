@@ -61,7 +61,7 @@ import { readFile } from 'node:fs/promises';
 import { mediaFilePath, saveMediaFile } from '../services/mediaStorage.js';
 import { uploadMedia, sendMediaMessage } from '../whatsapp/client.js';
 import { requireRole } from '../middleware/auth.js';
-import { sendTextMessage, checkConnectionStatus } from '../whatsapp/client.js';
+import { sendTextMessage, checkConnectionStatus, listMessageTemplates, sendTemplateMessage } from '../whatsapp/client.js';
 import { broadcast } from '../realtime.js';
 import {
   listFlowsWithSteps,
@@ -313,6 +313,55 @@ apiRouter.post('/conversations/:id/messages', asyncHandler(async (req, res) => {
       direction: 'outbound',
       senderType: 'agent',
       body: text,
+    });
+    await touchConversation(conversationId, { incrementUnread: false, isInbound: false });
+    await markFirstResponseIfNeeded(conversationId);
+    broadcast({ type: 'message:new', conversationId: Number(conversationId), message: saved });
+    res.status(201).json(saved);
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+}));
+
+// Templates de mensagem aprovados pela Meta — únicos que podem ser enviados
+// fora da janela de 24h (ver WINDOW_CLOSED acima). Cache simples em memória
+// (60s) pra não bater na Graph API a cada abertura do seletor de templates.
+let templatesCache = { data: null, fetchedAt: 0 };
+apiRouter.get('/templates', asyncHandler(async (req, res) => {
+  const now = Date.now();
+  if (templatesCache.data && now - templatesCache.fetchedAt < 60000) {
+    return res.json(templatesCache.data);
+  }
+  try {
+    const templates = await listMessageTemplates();
+    templatesCache = { data: templates, fetchedAt: now };
+    res.json(templates);
+  } catch (err) {
+    res.status(502).json({ error: { code: 'templates_fetch_failed', message: err.message } });
+  }
+}));
+
+apiRouter.post('/conversations/:id/send-template', asyncHandler(async (req, res) => {
+  const conversationId = req.params.id;
+  const { name, language, components, preview } = req.body;
+  if (!name || !language) return res.status(400).json({ error: 'name e language são obrigatórios' });
+
+  const convResult = await query(
+    `SELECT c.*, ct.wa_id FROM conversations c
+     JOIN contacts ct ON ct.id = c.contact_id WHERE c.id = $1`,
+    [conversationId]
+  );
+  const conversation = convResult.rows[0];
+  if (!conversation) return res.status(404).json({ error: 'Conversa não encontrada' });
+
+  try {
+    const sent = await sendTemplateMessage(conversation.wa_id, { name, language, components });
+    const saved = await insertMessage({
+      conversationId,
+      waMessageId: sent?.messages?.[0]?.id,
+      direction: 'outbound',
+      senderType: 'agent',
+      body: preview || `[template: ${name}]`,
     });
     await touchConversation(conversationId, { incrementUnread: false, isInbound: false });
     await markFirstResponseIfNeeded(conversationId);

@@ -221,6 +221,10 @@ button{font-family:'Inter',sans-serif;}
                 </select>
                 <div style="width:1px;height:18px;background:#E4E1D8;margin:0 4px;"></div>
                 <span id="conversa-janela" style="font-size:11.5px;color:#82867F;"></span>
+                <button type="button" id="conversa-template-btn" style="display:flex;align-items:center;gap:5px;background:#FFFFFF;border:1px solid #E4E1D8;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:600;color:#3A3D38;cursor:pointer;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5B5F58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M9 13h6"></path><path d="M9 17h6"></path></svg>
+                  Template
+                </button>
               </div>
 
               <div style="flex-grow:1;display:flex;min-height:0;">
@@ -947,6 +951,15 @@ button{font-family:'Inter',sans-serif;}
   </div>
 </div>
 
+<div id="template-picker-overlay" style="display:none;position:fixed;inset:0;background:rgba(20,24,26,0.45);z-index:70;align-items:center;justify-content:center;">
+  <div style="background:#FFFFFF;border-radius:16px;width:480px;max-height:85vh;overflow-y:auto;padding:24px;position:relative;">
+    <button id="template-picker-close" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:#9A9D96;font-size:18px;line-height:1;">×</button>
+    <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:16px;color:#14181A;margin-bottom:4px;">Enviar template</div>
+    <div style="font-size:12px;color:#82867F;margin-bottom:16px;">Único jeito de reabrir a conversa quando a janela de 24h está fechada — só templates aprovados pela Meta.</div>
+    <div id="template-picker-body">Carregando templates...</div>
+  </div>
+</div>
+
 <script>
 (function(){
   var screens = document.querySelectorAll('.screen');
@@ -1459,12 +1472,133 @@ button{font-family:'Inter',sans-serif;}
       document.getElementById('conversa-messages').scrollTop = document.getElementById('conversa-messages').scrollHeight;
     } catch (err) {
       if (err.message && err.message.indexOf('janela de 24h') !== -1) {
-        alert('A janela de 24h desse contato está fechada. Pra falar com ele de novo é preciso usar um template aprovado pela Meta (ainda não disponível nesta tela).');
+        input.value = text;
+        openTemplatePicker();
       } else {
         alert('Não foi possível enviar: ' + err.message);
+        input.value = text;
       }
-      input.value = text;
     }
+  });
+
+  // ── Templates de mensagem (Meta) — único jeito de reabrir conversa fora da janela de 24h ──
+  var templatePickerCache = null;
+
+  function templateBodyText(template) {
+    var bodyComp = (template.components || []).find(function (c) { return c.type === 'BODY'; });
+    return bodyComp ? bodyComp.text : '';
+  }
+
+  function templateVariableCount(bodyText) {
+    var matches = bodyText.match(/\{\{\d+\}\}/g);
+    return matches ? new Set(matches).size : 0;
+  }
+
+  async function openTemplatePicker() {
+    var overlay = document.getElementById('template-picker-overlay');
+    var body = document.getElementById('template-picker-body');
+    overlay.style.display = 'flex';
+    body.innerHTML = 'Carregando templates...';
+
+    if (!templatePickerCache) {
+      try {
+        templatePickerCache = await api('/templates');
+      } catch (err) {
+        body.innerHTML = '<div style="color:#B42318;font-size:12.5px;">Não foi possível carregar os templates: ' + escapeHtml(err.message) + '</div>';
+        return;
+      }
+    }
+
+    if (!templatePickerCache.length) {
+      body.innerHTML = '<div style="font-size:12.5px;color:#9A9D96;">Nenhum template aprovado encontrado pra essa conta do WhatsApp. Crie e aprove um template no Gerenciador do WhatsApp da Meta primeiro.</div>';
+      return;
+    }
+
+    body.innerHTML =
+      '<label style="display:flex;flex-direction:column;gap:5px;margin-bottom:14px;">' +
+        '<span style="font-size:11.5px;font-weight:600;color:#5B5F58;">Template</span>' +
+        '<select id="tpl-select" style="width:100%;background:#F5F4EF;border:1px solid #E4E1D8;border-radius:9px;padding:9px 12px;font-size:13px;color:#14181A;box-sizing:border-box;font-family:\'Inter\',sans-serif;">' +
+          templatePickerCache.map(function (t, i) { return '<option value="' + i + '">' + escapeHtml(t.name) + ' (' + escapeHtml(t.language) + ')</option>'; }).join('') +
+        '</select>' +
+      '</label>' +
+      '<div id="tpl-vars-wrap" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;"></div>' +
+      '<div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;">Prévia</div>' +
+      '<div id="tpl-preview" style="background:#F5F4EF;border-radius:10px;padding:12px;font-size:12.5px;color:#1F2421;line-height:1.4;margin-bottom:16px;"></div>' +
+      '<button id="tpl-send-btn" style="width:100%;background:#EB6D37;color:#FFFFFF;border:none;border-radius:9px;padding:11px;font-weight:700;font-size:13px;cursor:pointer;">Enviar template</button>';
+
+    function renderSelectedTemplate() {
+      var idx = parseInt(document.getElementById('tpl-select').value, 10);
+      var template = templatePickerCache[idx];
+      var bodyText = templateBodyText(template);
+      var varCount = templateVariableCount(bodyText);
+
+      var varsWrap = document.getElementById('tpl-vars-wrap');
+      varsWrap.innerHTML = '';
+      for (var i = 1; i <= varCount; i++) {
+        var field = document.createElement('label');
+        field.style.cssText = 'display:flex;flex-direction:column;gap:4px;';
+        field.innerHTML = '<span style="font-size:11.5px;font-weight:600;color:#5B5F58;">Variável {{' + i + '}}</span>' +
+          '<input class="tpl-var-input" data-var-index="' + i + '" style="width:100%;background:#F5F4EF;border:1px solid #E4E1D8;border-radius:8px;padding:8px 10px;font-size:12.5px;color:#14181A;box-sizing:border-box;"/>';
+        varsWrap.appendChild(field);
+      }
+
+      function updatePreview() {
+        var preview = bodyText;
+        varsWrap.querySelectorAll('.tpl-var-input').forEach(function (input) {
+          var idx2 = input.getAttribute('data-var-index');
+          preview = preview.split('{{' + idx2 + '}}').join(input.value || ('{{' + idx2 + '}}'));
+        });
+        document.getElementById('tpl-preview').textContent = preview || '(template sem corpo de texto)';
+      }
+      varsWrap.querySelectorAll('.tpl-var-input').forEach(function (input) {
+        input.addEventListener('input', updatePreview);
+      });
+      updatePreview();
+    }
+
+    document.getElementById('tpl-select').addEventListener('change', renderSelectedTemplate);
+    renderSelectedTemplate();
+
+    document.getElementById('tpl-send-btn').addEventListener('click', async function () {
+      if (!state.currentConversationId) return;
+      var idx = parseInt(document.getElementById('tpl-select').value, 10);
+      var template = templatePickerCache[idx];
+      var varInputs = document.querySelectorAll('.tpl-var-input');
+      var components = [];
+      if (varInputs.length) {
+        components.push({
+          type: 'body',
+          parameters: Array.from(varInputs).map(function (input) { return { type: 'text', text: input.value || '' }; }),
+        });
+      }
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+      try {
+        var saved = await api('/conversations/' + state.currentConversationId + '/send-template', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: template.name, language: template.language, components: components,
+            preview: document.getElementById('tpl-preview').textContent,
+          }),
+        });
+        document.getElementById('conversa-messages').appendChild(renderBubble(saved));
+        document.getElementById('conversa-messages').scrollTop = document.getElementById('conversa-messages').scrollHeight;
+        document.getElementById('template-picker-overlay').style.display = 'none';
+      } catch (err) {
+        alert('Não foi possível enviar o template: ' + err.message);
+      }
+      btn.disabled = false;
+      btn.textContent = 'Enviar template';
+    });
+  }
+
+  document.getElementById('conversa-template-btn').addEventListener('click', openTemplatePicker);
+  document.getElementById('template-picker-close').addEventListener('click', function () {
+    document.getElementById('template-picker-overlay').style.display = 'none';
+  });
+  document.getElementById('template-picker-overlay').addEventListener('click', function (e) {
+    if (e.target === this) this.style.display = 'none';
   });
 
   document.getElementById('conversa-anexo-input').addEventListener('change', async function () {

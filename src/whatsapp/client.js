@@ -34,6 +34,39 @@ export async function sendTextMessage(toWaId, text) {
   });
 }
 
+// Lista os templates de mensagem aprovados pela Meta pra essa conta (WABA) —
+// únicos que podem ser enviados fora da janela de 24h. Degrada pra lista
+// vazia (em vez de lançar) se a conta ainda não tiver WABA/token configurado,
+// pra não quebrar a tela de templates antes da conexão real estar pronta.
+export async function listMessageTemplates() {
+  const wabaId = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
+  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+  if (!wabaId || !token) return [];
+
+  const res = await fetch(apiUrl(`${wabaId}/message_templates?fields=name,language,status,category,components&limit=100`), {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data?.error?.message || `Falha ao listar templates (${res.status})`);
+  }
+  return (data.data || []).filter((t) => t.status === 'APPROVED');
+}
+
+export async function sendTemplateMessage(toWaId, { name, language, components }) {
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  return callGraphApi(`${phoneNumberId}/messages`, {
+    messaging_product: 'whatsapp',
+    to: toWaId,
+    type: 'template',
+    template: {
+      name,
+      language: { code: language },
+      components: components || [],
+    },
+  });
+}
+
 export async function markMessageAsRead(waMessageId) {
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   return callGraphApi(`${phoneNumberId}/messages`, {
