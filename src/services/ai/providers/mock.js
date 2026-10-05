@@ -31,6 +31,14 @@ export async function completeMock({ system, messages, feature }) {
     };
   }
 
+  if (feature === 'ai_agent_reply') {
+    return {
+      text: '[mock] Resposta automática do agente de IA — configure uma chave real em Configurações para respostas de verdade.',
+      tokensIn: lastUserMessage.length,
+      tokensOut: 20,
+    };
+  }
+
   if (feature === 'classify_automation') {
     return { text: JSON.stringify({ result: false }), tokensIn: lastUserMessage.length, tokensOut: 10 };
   }

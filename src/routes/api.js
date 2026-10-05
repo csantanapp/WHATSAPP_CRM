@@ -53,6 +53,9 @@ import { getDistributionRule, upsertDistributionRule } from '../services/distrib
 import { summarizeConversation, getLatestInsight, getAiSettings, updateAiSettings, AI_PROVIDERS } from '../services/ai/AIService.js';
 import { runRadarNow } from '../jobs/dailyRadarJob.js';
 import { getRiskRadarConversations } from '../repositories/radar.js';
+import {
+  listAgents, getAgent, createAgent, updateAgent, setAgentActive, deleteAgent, duplicateAgent,
+} from '../repositories/aiAgents.js';
 import multer from 'multer';
 import { readFile } from 'node:fs/promises';
 import { mediaFilePath, saveMediaFile } from '../services/mediaStorage.js';
@@ -396,6 +399,46 @@ apiRouter.post('/ai/radar/run', requireRole('admin', 'supervisor'), asyncHandler
 
 apiRouter.get('/radar/risk', asyncHandler(async (req, res) => {
   res.json(await getRiskRadarConversations(req.tenantId, req.user));
+}));
+
+apiRouter.get('/ai-agents', asyncHandler(async (req, res) => {
+  res.json(await listAgents(req.tenantId));
+}));
+
+apiRouter.get('/ai-agents/:id', asyncHandler(async (req, res) => {
+  const agent = await getAgent(req.tenantId, req.params.id);
+  if (!agent) return res.status(404).json({ error: 'Agente não encontrado' });
+  res.json(agent);
+}));
+
+apiRouter.post('/ai-agents', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
+  if (!req.body.name) return res.status(400).json({ error: 'name é obrigatório' });
+  const agent = await createAgent(req.tenantId, req.body);
+  res.status(201).json(agent);
+}));
+
+apiRouter.patch('/ai-agents/:id', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
+  const agent = await updateAgent(req.tenantId, req.params.id, req.body);
+  if (!agent) return res.status(404).json({ error: 'Agente não encontrado' });
+  res.json(agent);
+}));
+
+apiRouter.patch('/ai-agents/:id/active', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
+  const agent = await setAgentActive(req.tenantId, req.params.id, !!req.body.is_active);
+  if (!agent) return res.status(404).json({ error: 'Agente não encontrado' });
+  res.json(agent);
+}));
+
+apiRouter.post('/ai-agents/:id/duplicate', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
+  const agent = await duplicateAgent(req.tenantId, req.params.id);
+  if (!agent) return res.status(404).json({ error: 'Agente não encontrado' });
+  res.status(201).json(agent);
+}));
+
+apiRouter.delete('/ai-agents/:id', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
+  const deleted = await deleteAgent(req.tenantId, req.params.id);
+  if (!deleted) return res.status(404).json({ error: 'Agente não encontrado' });
+  res.status(204).end();
 }));
 
 apiRouter.patch('/conversations/:id/priority', asyncHandler(async (req, res) => {

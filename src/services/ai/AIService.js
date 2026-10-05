@@ -46,7 +46,7 @@ async function logUsage(tenantId, feature, provider, tokensIn, tokensOut) {
 // Núcleo: escolhe o provider certo, respeita o limite mensal, loga uso, e
 // NUNCA deixa uma falha de IA quebrar o fluxo do atendimento — degrada pro
 // mock (ou devolve null) e loga o erro.
-async function complete({ tenantId, feature, system, messages }) {
+async function complete({ tenantId, feature, system, messages, providerOverride }) {
   const settings = await getSettings(tenantId);
   const used = await usageThisMonth(tenantId);
   if (used >= settings.monthly_limit) {
@@ -54,23 +54,23 @@ async function complete({ tenantId, feature, system, messages }) {
     return null;
   }
 
-  const providerDef = AI_PROVIDERS[settings.provider];
+  const providerId = providerOverride || settings.provider;
+  const providerDef = AI_PROVIDERS[providerId];
   var apiKey = null;
   if (providerDef) {
-    if (settings.api_key_encrypted) {
+    // A chave salva no painel é só do provider configurado em ai_settings —
+    // um agente com provider diferente (providerOverride) só funciona de
+    // verdade se houver fallback no .env pra ele; senão degrada pro mock.
+    if (providerId === settings.provider && settings.api_key_encrypted) {
       try {
         apiKey = decryptSecret(settings.api_key_encrypted);
       } catch (err) {
         logger.error('ai_key_decrypt_failed', { tenantId, message: err.message });
       }
     }
-    // Fallback pro .env — útil se alguém preferir configurar lá em vez do painel.
-    // Atenção: a chave salva no painel é "uma só por tenant"; trocar de provedor
-    // sem colar uma chave nova reaproveita a antiga, o que falha (e degrada pro
-    // mock) até o usuário colar a chave certa do novo provedor escolhido.
     if (!apiKey) apiKey = process.env[providerDef.envFallback] || null;
   }
-  const provider = providerDef && apiKey ? settings.provider : 'mock';
+  const provider = providerDef && apiKey ? providerId : 'mock';
 
   try {
     const fn = provider === 'mock' ? completeMock : providerDef.fn;
@@ -165,6 +165,23 @@ export async function classifyForAutomation(tenantId, { question, transcript }) 
   if (!result) return false;
   const parsed = parseJsonSafe(result.text);
   return !!(parsed && parsed.result === true);
+}
+
+// Resposta de um Agente de IA (persona configurável, sem tool-calling) — usada
+// pelo dispatcher de agentes (src/automation/aiAgents.js) no lugar de um
+// step fixo de automação. O próprio prompt instrui o modelo a responder
+// com o token [[HANDOFF]] quando o cliente precisa de um humano.
+export async function replyAsAgent(tenantId, { systemPrompt, transcript, providerOverride }) {
+  const system = (systemPrompt || '') +
+    '\n\nSe o cliente precisar claramente falar com um humano (reclamação grave, pedido explícito de atendente, ou assunto fora do seu escopo), responda EXATAMENTE com o texto [[HANDOFF]] e mais nada.';
+  const result = await complete({
+    tenantId,
+    feature: 'ai_agent_reply',
+    system,
+    messages: [{ role: 'user', content: transcript }],
+    providerOverride: providerOverride || undefined,
+  });
+  return result ? result.text : null;
 }
 
 export async function getAiSettings(tenantId) {

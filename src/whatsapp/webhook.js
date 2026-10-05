@@ -20,6 +20,7 @@ import { transcribeAudio } from '../services/transcription/TranscriptionService.
 import { getDefaultTenantId } from '../tenant.js';
 import { broadcast } from '../realtime.js';
 import { runTriggersForInboundMessage } from '../automation/engine.js';
+import { runAiAgentsForInboundMessage } from '../automation/aiAgents.js';
 
 export const webhookRouter = Router();
 
@@ -181,6 +182,7 @@ async function handleInboundMessages(value) {
     if (await handleOptOutIfRequested(conversation, contact, body)) continue;
 
     await runTriggersForInboundMessage({ conversation, contact, message: saved });
+    await runAiAgentsForInboundMessage({ conversation, contact, message: saved });
   }
 }
 
