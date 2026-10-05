@@ -249,17 +249,36 @@ button{font-family:'Inter',sans-serif;}
                 </div>
 
                 <div style="width:320px;flex-shrink:0;border-left:1px solid #E7E5DF;padding:22px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:20px;">
-                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;">
-                    <div id="painel-avatar" style="width:64px;height:64px;border-radius:50%;background:#FBEAE3;color:#D85A26;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:700;font-size:20px;margin-bottom:10px;">--</div>
-                    <div id="painel-nome" title="Clique para editar o nome" style="font-family:'Inter',sans-serif;font-weight:700;font-size:15px;color:#14181A;cursor:pointer;">--</div>
-                    <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
-                      <span id="painel-telefone" style="font-size:12.5px;color:#82867F;"></span>
-                    </div>
-                    <div id="painel-email" title="Clique para editar o e-mail" style="font-size:12px;color:#9A9D96;cursor:pointer;margin-top:2px;">+ adicionar e-mail</div>
-                  </div>
                   <div>
-                    <div id="painel-tags" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;"></div>
+                    <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Contato</div>
+                    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+                      <div id="painel-avatar" style="width:64px;height:64px;border-radius:50%;background:#FBEAE3;color:#D85A26;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:700;font-size:20px;margin-bottom:10px;">--</div>
+                      <div id="painel-nome" title="Clique para editar o nome" style="font-family:'Inter',sans-serif;font-weight:700;font-size:15px;color:#14181A;cursor:pointer;">--</div>
+                      <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+                        <span id="painel-telefone" style="font-size:12.5px;color:#82867F;"></span>
+                      </div>
+                      <div id="painel-email" title="Clique para editar o e-mail" style="font-size:12px;color:#9A9D96;cursor:pointer;margin-top:2px;">+ adicionar e-mail</div>
+                      <a id="painel-ver-contato" href="#contatos" style="font-size:11.5px;font-weight:600;color:#D85A26;margin-top:8px;display:flex;align-items:center;gap:4px;cursor:pointer;">Ver contato <span>→</span></a>
+                    </div>
                   </div>
+
+                  <div>
+                    <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Tags da conversa</div>
+                    <div id="painel-tags" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:8px;"></div>
+                    <div id="painel-tags-sugeridas" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+                  </div>
+
+                  <div>
+                    <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Demanda aberta</div>
+                    <div id="painel-demanda-box"></div>
+                  </div>
+
+                  <div>
+                    <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Memória do contato</div>
+                    <div style="font-size:11px;color:#9A9D96;margin-bottom:8px;line-height:1.4;">Fatos duráveis sobre o contato — ficam salvos aqui mesmo depois que essa demanda encerrar.</div>
+                    <textarea id="painel-notas" placeholder="Adicionar fato durável sobre este contato..." style="width:100%;background:#F5F4EF;border:1px solid #E4E1D8;border-radius:10px;padding:11px 12px;font-size:12.5px;color:#3A3D38;min-height:56px;resize:vertical;font-family:'Inter',sans-serif;box-sizing:border-box;"></textarea>
+                  </div>
+
                   <div>
                     <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Pipeline</div>
                     <div style="background:#F5F4EF;border:1px solid #E4E1D8;border-radius:10px;padding:12px;">
@@ -267,17 +286,16 @@ button{font-family:'Inter',sans-serif;}
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#82867F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54Z"></path></svg>
                         <span id="painel-funil" style="font-size:11.5px;font-weight:600;color:#82867F;">--</span>
                       </div>
-                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-                        <span style="width:8px;height:8px;border-radius:50%;background:#EB6D37;display:inline-block;flex-shrink:0;"></span>
-                        <span id="painel-etapa" style="font-size:14.5px;font-weight:700;color:#14181A;">--</span>
-                      </div>
-                      <button id="painel-avancar-etapa" style="width:100%;background:#EB6D37;border:none;color:#FFFFFF;border-radius:9px;padding:10px;font-weight:600;font-size:12.5px;cursor:pointer;">Mover para próxima etapa →</button>
+                      <select id="painel-etapa-select" style="width:100%;background:#FFFFFF;border:1px solid #E4E1D8;border-radius:8px;padding:9px 10px;font-size:13px;font-weight:600;color:#14181A;font-family:'Inter',sans-serif;cursor:pointer;margin-bottom:10px;">
+                        <option value="">--</option>
+                      </select>
                       <button id="painel-redirecionar-funil" style="width:100%;background:none;border:none;color:#5B5F58;padding:9px 0 0;font-weight:600;font-size:11.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5B5F58" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3 21 7l-4 4"></path><path d="M3 11V9a2 2 0 0 1 2-2h16"></path><path d="M7 21 3 17l4-4"></path><path d="M21 13v2a2 2 0 0 1-2 2H3"></path></svg>
                         Redirecionar para outro funil
                       </button>
                     </div>
                   </div>
+
                   <div>
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
                       <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;">Resumo (IA)</div>
@@ -292,9 +310,10 @@ button{font-family:'Inter',sans-serif;}
                     </div>
                     <div id="oportunidade-box" style="background:#F5F4EF;border:1px solid #E4E1D8;border-radius:10px;padding:12px;font-size:12.5px;color:#82867F;">Nenhuma oportunidade aberta.</div>
                   </div>
+
                   <div>
-                    <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Notas internas</div>
-                    <textarea id="painel-notas" placeholder="Adicionar nota sobre este lead..." style="width:100%;background:#F5F4EF;border:1px solid #E4E1D8;border-radius:10px;padding:11px 12px;font-size:12.5px;color:#3A3D38;min-height:56px;resize:vertical;font-family:'Inter',sans-serif;box-sizing:border-box;"></textarea>
+                    <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Leads recentes</div>
+                    <div id="painel-leads-recentes" style="display:flex;flex-direction:column;gap:6px;"></div>
                   </div>
                 </div>
               </div>
@@ -1303,7 +1322,58 @@ button{font-family:'Inter',sans-serif;}
     emailEl.textContent = conv.contact_email || '+ adicionar e-mail';
     emailEl.style.color = conv.contact_email ? '#5B5F58' : '#9A9D96';
     document.getElementById('painel-funil').textContent = conv.funnel_name || '--';
-    document.getElementById('painel-etapa').textContent = conv.stage_name || '--';
+    var etapaSelect = document.getElementById('painel-etapa-select');
+    var currentFunnelObj = state.funnels.find(function (f) { return f.id === conv.funnel_id; });
+    etapaSelect.innerHTML = currentFunnelObj && currentFunnelObj.stages.length
+      ? currentFunnelObj.stages.map(function (s) {
+          return '<option value="' + s.id + '"' + (s.id === conv.funnel_stage_id ? ' selected' : '') + '>' + escapeHtml(s.name) + '</option>';
+        }).join('')
+      : '<option value="">Sem etapas</option>';
+
+    document.getElementById('painel-ver-contato').onclick = function (e) {
+      e.preventDefault();
+      window.__goto && window.__goto('contatos');
+      setTimeout(function () { openLeadDetail(conv.contact_id); }, 60);
+    };
+
+    var demandaBox = document.getElementById('painel-demanda-box');
+    if (conv.status === 'closed') {
+      demandaBox.innerHTML = '<div style="font-size:12px;color:#9A9D96;">Nenhuma demanda aberta — essa conversa está encerrada.</div>';
+    } else {
+      var lastActivity = conv.last_message_at || conv.created_at;
+      var hoursOpen = lastActivity ? Math.round((Date.now() - new Date(lastActivity).getTime()) / 3600000) : 0;
+      var statusLabel = conv.status === 'pending' ? 'Pendente' : 'Aberta';
+      demandaBox.innerHTML =
+        '<div style="background:#F5F4EF;border:1px solid #E4E1D8;border-radius:10px;padding:12px;">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">' +
+            '<span style="font-size:12.5px;font-weight:700;color:#14181A;">' + statusLabel + '</span>' +
+            '<span style="font-size:11px;color:#9A9D96;">há ' + hoursOpen + 'h</span>' +
+          '</div>' +
+          '<div style="font-size:12px;color:#5B5F58;margin-bottom:10px;">Responder à nova mensagem do cliente</div>' +
+          '<button id="painel-encerrar-demanda" style="width:100%;background:#FFFFFF;border:1px solid #E4E1D8;border-radius:8px;padding:8px;font-weight:600;font-size:12px;color:#B42318;cursor:pointer;">Encerrar demanda</button>' +
+        '</div>';
+      document.getElementById('painel-encerrar-demanda').addEventListener('click', async function () {
+        await api('/conversations/' + state.currentConversationId + '/status', { method: 'PATCH', body: JSON.stringify({ status: 'closed' }) });
+        refreshConversationPanel();
+        if (state.currentFunnelId) renderFunnel(state.currentFunnelId);
+      });
+    }
+
+    var leadsEl = document.getElementById('painel-leads-recentes');
+    leadsEl.innerHTML = '<div style="font-size:12px;color:#9A9D96;">Carregando...</div>';
+    api('/contacts/' + conv.contact_id).then(function (contactDetail) {
+      var others = (contactDetail.conversations || []).filter(function (c) { return c.id !== state.currentConversationId; });
+      if (!others.length) {
+        leadsEl.innerHTML = '<div style="font-size:12px;color:#9A9D96;">Nenhuma outra conversa.</div>';
+        return;
+      }
+      leadsEl.innerHTML = others.map(function (c) {
+        return '<div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid #F0EFEA;">' +
+          '<span style="color:#3A3D38;">' + escapeHtml(c.funnel_name || 'Sem funil') + '</span>' +
+          '<span style="font-size:10.5px;font-weight:600;color:#5B5F58;background:#EFEDE6;padding:2px 8px;border-radius:20px;">' + escapeHtml(c.stage_name || '--') + '</span>' +
+        '</div>';
+      }).join('');
+    }).catch(function () { leadsEl.innerHTML = ''; });
 
     document.getElementById('conversa-atribuido').textContent = conv.assigned_user_name ? ('Com: ' + conv.assigned_user_name) : 'Não atribuída';
     document.getElementById('conversa-status-select').value = conv.status || 'open';
@@ -1334,6 +1404,21 @@ button{font-family:'Inter',sans-serif;}
     document.getElementById('painel-add-tag').addEventListener('click', function () {
       openTagPicker(conv.contact_id, conv.contact_tags, refreshConversationPanel);
     });
+
+    var sugeridasEl = document.getElementById('painel-tags-sugeridas');
+    api('/tags').then(function (catalog) {
+      var applied = conv.contact_tags || [];
+      var suggestions = catalog.filter(function (t) { return applied.indexOf(t.name) === -1; }).slice(0, 8);
+      sugeridasEl.innerHTML = suggestions.map(function (t) {
+        return '<button data-painel-quick-tag="' + escapeHtml(t.name) + '" style="font-size:10.5px;font-weight:600;color:#5B5F58;background:none;border:1px dashed #D8D5CC;border-radius:20px;padding:3px 9px;cursor:pointer;">+ ' + escapeHtml(t.name) + '</button>';
+      }).join('');
+      sugeridasEl.querySelectorAll('[data-painel-quick-tag]').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+          await api('/contacts/' + conv.contact_id + '/tags', { method: 'POST', body: JSON.stringify({ tag: btn.getAttribute('data-painel-quick-tag') }) });
+          refreshConversationPanel();
+        });
+      });
+    }).catch(function () { sugeridasEl.innerHTML = ''; });
   }
 
   document.getElementById('painel-nome').addEventListener('click', async function () {
@@ -1361,9 +1446,12 @@ button{font-family:'Inter',sans-serif;}
     await api('/contacts/' + conv.contact_id, { method: 'PATCH', body: JSON.stringify({ notes: this.value }) });
   });
 
-  document.getElementById('painel-avancar-etapa').addEventListener('click', async function () {
-    if (!state.currentConversationId) return;
-    await api('/conversations/' + state.currentConversationId + '/advance-stage', { method: 'POST' });
+  document.getElementById('painel-etapa-select').addEventListener('change', async function () {
+    if (!state.currentConversationId || !this.value) return;
+    await api('/conversations/' + state.currentConversationId + '/stage', {
+      method: 'PATCH',
+      body: JSON.stringify({ funnel_stage_id: parseInt(this.value, 10) }),
+    });
     refreshConversationPanel();
     if (state.currentFunnelId) renderFunnel(state.currentFunnelId);
   });
