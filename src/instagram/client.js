@@ -36,7 +36,7 @@ export async function getInstagramProfile(igsid) {
   const pageToken = process.env.INSTAGRAM_PAGE_ACCESS_TOKEN;
   if (!pageToken) return null;
   try {
-    const res = await fetch(apiUrl(`${igsid}?fields=name,username`), {
+    const res = await fetch(apiUrl(`${igsid}?fields=name,username,profile_pic`), {
       headers: { Authorization: `Bearer ${pageToken}` },
     });
     const data = await res.json();

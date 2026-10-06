@@ -25,7 +25,7 @@ export async function getDashboardSummary(tenantId) {
 
 export async function getRecentConversations(tenantId, limit = 8) {
   const result = await query(
-    `SELECT c.*, ct.name AS contact_name, ct.phone_display, ct.avatar_initials, fs.name AS stage_name
+    `SELECT c.*, ct.name AS contact_name, ct.phone_display, ct.avatar_initials, ct.avatar_url, fs.name AS stage_name
      FROM conversations c
      JOIN contacts ct ON ct.id = c.contact_id
      LEFT JOIN funnel_stages fs ON fs.id = c.funnel_stage_id

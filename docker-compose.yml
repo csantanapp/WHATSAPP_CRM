@@ -6,16 +6,34 @@ services:
     env_file: .env.production
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@db:5432/whatsapp_crm
+      - WHISPER_LOCAL_URL=http://whisper:9000
     expose:
       - "3000"
     depends_on:
       db:
         condition: service_healthy
+      whisper:
+        condition: service_started
     volumes:
       - whatsapp_crm_media:/data/media
     networks:
       - whatsapp-crm
       - caddy_net
+
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    container_name: whatsapp-crm-whisper
+    restart: unless-stopped
+    environment:
+      - ASR_MODEL=small
+      - ASR_ENGINE=faster_whisper
+      - ASR_MODEL_PATH=/data/whisper
+    volumes:
+      - whatsapp_crm_whisper_models:/data/whisper
+    expose:
+      - "9000"
+    networks:
+      - whatsapp-crm
 
   db:
     image: postgres:16-alpine
@@ -43,3 +61,4 @@ networks:
 volumes:
   whatsapp_crm_db_data:
   whatsapp_crm_media:
+  whatsapp_crm_whisper_models:

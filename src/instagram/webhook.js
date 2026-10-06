@@ -80,12 +80,18 @@ async function handleInboundMessage(event) {
 
   // Contato novo sem nome — tenta enriquecer com o perfil via Graph API
   // (melhor esforço, não bloqueia o resto se falhar).
-  if (!contact.name) {
+  if (!contact.name || !contact.avatar_url) {
     const profile = await getInstagramProfile(igsid);
-    if (profile?.username) {
-      const display = '@' + profile.username;
-      await query('UPDATE contacts SET name = $2, phone_display = $2 WHERE id = $1', [contact.id, display]);
-      contact = { ...contact, name: display, phone_display: display };
+    if (profile) {
+      const display = contact.name || (profile.username ? '@' + profile.username : null);
+      const avatarUrl = profile.profile_pic || contact.avatar_url || null;
+      if (display || avatarUrl) {
+        await query(
+          'UPDATE contacts SET name = COALESCE(name, $2), phone_display = COALESCE(phone_display, $2), avatar_url = COALESCE($3, avatar_url) WHERE id = $1',
+          [contact.id, display, avatarUrl]
+        );
+        contact = { ...contact, name: contact.name || display, phone_display: contact.phone_display || display, avatar_url: avatarUrl || contact.avatar_url };
+      }
     }
   }
 
