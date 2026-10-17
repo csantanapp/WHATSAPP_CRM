@@ -1,5 +1,4 @@
 import { query } from '../db/pool.js';
-import { sendTextMessage } from '../whatsapp/client.js';
 import { insertMessage } from '../repositories/messages.js';
 import { addTagToContact } from '../repositories/contacts.js';
 import { moveConversationToStage, assignConversation, setConversationStatus } from '../repositories/conversations.js';
@@ -9,6 +8,7 @@ import { scheduleJob } from '../jobs/scheduledJobs.js';
 import { broadcast } from '../realtime.js';
 import { logger } from '../logger.js';
 import { classifyForAutomation } from '../services/ai/AIService.js';
+import { sendQuestion, handleQuestionReply, sendText } from './formQuestion.js';
 
 async function isFirstMessageOfConversation(conversationId) {
   const result = await query(
@@ -102,10 +102,10 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
           break;
         }
         const text = current.config?.text || '';
-        const sent = await sendTextMessage(contact.wa_id, text);
+        const sent = await sendText(contact, text);
         const saved = await insertMessage({
           conversationId: conversation.id,
-          waMessageId: sent?.messages?.[0]?.id,
+          waMessageId: sent?.messages?.[0]?.id || sent?.message_id,
           direction: 'outbound',
           senderType: 'automation',
           body: text,
@@ -193,17 +193,7 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
           await updateRun(run.id, { currentStepId: null, status: 'stopped' });
           return;
         }
-        const text = current.config?.text || '';
-        const sent = await sendTextMessage(contact.wa_id, text);
-        const saved = await insertMessage({
-          conversationId: conversation.id,
-          waMessageId: sent?.messages?.[0]?.id,
-          direction: 'outbound',
-          senderType: 'automation',
-          body: text,
-          automationFlowId: flow.id,
-        });
-        broadcast({ type: 'message:new', conversationId: conversation.id, message: saved });
+        await sendQuestion({ flow, conversation, contact, step: current });
         await updateRun(run.id, { currentStepId: current.id, status: 'waiting_reply' });
         return;
       }
@@ -298,15 +288,23 @@ export async function runTriggersForInboundMessage({ conversation, contact, mess
     return;
   }
 
-  await query(
-    'INSERT INTO automation_run_answers (automation_run_id, step_id, answer) VALUES ($1,$2,$3)',
-    [run.id, run.current_step_id, message.body]
-  );
-
   const step = await getStep(run.current_step_id);
-  const nextStep = step?.next_step_id ? await getStep(step.next_step_id) : null;
   const flowResult = await query('SELECT * FROM automation_flows WHERE id = $1', [run.automation_flow_id]);
   const flow = flowResult.rows[0];
+
+  if (step?.step_type === 'ask_question') {
+    // Valida e grava a resposta na ficha; se for inválida, repergunta e
+    // continua aguardando.
+    const outcome = await handleQuestionReply({ flow, run, step, conversation, contact, message });
+    if (outcome === 'retry') return;
+  } else if (step) {
+    await query(
+      'INSERT INTO automation_run_answers (automation_run_id, step_id, answer) VALUES ($1,$2,$3)',
+      [run.id, run.current_step_id, message.body]
+    );
+  }
+
+  const nextStep = step?.next_step_id ? await getStep(step.next_step_id) : null;
 
   if (!nextStep) {
     await updateRun(run.id, { currentStepId: null, status: 'completed' });

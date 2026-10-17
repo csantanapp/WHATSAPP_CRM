@@ -98,7 +98,7 @@ async function handleInboundMessages(value) {
   if (!conversation) {
     isNewConversation = true;
     const firstMsg = value.messages[0];
-    const firstBody = firstMsg?.text?.body || firstMsg?.button?.text || firstMsg?.interactive?.button_reply?.title || '';
+    const firstBody = firstMsg?.text?.body || firstMsg?.button?.text || firstMsg?.interactive?.button_reply?.title || firstMsg?.interactive?.list_reply?.title || '';
 
     // Roteamento por campanha: se a primeira mensagem contém a palavra-chave de
     // algum link wa.me gerado (ex: link do stand do evento), o lead cai direto
@@ -127,7 +127,7 @@ async function handleInboundMessages(value) {
   }
 
   for (const msg of value.messages) {
-    const body = msg.text?.body || msg.button?.text || msg.interactive?.button_reply?.title || null;
+    const body = msg.text?.body || msg.button?.text || msg.interactive?.button_reply?.title || msg.interactive?.list_reply?.title || null;
     const media = await processInboundMedia(msg);
 
     const saved = await insertMessage({

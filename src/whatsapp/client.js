@@ -154,3 +154,46 @@ export async function sendMediaMessage(toWaId, mediaId, type, caption) {
   };
   return callGraphApi(`${phoneNumberId}/messages`, body);
 }
+
+// Mensagem interativa com até 3 botões de resposta rápida (nó "Perguntar" do
+// formulário em conversa). A Meta corta título de botão em 20 caracteres.
+export async function sendButtonsMessage(toWaId, text, options) {
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  return callGraphApi(`${phoneNumberId}/messages`, {
+    messaging_product: 'whatsapp',
+    to: toWaId,
+    type: 'interactive',
+    interactive: {
+      type: 'button',
+      body: { text },
+      action: {
+        buttons: options.slice(0, 3).map((title, i) => ({
+          type: 'reply',
+          reply: { id: `opt_${i + 1}`, title: title.slice(0, 20) },
+        })),
+      },
+    },
+  });
+}
+
+// Mensagem interativa em formato de lista (até 10 opções) — o lead toca no
+// botão `buttonLabel` e escolhe uma linha. Título de linha: até 24 caracteres.
+export async function sendListMessage(toWaId, text, buttonLabel, options) {
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  return callGraphApi(`${phoneNumberId}/messages`, {
+    messaging_product: 'whatsapp',
+    to: toWaId,
+    type: 'interactive',
+    interactive: {
+      type: 'list',
+      body: { text },
+      action: {
+        button: (buttonLabel || 'Ver opções').slice(0, 20),
+        sections: [{
+          title: 'Opções',
+          rows: options.slice(0, 10).map((title, i) => ({ id: `opt_${i + 1}`, title: title.slice(0, 24) })),
+        }],
+      },
+    },
+  });
+}

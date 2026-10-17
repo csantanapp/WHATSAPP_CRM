@@ -262,6 +262,11 @@ button{font-family:'Inter',sans-serif;}
                     </div>
                   </div>
 
+                  <div id="painel-campos-wrap" style="display:none;">
+                    <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Dados do formulário</div>
+                    <div id="painel-campos"></div>
+                  </div>
+
                   <div>
                     <div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Tags da conversa</div>
                     <div id="painel-tags" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:8px;"></div>
@@ -652,6 +657,7 @@ button{font-family:'Inter',sans-serif;}
                   <button class="flow-palette-btn" data-add-node="condition">𝗬&nbsp;&nbsp;Condição</button>
                   <button class="flow-palette-btn" data-add-node="classify_ai">🧠&nbsp;&nbsp;Classificar (IA)</button>
                   <button class="flow-palette-btn" data-add-node="send_message">💬&nbsp;&nbsp;Resposta (texto)</button>
+                  <button class="flow-palette-btn" data-add-node="ask_question">📝&nbsp;&nbsp;Pergunta (formulário)</button>
                   <button class="flow-palette-btn" data-add-node="repeat">🔁&nbsp;&nbsp;Repetir</button>
                   <button class="flow-palette-btn" data-add-node="action">⚡&nbsp;&nbsp;Ação</button>
                   <button class="flow-palette-btn" data-add-node="create_task">🔔&nbsp;&nbsp;Lembrete interno</button>
@@ -1331,6 +1337,18 @@ button{font-family:'Inter',sans-serif;}
     });
   }
 
+  // Campos personalizados preenchidos pelo nó "Pergunta (formulário)".
+  function customFieldsHtml(fields) {
+    var keys = Object.keys(fields || {});
+    if (!keys.length) return '';
+    return keys.map(function (k) {
+      return '<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #F0EFEA;font-size:12.5px;">' +
+        '<span style="color:#82867F;">' + escapeHtml(k) + '</span>' +
+        '<span style="color:#14181A;font-weight:600;text-align:right;word-break:break-word;">' + escapeHtml(String(fields[k])) + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
   async function refreshConversationPanel() {
     if (!state.currentConversationId) return;
     var conv;
@@ -1354,6 +1372,9 @@ button{font-family:'Inter',sans-serif;}
     var emailEl = document.getElementById('painel-email');
     emailEl.textContent = conv.contact_email || '+ adicionar e-mail';
     emailEl.style.color = conv.contact_email ? '#5B5F58' : '#9A9D96';
+    var camposHtml = customFieldsHtml(conv.contact_custom_fields);
+    document.getElementById('painel-campos').innerHTML = camposHtml;
+    document.getElementById('painel-campos-wrap').style.display = camposHtml ? 'block' : 'none';
     document.getElementById('painel-funil').textContent = conv.funnel_name || '--';
     var etapaSelect = document.getElementById('painel-etapa-select');
     var currentFunnelObj = state.funnels.find(function (f) { return f.id === conv.funnel_id; });
@@ -1548,7 +1569,7 @@ button{font-family:'Inter',sans-serif;}
       : '';
 
     var mediaHtml = renderMediaContent(m, textColor);
-    var textHtml = m.body ? '<div style="font-size:13.5px;color:' + textColor + ';line-height:1.5;' + (mediaHtml ? 'margin-top:6px;' : '') + '">' + escapeHtml(m.body) + '</div>' : '';
+    var textHtml = m.body ? '<div style="font-size:13.5px;color:' + textColor + ';line-height:1.5;white-space:pre-wrap;word-break:break-word;' + (mediaHtml ? 'margin-top:6px;' : '') + '">' + escapeHtml(m.body) + '</div>' : '';
 
     wrap.innerHTML =
       tagHtml +
@@ -1919,6 +1940,9 @@ button{font-family:'Inter',sans-serif;}
       if (data.type === 'message:new' || data.type === 'conversation:stage_changed') {
         if (state.currentFunnelId) renderFunnel(state.currentFunnelId);
       }
+      if (data.type === 'contact:updated' && data.conversationId === state.currentConversationId) {
+        refreshConversationPanel();
+      }
       if (data.type === 'message:transcribed' && data.conversationId === state.currentConversationId) {
         var pending = document.querySelector('.transcricao-pendente[data-msg-id="' + data.messageId + '"]');
         if (pending) {
@@ -2113,6 +2137,38 @@ button{font-family:'Inter',sans-serif;}
       ],
     },
     {
+      id: 'formulario-qualificacao',
+      icon: '📝',
+      title: 'Formulário de qualificação',
+      description: 'Na primeira mensagem, pergunta nome, e-mail e interesse (com botões), grava tudo na ficha do lead e marca a tag "lead-qualificado".',
+      trigger_type: 'first_message',
+      trigger_config: {},
+      steps: [
+        {
+          client_id: 'nome', step_type: 'ask_question', x: 380, y: 160,
+          config: { text: 'Olá! 👋 Pra eu te atender melhor, qual é o seu nome?', reply_type: 'text', validate: 'none', save_to: 'name' },
+          next_step_id: 'email',
+        },
+        {
+          client_id: 'email', step_type: 'ask_question', x: 680, y: 160,
+          config: { text: 'Prazer! Qual o seu melhor e-mail?', reply_type: 'text', validate: 'email', save_to: 'email' },
+          next_step_id: 'interesse',
+        },
+        {
+          client_id: 'interesse', step_type: 'ask_question', x: 980, y: 160,
+          config: { text: 'Perfeito! E qual desses serviços te interessa?', reply_type: 'buttons', options: ['Tráfego pago', 'Redes sociais', 'Site / Landing'], save_to: 'custom', custom_field: 'Interesse' },
+          next_step_id: 'tag',
+        },
+        { client_id: 'tag', step_type: 'add_tag', x: 1280, y: 160, config: { tag: 'lead-qualificado' }, next_step_id: 'obrigado' },
+        {
+          client_id: 'obrigado', step_type: 'send_message', x: 1540, y: 160,
+          config: { text: 'Obrigado! Já anotei tudo aqui e um especialista vai falar com você em instantes. 🚀' },
+          next_step_id: 'end',
+        },
+        { client_id: 'end', step_type: 'end', x: 1800, y: 160, config: { label: 'Lead qualificado' } },
+      ],
+    },
+    {
       id: 'captura-orcamento',
       icon: '💰',
       title: 'Captura de orçamento',
@@ -2224,7 +2280,7 @@ button{font-family:'Inter',sans-serif;}
   var FLOW_NODE_META = {
     trigger: { bg: '#FBEAE3', stroke: '#D85A26', icon: '▶', label: 'Gatilho' },
     send_message: { bg: '#EEF2FF', stroke: '#4338CA', icon: '💬', label: 'Resposta (texto)' },
-    ask_question: { bg: '#EEF2FF', stroke: '#4338CA', icon: '💬', label: 'Resposta (texto)' },
+    ask_question: { bg: '#E8F5F3', stroke: '#0F766E', icon: '📝', label: 'Pergunta (formulário)' },
     wait: { bg: '#FEF3E2', stroke: '#B45309', icon: '🕒', label: 'Aguardar' },
     condition: { bg: '#FDECC8', stroke: '#92400E', icon: '𝗬', label: 'Condição' },
     classify_ai: { bg: '#E6F4EA', stroke: '#15803D', icon: '🧠', label: 'Classificar (IA)' },
@@ -2268,7 +2324,13 @@ button{font-family:'Inter',sans-serif;}
     var c = node.config || {};
     switch (node.step_type) {
       case 'send_message': return escapeHtml((c.text || '(sem texto)').slice(0, 70));
-      case 'ask_question': return escapeHtml((c.text || '(sem texto)').slice(0, 70)) + ' <span style="color:#9A9D96;">· aguarda resposta</span>';
+      case 'ask_question': {
+        var saveLabel = { name: 'Nome', email: 'E-mail', custom: c.custom_field || 'campo' }[c.save_to];
+        var optCount = (c.reply_type === 'buttons' || c.reply_type === 'list') ? Math.min((c.options || []).length, c.reply_type === 'list' ? 10 : 3) : 0;
+        return escapeHtml((c.text || '(sem texto)').slice(0, 60)) +
+          ' <span style="color:#9A9D96;">· ' + (optCount ? optCount + ' opções' : 'aguarda resposta') +
+          (saveLabel ? ' → salva em <b>' + escapeHtml(saveLabel) + '</b>' : '') + '</span>';
+      }
       case 'wait': return 'Esperar ' + (c.minutes || 0) + ' min';
       case 'condition':
         if (c.check === 'stage_equals') return 'Se etapa atual é...';
@@ -2577,6 +2639,7 @@ button{font-family:'Inter',sans-serif;}
     if (kind === 'condition') { flowAddNode('condition', { check: 'tag_exists', true_label: 'Sim', false_label: 'Não' }); return; }
     if (kind === 'classify_ai') { flowAddNode('classify_ai', { true_label: 'Sim', false_label: 'Não' }); return; }
     if (kind === 'send_message') { flowAddNode('send_message', { text: '' }); return; }
+    if (kind === 'ask_question') { flowAddNode('ask_question', { text: '', reply_type: 'text', validate: 'none', save_to: '' }); return; }
     if (kind === 'repeat') { flowAddNode('repeat', {}); return; }
     if (kind === 'create_task') { flowAddNode('create_task', { title: 'Follow-up' }); return; }
     if (kind === 'move_stage') { flowAddNode('move_stage', {}); return; }
@@ -2632,7 +2695,70 @@ button{font-family:'Inter',sans-serif;}
     var c = node.config || {};
     var flowFunnel = state.funnels.find(function (f) { return f.id === flowCanvas.flow.funnel_id; });
 
-    if (node.step_type === 'send_message' || node.step_type === 'ask_question') {
+    if (node.step_type === 'ask_question') {
+      title.textContent = 'Pergunta (formulário)';
+      var replyType = c.reply_type || 'text';
+      var saveTo = c.save_to || '';
+      body.innerHTML =
+        flowFieldHtml('f-text', 'Pergunta', flowTextareaHtml('f-text', c.text)) +
+        flowFieldHtml('f-reply-type', 'Como o lead responde', flowSelectHtml('f-reply-type', [
+          { value: 'text', label: 'Resposta livre (texto)' },
+          { value: 'buttons', label: 'Botões (até 3 opções)' },
+          { value: 'list', label: 'Lista de opções (até 10)' },
+        ], replyType)) +
+        '<div id="f-options-wrap" style="display:' + (replyType === 'text' ? 'none' : 'flex') + ';flex-direction:column;gap:10px;">' +
+          flowFieldHtml('f-options', 'Opções (uma por linha)', flowTextareaHtml('f-options', (c.options || []).join('\n'))) +
+          '<div id="f-options-hint" style="font-size:11.5px;color:#9A9D96;"></div>' +
+          '<div id="f-list-button-wrap" style="display:' + (replyType === 'list' ? 'block' : 'none') + ';">' +
+            flowFieldHtml('f-list-button', 'Texto do botão que abre a lista', flowInputHtml('f-list-button', c.list_button || 'Ver opções')) +
+          '</div>' +
+        '</div>' +
+        '<div id="f-validate-wrap" style="display:' + (replyType === 'text' ? 'block' : 'none') + ';">' +
+          flowFieldHtml('f-validate', 'Validar formato da resposta', flowSelectHtml('f-validate', [
+            { value: 'none', label: 'Não validar (aceita qualquer texto)' },
+            { value: 'email', label: 'E-mail' },
+            { value: 'phone', label: 'Telefone (com DDD)' },
+            { value: 'number', label: 'Número' },
+          ], c.validate || 'none')) +
+        '</div>' +
+        flowFieldHtml('f-save-to', 'Salvar a resposta na ficha do lead', flowSelectHtml('f-save-to', [
+          { value: '', label: 'Não salvar (só fica no histórico da conversa)' },
+          { value: 'name', label: 'Nome do lead' },
+          { value: 'email', label: 'E-mail do lead' },
+          { value: 'custom', label: 'Campo personalizado' },
+        ], saveTo)) +
+        '<div id="f-custom-wrap" style="display:' + (saveTo === 'custom' ? 'block' : 'none') + ';">' +
+          flowFieldHtml('f-custom-field', 'Nome do campo (ex: Interesse, Orçamento, Cidade)', flowInputHtml('f-custom-field', c.custom_field || '')) +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 110px;gap:10px;">' +
+          flowFieldHtml('f-retry-text', 'Mensagem se a resposta for inválida (opcional)', flowInputHtml('f-retry-text', c.retry_text || '')) +
+          flowFieldHtml('f-max-retries', 'Tentativas', flowInputHtml('f-max-retries', c.max_retries != null ? c.max_retries : 2, 'number')) +
+        '</div>' +
+        '<div style="font-size:11.5px;color:#9A9D96;line-height:1.45;">O fluxo pausa até o lead responder. Se a resposta for inválida, a pergunta é refeita; esgotadas as tentativas, o fluxo segue sem salvar. No Instagram, botões e listas viram opções numeradas no texto (o lead pode responder "1", "2"...).</div>';
+
+      var updateOptionsHint = function () {
+        var type = document.getElementById('f-reply-type').value;
+        var limit = type === 'list' ? { count: 10, chars: 24 } : { count: 3, chars: 20 };
+        var opts = document.getElementById('f-options').value.split('\n').map(function (o) { return o.trim(); }).filter(Boolean);
+        var tooLong = opts.filter(function (o) { return o.length > limit.chars; });
+        var msg = 'Máximo ' + limit.count + ' opções, ' + limit.chars + ' caracteres cada (limite do WhatsApp).';
+        if (opts.length > limit.count) msg += ' <b style="color:#B42318;">Você tem ' + opts.length + ' — só as ' + limit.count + ' primeiras serão enviadas.</b>';
+        if (tooLong.length) msg += ' <b style="color:#B42318;">' + tooLong.length + ' opção(ões) serão cortadas.</b>';
+        document.getElementById('f-options-hint').innerHTML = msg;
+      };
+      document.getElementById('f-reply-type').addEventListener('change', function () {
+        document.getElementById('f-options-wrap').style.display = this.value === 'text' ? 'none' : 'flex';
+        document.getElementById('f-list-button-wrap').style.display = this.value === 'list' ? 'block' : 'none';
+        document.getElementById('f-validate-wrap').style.display = this.value === 'text' ? 'block' : 'none';
+        updateOptionsHint();
+      });
+      document.getElementById('f-options').addEventListener('input', updateOptionsHint);
+      document.getElementById('f-save-to').addEventListener('change', function () {
+        document.getElementById('f-custom-wrap').style.display = this.value === 'custom' ? 'block' : 'none';
+        if (this.value === 'email') document.getElementById('f-validate').value = 'email';
+      });
+      updateOptionsHint();
+    } else if (node.step_type === 'send_message') {
       title.textContent = 'Resposta (texto)';
       body.innerHTML =
         flowFieldHtml('f-text', 'Mensagem', flowTextareaHtml('f-text', c.text)) +
@@ -2750,9 +2876,31 @@ button{font-family:'Inter',sans-serif;}
       flowCanvas.flow.trigger_type = val('f-trigger-type');
       flowCanvas.flow.trigger_config = flowCanvas.flow.trigger_type === 'keyword' ? { keyword: val('f-keyword') } : {};
       flowCanvas.flow.funnel_id = val('f-funnel') ? parseInt(val('f-funnel'), 10) : null;
-    } else if (node.step_type === 'send_message' || node.step_type === 'ask_question') {
+    } else if (node.step_type === 'ask_question') {
+      var replyTypeVal = val('f-reply-type');
+      var saveToVal = val('f-save-to');
+      var maxRetriesVal = parseInt(val('f-max-retries'), 10);
+      node.config = {
+        text: val('f-text'),
+        reply_type: replyTypeVal,
+        options: replyTypeVal === 'text' ? [] : val('f-options').split('\n').map(function (o) { return o.trim(); }).filter(Boolean),
+        list_button: replyTypeVal === 'list' ? (val('f-list-button') || 'Ver opções') : undefined,
+        validate: replyTypeVal === 'text' ? val('f-validate') : 'none',
+        save_to: saveToVal,
+        custom_field: saveToVal === 'custom' ? (val('f-custom-field') || '').trim() : undefined,
+        retry_text: val('f-retry-text') || undefined,
+        max_retries: isNaN(maxRetriesVal) ? 2 : Math.max(0, Math.min(5, maxRetriesVal)),
+      };
+      if (saveToVal === 'custom' && !node.config.custom_field) {
+        alert('Dê um nome ao campo personalizado (ex: Interesse).');
+        return;
+      }
+    } else if (node.step_type === 'send_message') {
       node.config = { text: val('f-text') };
-      node.step_type = document.getElementById('f-wait-reply').checked ? 'ask_question' : 'send_message';
+      if (document.getElementById('f-wait-reply').checked) {
+        node.step_type = 'ask_question';
+        node.config = { text: node.config.text, reply_type: 'text', validate: 'none', save_to: '' };
+      }
     } else if (node.step_type === 'wait') {
       node.config = { minutes: parseInt(val('f-minutes'), 10) || 60 };
     } else if (node.step_type === 'condition') {
@@ -3423,6 +3571,10 @@ button{font-family:'Inter',sans-serif;}
         '<div id="modal-lead-email" title="Clique para editar" style="font-size:12px;color:' + (lead.email ? '#5B5F58' : '#9A9D96') + ';cursor:pointer;margin-top:2px;">' + escapeHtml(lead.email || '+ adicionar e-mail') + '</div>' +
       '</div>' +
       '<div style="margin-bottom:18px;">' + tagsHtml + '</div>' +
+      (customFieldsHtml(lead.custom_fields) ? '<div style="margin-bottom:18px;">' +
+        '<div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Dados do formulário</div>' +
+        customFieldsHtml(lead.custom_fields) +
+      '</div>' : '') +
       '<div style="margin-bottom:18px;">' +
         '<div style="font-size:11px;font-weight:600;color:#9A9D96;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Presença em funis</div>' +
         conversationsHtml +
