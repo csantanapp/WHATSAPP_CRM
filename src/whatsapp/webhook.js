@@ -181,8 +181,10 @@ async function handleInboundMessages(value) {
     // nenhuma automação de marketing roda depois disso pra ele (ver engine.js).
     if (await handleOptOutIfRequested(conversation, contact, body)) continue;
 
-    await runTriggersForInboundMessage({ conversation, contact, message: saved });
-    await runAiAgentsForInboundMessage({ conversation, contact, message: saved });
+    // Agente de IA fica em silêncio quando um fluxo de automação tratou a
+    // mensagem (ex: lead respondendo um formulário), pra não responder em dobro.
+    const handledByAutomation = await runTriggersForInboundMessage({ conversation, contact, message: saved });
+    if (!handledByAutomation) await runAiAgentsForInboundMessage({ conversation, contact, message: saved });
   }
 }
 

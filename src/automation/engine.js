@@ -250,17 +250,22 @@ function isWithinBusinessHours(config) {
   }
 }
 
+// Retorna true quando a mensagem foi tratada por um fluxo de automação
+// (disparou um fluxo ou respondeu a uma pergunta pendente) — nesse caso os
+// Agentes de IA ficam em silêncio, pra não responder junto com o fluxo.
 export async function runTriggersForInboundMessage({ conversation, contact, message }) {
   // Trigger: primeira mensagem da conversa dispara fluxos configurados como "first_message".
   if (await isFirstMessageOfConversation(conversation.id)) {
     const flows = await getActiveFlowsByTrigger('first_message', conversation.funnel_id);
+    let handled = false;
     for (const flow of flows) {
       const firstStep = await getFirstStep(flow.id);
       if (!firstStep) continue;
       const run = await createRun(flow.id, conversation.id, firstStep.id, 'running');
+      handled = true;
       await runFlowFromStep({ flow, conversation, contact, step: firstStep, run });
     }
-    return;
+    return handled;
   }
 
   // Se há uma automação aguardando resposta nesta conversa, continua o fluxo a partir dela.
@@ -279,24 +284,26 @@ export async function runTriggersForInboundMessage({ conversation, contact, mess
       const keyword = f.trigger_config?.keyword;
       return keyword && (message.body || '').toLowerCase().includes(keyword.toLowerCase());
     });
-    if (!matched) return;
+    if (!matched) return false;
 
     const firstStep = await getFirstStep(matched.id);
-    if (!firstStep) return;
+    if (!firstStep) return false;
     const newRun = await createRun(matched.id, conversation.id, firstStep.id, 'running');
     await runFlowFromStep({ flow: matched, conversation, contact, step: firstStep, run: newRun });
-    return;
+    return true;
   }
 
   const step = await getStep(run.current_step_id);
   const flowResult = await query('SELECT * FROM automation_flows WHERE id = $1', [run.automation_flow_id]);
   const flow = flowResult.rows[0];
 
+  let nextStepId = step?.next_step_id;
   if (step?.step_type === 'ask_question') {
     // Valida e grava a resposta na ficha; se for inválida, repergunta e
-    // continua aguardando.
-    const outcome = await handleQuestionReply({ flow, run, step, conversation, contact, message });
-    if (outcome === 'retry') return;
+    // continua aguardando. Com "caminho por opção", segue o ramo da opção.
+    const reply = await handleQuestionReply({ flow, run, step, conversation, contact, message });
+    if (reply.outcome === 'retry') return true;
+    nextStepId = reply.nextStepId;
   } else if (step) {
     await query(
       'INSERT INTO automation_run_answers (automation_run_id, step_id, answer) VALUES ($1,$2,$3)',
@@ -304,15 +311,16 @@ export async function runTriggersForInboundMessage({ conversation, contact, mess
     );
   }
 
-  const nextStep = step?.next_step_id ? await getStep(step.next_step_id) : null;
+  const nextStep = nextStepId ? await getStep(nextStepId) : null;
 
   if (!nextStep) {
     await updateRun(run.id, { currentStepId: null, status: 'completed' });
-    return;
+    return true;
   }
 
   await updateRun(run.id, { currentStepId: nextStep.id, status: 'running' });
   await runFlowFromStep({ flow, conversation, contact, step: nextStep, run });
+  return true;
 }
 
 // Gatilho: tag adicionada a um contato (chamado pela rota de tags em api.js).

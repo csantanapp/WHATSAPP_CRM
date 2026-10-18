@@ -83,10 +83,13 @@ export async function replaceFlowSteps(flowId, steps) {
   const idByClientId = {};
   for (let i = 0; i < normalized.length; i++) {
     const s = normalized[i];
+    // option_next (ramo por opção do nó Pergunta) chega fora do config, com
+    // client_ids — é resolvido pros ids reais no segundo passo, abaixo.
+    const { option_next: _ignored, ...config } = s.config || {};
     const inserted = await query(
       `INSERT INTO automation_flow_steps (automation_flow_id, step_type, config, position, position_x, position_y)
        VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
-      [flowId, s.step_type, JSON.stringify(s.config || {}), i, s.position_x || 0, s.position_y || 0]
+      [flowId, s.step_type, JSON.stringify(config), i, s.position_x || 0, s.position_y || 0]
     );
     idByClientId[s.client_id] = inserted.rows[0].id;
   }
@@ -108,6 +111,19 @@ export async function replaceFlowSteps(flowId, steps) {
       `UPDATE automation_flow_steps SET next_step_id = $2, next_step_id_true = $3, next_step_id_false = $4 WHERE id = $1`,
       [realId, nextStepId, nextStepIdTrue, nextStepIdFalse]
     );
+
+    // Nó Pergunta com "caminho por opção": { "<índice da opção>": client_id }
+    // vira config.option_next = { "<índice>": id real do passo }.
+    if (s.option_next && typeof s.option_next === 'object') {
+      const optionNext = {};
+      for (const [index, ref] of Object.entries(s.option_next)) {
+        if (ref && idByClientId[ref]) optionNext[index] = idByClientId[ref];
+      }
+      await query(
+        `UPDATE automation_flow_steps SET config = config || jsonb_build_object('option_next', $2::jsonb) WHERE id = $1`,
+        [realId, JSON.stringify(optionNext)]
+      );
+    }
   }
 
   return getFlowWithSteps(flowId);

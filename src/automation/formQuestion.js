@@ -6,20 +6,28 @@ import { logActivity } from '../repositories/activityLog.js';
 import { broadcast } from '../realtime.js';
 
 // Formulário em conversa: o nó "Perguntar" (ask_question) pode
-//   - oferecer opções (botões até 3 / lista até 10 no WhatsApp; no Instagram
-//     viram uma lista numerada no texto),
+//   - oferecer opções: botões (até 3), lista (até 10, atrás do botão "Ver
+//     opções"), texto numerado (opções escritas na mensagem, lead responde
+//     com o número ou o nome) ou texto numerado + lista (as duas coisas); no
+//     Instagram qualquer formato com opções vira texto numerado,
 //   - validar o formato da resposta (e-mail, telefone, número) e perguntar de
 //     novo até `max_retries` vezes,
 //   - gravar a resposta na ficha do lead (nome, e-mail ou campo personalizado).
 //
-// config: { text, reply_type: 'text'|'buttons'|'list', options: [], list_button,
+// config: { text, reply_type: 'text'|'buttons'|'list'|'numbered'|'list_numbered', options: [], list_button,
 //           validate: 'none'|'email'|'phone'|'number', save_to: ''|'name'|'email'|'custom',
 //           custom_field, retry_text, max_retries }
 
-const OPTION_LIMITS = { buttons: { count: 3, chars: 20 }, list: { count: 10, chars: 24 } };
+const OPTION_LIMITS = {
+  buttons: { count: 3, chars: 20 },
+  list: { count: 10, chars: 24 },
+  list_numbered: { count: 10, chars: 24 }, // limite da lista da Meta
+  numbered: { count: 20, chars: 60 }, // só texto: limite nosso, pra mensagem não virar um textão
+};
 
 const DEFAULT_RETRY_TEXT = {
   options: 'Por favor, escolha uma das opções abaixo 👇',
+  numbered: 'Não encontrei essa opção. Responda com o número de uma das opções abaixo 👇',
   email: 'Hmm, esse e-mail não parece válido. Pode enviar de novo? (ex: nome@empresa.com)',
   phone: 'Não consegui entender o telefone. Pode enviar com DDD? (ex: 44 99999-9999)',
   number: 'Pode responder só com o número, por favor?',
@@ -53,13 +61,19 @@ export async function sendQuestion({ flow, conversation, contact, step, textOver
   const options = questionOptions(config);
   const numbered = options.map((o, i) => `${i + 1}. ${o}`).join('\n');
 
+  const textWithOptions = options.length ? `${text}\n\n${numbered}` : text;
+  const type = config.reply_type;
+
   let sent;
-  if (options.length && contact.channel !== 'instagram') {
-    sent = config.reply_type === 'list'
-      ? await sendListMessage(contact.wa_id, text, config.list_button, options)
-      : await sendButtonsMessage(contact.wa_id, text, options);
+  if (options.length && contact.channel !== 'instagram' && type === 'buttons') {
+    sent = await sendButtonsMessage(contact.wa_id, text, options);
+  } else if (options.length && contact.channel !== 'instagram' && type === 'list') {
+    sent = await sendListMessage(contact.wa_id, text, config.list_button, options);
+  } else if (options.length && contact.channel !== 'instagram' && type === 'list_numbered') {
+    // Opções visíveis na própria mensagem e também no botão da lista.
+    sent = await sendListMessage(contact.wa_id, textWithOptions, config.list_button, options);
   } else {
-    sent = await sendText(contact, options.length ? `${text}\n\n${numbered}` : text);
+    sent = await sendText(contact, textWithOptions);
   }
 
   const saved = await insertMessage({
@@ -67,7 +81,7 @@ export async function sendQuestion({ flow, conversation, contact, step, textOver
     waMessageId: sent?.messages?.[0]?.id || sent?.message_id,
     direction: 'outbound',
     senderType: 'automation',
-    body: options.length ? `${text}\n\n${numbered}` : text,
+    body: textWithOptions,
     automationFlowId: flow.id,
   });
   broadcast({ type: 'message:new', conversationId: conversation.id, message: saved });
@@ -80,10 +94,12 @@ export function parseAnswer(config, rawBody) {
 
   const options = questionOptions(config);
   if (options.length) {
-    const byTitle = options.find((o) => o.toLowerCase() === answer.toLowerCase());
+    // Compara sem acento/maiúscula: "fisioterapia" casa com "Fisioterapia".
+    const byTitle = options.find((o) => normalize(o) === normalize(answer));
     if (byTitle) return byTitle;
-    // Fallback do Instagram/texto livre: lead responde "2" pra segunda opção.
-    const index = /^\d{1,2}$/.test(answer) ? parseInt(answer, 10) - 1 : -1;
+    // Texto numerado: lead responde "2", "2.", "2)" ou "opção 2".
+    const match = answer.match(/^(?:op[cç][aã]o\s*)?(\d{1,2})\s*[.)-]?$/i);
+    const index = match ? parseInt(match[1], 10) - 1 : -1;
     return options[index] || null;
   }
 
@@ -109,9 +125,15 @@ export function parseAnswer(config, rawBody) {
   return answer;
 }
 
+function normalize(text) {
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+}
+
 function retryTextFor(config) {
   if (config?.retry_text) return config.retry_text;
-  if (questionOptions(config).length) return DEFAULT_RETRY_TEXT.options;
+  if (questionOptions(config).length) {
+    return config.reply_type === 'numbered' ? DEFAULT_RETRY_TEXT.numbered : DEFAULT_RETRY_TEXT.options;
+  }
   const validate = config?.validate || (config?.save_to === 'email' ? 'email' : 'none');
   if (validate !== 'none') return DEFAULT_RETRY_TEXT[validate];
   if (config?.save_to === 'name') return DEFAULT_RETRY_TEXT.name;
@@ -148,9 +170,11 @@ async function saveAnswerToContact({ contact, conversation, config, value }) {
   broadcast({ type: 'contact:updated', contactId: contact.id, conversationId: conversation.id });
 }
 
-// Trata a resposta do lead a um nó "Perguntar". Retorna:
-//   'retry' — resposta inválida, repergunta enviada, a run continua aguardando;
-//   'next'  — segue pro próximo passo (resposta válida, ou tentativas esgotadas).
+// Trata a resposta do lead a um nó "Perguntar". Retorna { outcome, nextStepId }:
+//   outcome 'retry' — resposta inválida, repergunta enviada, a run continua aguardando;
+//   outcome 'next'  — segue pro próximo passo (resposta válida, ou tentativas esgotadas).
+// nextStepId é o passo do ramo da opção escolhida quando o nó tem "caminho por
+// opção" (config.branch_by_option + config.option_next), senão o next_step_id normal.
 export async function handleQuestionReply({ flow, run, step, conversation, contact, message }) {
   const config = step.config || {};
   const value = parseAnswer(config, message.body);
@@ -168,11 +192,15 @@ export async function handleQuestionReply({ flow, run, step, conversation, conta
     const maxRetries = Number.isInteger(config.max_retries) ? config.max_retries : 2;
     if (invalid.rows[0].count <= maxRetries) {
       await sendQuestion({ flow, conversation, contact, step, textOverride: retryTextFor(config) });
-      return 'retry';
+      return { outcome: 'retry' };
     }
-    return 'next'; // desiste de validar e segue o fluxo, sem gravar nada na ficha
+    // Desiste de validar e segue pelo caminho padrão, sem gravar nada na ficha.
+    return { outcome: 'next', nextStepId: step.next_step_id };
   }
 
   await saveAnswerToContact({ contact, conversation, config, value });
-  return 'next';
+
+  const optionIndex = questionOptions(config).indexOf(value);
+  const branchStepId = config.branch_by_option && optionIndex !== -1 ? config.option_next?.[optionIndex] : null;
+  return { outcome: 'next', nextStepId: branchStepId || step.next_step_id };
 }

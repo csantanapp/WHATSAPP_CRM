@@ -120,6 +120,8 @@ async function handleInboundMessage(event) {
   await touchConversation(conversation.id, { incrementUnread: true, isInbound: true });
   broadcast({ type: 'message:new', conversationId: conversation.id, message: saved });
 
-  await runTriggersForInboundMessage({ conversation, contact, message: saved });
-  await runAiAgentsForInboundMessage({ conversation, contact, message: saved });
+  // Agente de IA fica em silêncio quando um fluxo de automação tratou a
+  // mensagem (ex: lead respondendo um formulário), pra não responder em dobro.
+  const handledByAutomation = await runTriggersForInboundMessage({ conversation, contact, message: saved });
+  if (!handledByAutomation) await runAiAgentsForInboundMessage({ conversation, contact, message: saved });
 }

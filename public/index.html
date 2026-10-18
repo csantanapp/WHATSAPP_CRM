@@ -2241,6 +2241,7 @@ button{font-family:'Inter',sans-serif;}
           next_step_id: s.next_step_id || null,
           next_step_id_true: s.next_step_id_true || null,
           next_step_id_false: s.next_step_id_false || null,
+          option_next: s.option_next || null,
         };
       }),
     };
@@ -2309,15 +2310,73 @@ button{font-family:'Inter',sans-serif;}
 
   function flowNewClientId() { return 'n' + (flowCanvas.nodeSeq++) + '_' + Date.now().toString(36); }
 
+  // Opções do nó Pergunta quando ele está com "caminho diferente para cada
+  // opção" ligado — cada uma vira uma saída própria no canvas.
+  function flowNodeBranchOptions(node) {
+    var c = node.config || {};
+    var limit = FORM_OPTION_LIMITS[c.reply_type];
+    if (node.step_type !== 'ask_question' || !c.branch_by_option || !limit) return [];
+    return (c.options || []).map(function (o) { return String(o || '').trim().slice(0, limit.chars); })
+      .filter(Boolean).slice(0, limit.count);
+  }
+
   function flowNodeHandles(node) {
     if (node.kind === 'trigger') return ['out'];
     if (node.step_type === 'condition' || node.step_type === 'classify_ai') return ['true', 'false'];
     if (node.step_type === 'end') return [];
+    var branches = flowNodeBranchOptions(node);
+    if (branches.length) return branches.map(function (_, i) { return 'opt_' + i; }).concat(['out']);
     return ['out'];
   }
 
+  // Nó com ramo por opção: corpo com altura fixa e uma linha por saída abaixo dele.
+  var FLOW_BRANCH_FIRST_OFFSET = 100;
+  var FLOW_BRANCH_ROW = 24;
+
   function flowNodeHeight(node) {
+    var branches = flowNodeBranchOptions(node);
+    if (branches.length) return FLOW_BRANCH_FIRST_OFFSET + branches.length * FLOW_BRANCH_ROW + 20;
     return flowNodeHandles(node).length > 1 ? 86 : 70;
+  }
+
+  // Nó com ramos: só a pergunta, curta (as opções já aparecem nas saídas).
+  function flowBranchNodeSummary(node) {
+    var text = (node.config && node.config.text) || '(sem texto)';
+    return escapeHtml(text.length > 52 ? text.slice(0, 50) + '…' : text);
+  }
+
+  function flowHandleOffset(node, handle) {
+    if (handle === 'true') return 34;
+    if (handle === 'false') return 62;
+    var branches = flowNodeBranchOptions(node);
+    if (branches.length) {
+      var index = handle === 'out' ? branches.length : parseInt(handle.slice(4), 10);
+      return FLOW_BRANCH_FIRST_OFFSET + index * FLOW_BRANCH_ROW;
+    }
+    return flowNodeHeight(node) / 2;
+  }
+
+  function flowHandleTarget(node, handle) {
+    if (handle === 'true') return node.next_step_id_true;
+    if (handle === 'false') return node.next_step_id_false;
+    if (handle.indexOf('opt_') === 0) return (node.option_next || {})[handle.slice(4)] || null;
+    return node.next_step_id;
+  }
+
+  function flowSetHandleTarget(node, handle, targetId) {
+    if (handle === 'true') node.next_step_id_true = targetId;
+    else if (handle === 'false') node.next_step_id_false = targetId;
+    else if (handle.indexOf('opt_') === 0) {
+      node.option_next = node.option_next || {};
+      node.option_next[handle.slice(4)] = targetId;
+    } else node.next_step_id = targetId;
+  }
+
+  // Todos os ids de destino de um nó (usado no organizar e ao excluir nó).
+  function flowNodeTargets(node) {
+    return [node.next_step_id, node.next_step_id_true, node.next_step_id_false]
+      .concat(Object.keys(node.option_next || {}).map(function (k) { return node.option_next[k]; }))
+      .filter(Boolean);
   }
 
   function flowNodeSummary(node) {
@@ -2326,7 +2385,8 @@ button{font-family:'Inter',sans-serif;}
       case 'send_message': return escapeHtml((c.text || '(sem texto)').slice(0, 70));
       case 'ask_question': {
         var saveLabel = { name: 'Nome', email: 'E-mail', custom: c.custom_field || 'campo' }[c.save_to];
-        var optCount = (c.reply_type === 'buttons' || c.reply_type === 'list') ? Math.min((c.options || []).length, c.reply_type === 'list' ? 10 : 3) : 0;
+        var optLimit = FORM_OPTION_LIMITS[c.reply_type];
+        var optCount = optLimit ? Math.min((c.options || []).length, optLimit.count) : 0;
         return escapeHtml((c.text || '(sem texto)').slice(0, 60)) +
           ' <span style="color:#9A9D96;">· ' + (optCount ? optCount + ' opções' : 'aguarda resposta') +
           (saveLabel ? ' → salva em <b>' + escapeHtml(saveLabel) + '</b>' : '') + '</span>';
@@ -2385,7 +2445,16 @@ button{font-family:'Inter',sans-serif;}
       var deleteX = node.kind === 'trigger' ? '' : '<div class="flow-node-delete-x" data-del-node="' + node.client_id + '">×</div>';
 
       var handlesHtml = '';
-      if (handles.length === 1) {
+      var branchOptions = flowNodeBranchOptions(node);
+      if (branchOptions.length) {
+        handlesHtml = '<div style="position:absolute;left:10px;right:10px;top:' + (FLOW_BRANCH_FIRST_OFFSET - 12) + 'px;border-top:1px dashed #E4E1D8;"></div>' +
+          handles.map(function (h) {
+            var top = flowHandleOffset(node, h);
+            var label = h === 'out' ? 'Demais respostas' : branchOptions[parseInt(h.slice(4), 10)];
+            return '<div class="flow-node-handle-label" style="top:' + top + 'px;left:10px;text-align:right;overflow:hidden;text-overflow:ellipsis;' + (h === 'out' ? 'color:#ACAFA8;font-style:italic;' : 'color:#0F766E;') + '">' + escapeHtml(label) + '</div>' +
+              '<div class="flow-node-handle" style="top:' + top + 'px;" data-handle="' + h + '" data-node="' + node.client_id + '"></div>';
+          }).join('');
+      } else if (handles.length === 1) {
         handlesHtml = '<div class="flow-node-handle" style="top:50%;transform:translateY(-50%);" data-handle="out" data-node="' + node.client_id + '"></div>';
       } else if (handles.length === 2) {
         var trueLabel = (node.config && node.config.true_label) || 'Sim';
@@ -2403,7 +2472,7 @@ button{font-family:'Inter',sans-serif;}
           '<span style="font-size:13px;">' + meta.icon + '</span>' +
           '<span class="flow-node-label" style="color:' + meta.stroke + ';">' + meta.label + '</span>' +
         '</div>' +
-        '<div class="flow-node-body">' + flowNodeSummary(node) + '</div>' +
+        '<div class="flow-node-body">' + (branchOptions.length ? flowBranchNodeSummary(node) : flowNodeSummary(node)) + '</div>' +
         handlesHtml;
 
       content.appendChild(el);
@@ -2435,16 +2504,10 @@ button{font-family:'Inter',sans-serif;}
   function flowEdgeList() {
     var edges = [];
     flowCanvas.nodes.forEach(function (node) {
-      var handles = flowNodeHandles(node);
-      if (handles.indexOf('out') !== -1 && node.next_step_id) {
-        edges.push({ from: node.client_id, to: node.next_step_id, handleOffset: flowNodeHeight(node) / 2 });
-      }
-      if (handles.indexOf('true') !== -1 && node.next_step_id_true) {
-        edges.push({ from: node.client_id, to: node.next_step_id_true, handleOffset: 34 });
-      }
-      if (handles.indexOf('false') !== -1 && node.next_step_id_false) {
-        edges.push({ from: node.client_id, to: node.next_step_id_false, handleOffset: 62 });
-      }
+      flowNodeHandles(node).forEach(function (h) {
+        var target = flowHandleTarget(node, h);
+        if (target) edges.push({ from: node.client_id, to: target, handleOffset: flowHandleOffset(node, h) });
+      });
     });
     return edges;
   }
@@ -2476,7 +2539,7 @@ button{font-family:'Inter',sans-serif;}
     if (flowCanvas.connecting) {
       var from = flowNodeById(flowCanvas.connecting.fromId);
       if (from) {
-        var offset = flowCanvas.connecting.handle === 'true' ? 34 : (flowCanvas.connecting.handle === 'false' ? 62 : flowNodeHeight(from) / 2);
+        var offset = flowHandleOffset(from, flowCanvas.connecting.handle);
         var x1 = from.x + 220, y1 = from.y + offset;
         svg.innerHTML += '<path d="' + flowEdgePath(x1, y1, flowCanvas.connecting.x, flowCanvas.connecting.y) + '" stroke="#D85A26" stroke-width="2" stroke-dasharray="5,4" fill="none"></path>';
       }
@@ -2554,9 +2617,7 @@ button{font-family:'Inter',sans-serif;}
           var targetNode = flowNodeById(targetId);
           if (targetId !== fromId && targetNode && targetNode.kind !== 'trigger') {
             var fromNode = flowNodeById(fromId);
-            if (handle === 'true') fromNode.next_step_id_true = targetId;
-            else if (handle === 'false') fromNode.next_step_id_false = targetId;
-            else fromNode.next_step_id = targetId;
+            flowSetHandleTarget(fromNode, handle, targetId);
             flowCanvas.dirty = true;
           }
         }
@@ -2598,6 +2659,7 @@ button{font-family:'Inter',sans-serif;}
       if (n.next_step_id === clientId) n.next_step_id = null;
       if (n.next_step_id_true === clientId) n.next_step_id_true = null;
       if (n.next_step_id_false === clientId) n.next_step_id_false = null;
+      Object.keys(n.option_next || {}).forEach(function (k) { if (n.option_next[k] === clientId) delete n.option_next[k]; });
     });
     flowCanvas.dirty = true;
     flowRenderAll();
@@ -2665,6 +2727,15 @@ button{font-family:'Inter',sans-serif;}
 
   var flowModalEditing = null;
 
+  // Mesmos limites de src/automation/formQuestion.js (OPTION_LIMITS).
+  var FORM_OPTION_LIMITS = {
+    buttons: { count: 3, chars: 20 },
+    list: { count: 10, chars: 24 },
+    list_numbered: { count: 10, chars: 24 },
+    numbered: { count: 20, chars: 60 },
+  };
+  function formUsesListButton(type) { return type === 'list' || type === 'list_numbered'; }
+
   async function flowOpenNodeModal(node) {
     flowModalEditing = node;
     var overlay = document.getElementById('flow-node-modal-overlay');
@@ -2704,12 +2775,18 @@ button{font-family:'Inter',sans-serif;}
         flowFieldHtml('f-reply-type', 'Como o lead responde', flowSelectHtml('f-reply-type', [
           { value: 'text', label: 'Resposta livre (texto)' },
           { value: 'buttons', label: 'Botões (até 3 opções)' },
-          { value: 'list', label: 'Lista de opções (até 10)' },
+          { value: 'list', label: 'Lista de opções (até 10, atrás do botão "Ver opções")' },
+          { value: 'numbered', label: 'Texto numerado (opções escritas na mensagem)' },
+          { value: 'list_numbered', label: 'Texto numerado + lista (até 10)' },
         ], replyType)) +
         '<div id="f-options-wrap" style="display:' + (replyType === 'text' ? 'none' : 'flex') + ';flex-direction:column;gap:10px;">' +
           flowFieldHtml('f-options', 'Opções (uma por linha)', flowTextareaHtml('f-options', (c.options || []).join('\n'))) +
           '<div id="f-options-hint" style="font-size:11.5px;color:#9A9D96;"></div>' +
-          '<div id="f-list-button-wrap" style="display:' + (replyType === 'list' ? 'block' : 'none') + ';">' +
+          '<label style="display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:#3A3D38;line-height:1.4;">' +
+            '<input type="checkbox" id="f-branch" style="margin-top:2px;" ' + (c.branch_by_option ? 'checked' : '') + '/>' +
+            '<span>Seguir um caminho diferente para cada opção <span style="display:block;color:#9A9D96;font-size:11.5px;">Cada opção ganha uma saída própria no canvas — ligue a outra Pergunta pra montar um submenu. Opções sem ligação seguem por "Demais respostas".</span></span>' +
+          '</label>' +
+          '<div id="f-list-button-wrap" style="display:' + (formUsesListButton(replyType) ? 'block' : 'none') + ';">' +
             flowFieldHtml('f-list-button', 'Texto do botão que abre a lista', flowInputHtml('f-list-button', c.list_button || 'Ver opções')) +
           '</div>' +
         '</div>' +
@@ -2734,21 +2811,21 @@ button{font-family:'Inter',sans-serif;}
           flowFieldHtml('f-retry-text', 'Mensagem se a resposta for inválida (opcional)', flowInputHtml('f-retry-text', c.retry_text || '')) +
           flowFieldHtml('f-max-retries', 'Tentativas', flowInputHtml('f-max-retries', c.max_retries != null ? c.max_retries : 2, 'number')) +
         '</div>' +
-        '<div style="font-size:11.5px;color:#9A9D96;line-height:1.45;">O fluxo pausa até o lead responder. Se a resposta for inválida, a pergunta é refeita; esgotadas as tentativas, o fluxo segue sem salvar. No Instagram, botões e listas viram opções numeradas no texto (o lead pode responder "1", "2"...).</div>';
+        '<div style="font-size:11.5px;color:#9A9D96;line-height:1.45;">O fluxo pausa até o lead responder. Se a resposta for inválida, a pergunta é refeita; esgotadas as tentativas, o fluxo segue sem salvar. No texto numerado o lead responde com o número ("1", "2"...) ou o nome da opção. No Instagram, qualquer formato com opções vira texto numerado.</div>';
 
       var updateOptionsHint = function () {
         var type = document.getElementById('f-reply-type').value;
-        var limit = type === 'list' ? { count: 10, chars: 24 } : { count: 3, chars: 20 };
+        var limit = FORM_OPTION_LIMITS[type] || FORM_OPTION_LIMITS.buttons;
         var opts = document.getElementById('f-options').value.split('\n').map(function (o) { return o.trim(); }).filter(Boolean);
         var tooLong = opts.filter(function (o) { return o.length > limit.chars; });
-        var msg = 'Máximo ' + limit.count + ' opções, ' + limit.chars + ' caracteres cada (limite do WhatsApp).';
+        var msg = 'Máximo ' + limit.count + ' opções, ' + limit.chars + ' caracteres cada' + (type === 'numbered' ? '.' : ' (limite do WhatsApp).');
         if (opts.length > limit.count) msg += ' <b style="color:#B42318;">Você tem ' + opts.length + ' — só as ' + limit.count + ' primeiras serão enviadas.</b>';
         if (tooLong.length) msg += ' <b style="color:#B42318;">' + tooLong.length + ' opção(ões) serão cortadas.</b>';
         document.getElementById('f-options-hint').innerHTML = msg;
       };
       document.getElementById('f-reply-type').addEventListener('change', function () {
         document.getElementById('f-options-wrap').style.display = this.value === 'text' ? 'none' : 'flex';
-        document.getElementById('f-list-button-wrap').style.display = this.value === 'list' ? 'block' : 'none';
+        document.getElementById('f-list-button-wrap').style.display = formUsesListButton(this.value) ? 'block' : 'none';
         document.getElementById('f-validate-wrap').style.display = this.value === 'text' ? 'block' : 'none';
         updateOptionsHint();
       });
@@ -2884,13 +2961,19 @@ button{font-family:'Inter',sans-serif;}
         text: val('f-text'),
         reply_type: replyTypeVal,
         options: replyTypeVal === 'text' ? [] : val('f-options').split('\n').map(function (o) { return o.trim(); }).filter(Boolean),
-        list_button: replyTypeVal === 'list' ? (val('f-list-button') || 'Ver opções') : undefined,
+        list_button: formUsesListButton(replyTypeVal) ? (val('f-list-button') || 'Ver opções') : undefined,
         validate: replyTypeVal === 'text' ? val('f-validate') : 'none',
         save_to: saveToVal,
         custom_field: saveToVal === 'custom' ? (val('f-custom-field') || '').trim() : undefined,
         retry_text: val('f-retry-text') || undefined,
         max_retries: isNaN(maxRetriesVal) ? 2 : Math.max(0, Math.min(5, maxRetriesVal)),
+        branch_by_option: replyTypeVal !== 'text' && document.getElementById('f-branch').checked,
       };
+      // Remove ligações de opções que deixaram de existir (lista encurtada ou ramo desligado).
+      var keptBranches = flowNodeBranchOptions(node).length;
+      Object.keys(node.option_next || {}).forEach(function (k) {
+        if (parseInt(k, 10) >= keptBranches) delete node.option_next[k];
+      });
       if (saveToVal === 'custom' && !node.config.custom_field) {
         alert('Dê um nome ao campo personalizado (ex: Interesse).');
         return;
@@ -2986,9 +3069,7 @@ button{font-family:'Inter',sans-serif;}
       depthOf[id] = depth;
       var node = flowNodeById(id);
       if (!node) continue;
-      if (node.next_step_id) queue.push([node.next_step_id, depth + 1]);
-      if (node.next_step_id_true) queue.push([node.next_step_id_true, depth + 1]);
-      if (node.next_step_id_false) queue.push([node.next_step_id_false, depth + 1]);
+      flowNodeTargets(node).forEach(function (t) { queue.push([t, depth + 1]); });
     }
     flowCanvas.nodes.forEach(function (n) { if (n.kind !== 'trigger' && depthOf[n.client_id] === undefined) depthOf[n.client_id] = 0; });
 
@@ -3002,9 +3083,11 @@ button{font-family:'Inter',sans-serif;}
     if (trigger) { trigger.x = 40; trigger.y = 160; }
     Object.keys(columns).forEach(function (d) {
       var col = columns[d];
-      col.forEach(function (n, i) {
+      var y = 40;
+      col.forEach(function (n) {
         n.x = 40 + 280 + parseInt(d, 10) * 280;
-        n.y = 40 + i * 120;
+        n.y = y;
+        y += Math.max(120, flowNodeHeight(n) + 40);
       });
     });
 
@@ -3038,6 +3121,7 @@ button{font-family:'Inter',sans-serif;}
           client_id: n.client_id, step_type: n.step_type, config: n.config,
           position_x: n.x, position_y: n.y,
           next_step_id: n.next_step_id, next_step_id_true: n.next_step_id_true, next_step_id_false: n.next_step_id_false,
+          option_next: n.option_next || null,
         };
       }),
     };
@@ -3097,8 +3181,13 @@ button{font-family:'Inter',sans-serif;}
       next_step_id: flow.steps.length ? 's' + flow.steps[0].id : null,
     }];
     flow.steps.forEach(function (s) {
+      // config.option_next guarda ids reais; no canvas vira node.option_next com client_ids.
+      var config = Object.assign({}, s.config || {});
+      var optionNext = {};
+      Object.keys(config.option_next || {}).forEach(function (k) { optionNext[k] = 's' + config.option_next[k]; });
+      delete config.option_next;
       flowCanvas.nodes.push({
-        client_id: 's' + s.id, kind: 'step', step_type: s.step_type, config: s.config || {},
+        client_id: 's' + s.id, kind: 'step', step_type: s.step_type, config: config, option_next: optionNext,
         x: s.position_x || 0, y: s.position_y || 0,
         next_step_id: s.next_step_id ? 's' + s.next_step_id : null,
         next_step_id_true: s.next_step_id_true ? 's' + s.next_step_id_true : null,
