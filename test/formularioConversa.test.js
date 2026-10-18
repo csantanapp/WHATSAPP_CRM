@@ -8,6 +8,7 @@ import { installMockFetch, restoreFetch, jsonResponse } from './helpers/mockFetc
 import { getDefaultTenantId } from '../src/tenant.js';
 import { createUser, findUserByEmail } from '../src/repositories/users.js';
 import { parseAnswer } from '../src/automation/formQuestion.js';
+import { renderTemplate } from '../src/automation/variables.js';
 
 // Formulário em conversa: nó "Perguntar" com validação, botões/lista e
 // gravação da resposta na ficha do lead.
@@ -244,4 +245,72 @@ test('agente de IA fica em silêncio enquanto o formulário trata a mensagem', a
   await leadSays(waId, 'tenho uma dúvida');
   assert.equal(sent.length, 2);
   assert.notEqual(sent.at(-1).text.body, 'Seu nome?');
+});
+
+test('variáveis: {{nome}}, {{primeiro_nome}}, campos do formulário e variável vazia', () => {
+  const contact = { name: 'Maria Souza', email: 'm@x.com', phone_display: '5544', custom_fields: { Interesse: 'Medicina' } };
+  assert.equal(renderTemplate('Olá, {{primeiro_nome}}! Curso: {{ interesse }}.', contact), 'Olá, Maria! Curso: Medicina.');
+  assert.equal(renderTemplate('{{nome}} / {{email}} / {{telefone}}', contact), 'Maria Souza / m@x.com / 5544');
+  assert.equal(renderTemplate('Olá, {{nome}}! Tudo bem?', {}), 'Olá! Tudo bem?');
+  assert.equal(renderTemplate('Oi {{nome}}, tudo bem?\nLinha 2', {}), 'Oi, tudo bem?\nLinha 2');
+  assert.equal(renderTemplate('Sem variável', contact), 'Sem variável');
+});
+
+test('lead já conhecido: pula perguntas com dado confirmado e segue o ramo já escolhido', async () => {
+  await agent.post('/api/automation-flows').send({
+    name: 'Qualificação com memória',
+    trigger_type: 'keyword',
+    trigger_config: { keyword: 'curso' },
+    steps: [
+      { client_id: 'n', step_type: 'ask_question', config: { text: 'Seu nome?', save_to: 'name', skip_if_known: true }, next_step_id: 'e' },
+      { client_id: 'e', step_type: 'ask_question', config: { text: 'Seu e-mail, {{primeiro_nome}}?', validate: 'email', save_to: 'email', skip_if_known: true }, next_step_id: 'c' },
+      {
+        client_id: 'c', step_type: 'ask_question',
+        config: { text: 'Qual curso?', reply_type: 'numbered', options: ['Medicina', 'Enfermagem'], branch_by_option: true, save_to: 'custom', custom_field: 'Curso', skip_if_known: true },
+        option_next: { 0: 'med' }, next_step_id: 'outro',
+      },
+      { client_id: 'med', step_type: 'send_message', config: { text: 'Bem-vindo de volta, {{primeiro_nome}}! Sobre {{Curso}}:' } },
+      { client_id: 'outro', step_type: 'send_message', config: { text: 'Ramo padrão' } },
+    ],
+  });
+
+  const waId = '5544900000030';
+  // 1ª vez: nome do perfil do WhatsApp ("Perfil WhatsApp") não conta, pergunta tudo.
+  await leadSays(waId, 'quero saber do curso');
+  assert.equal(sent.at(-1).text.body, 'Seu nome?');
+  await leadSays(waId, 'Maria Souza');
+  assert.equal(sent.at(-1).text.body, 'Seu e-mail, Maria?');
+  await leadSays(waId, 'maria@x.com');
+  await leadSays(waId, '1');
+  assert.equal(sent.at(-1).text.body, 'Bem-vindo de volta, Maria! Sobre Medicina:');
+
+  // 2ª vez: não pergunta nada, vai direto pro ramo de Medicina.
+  const before = sent.length;
+  await leadSays(waId, 'curso de novo');
+  assert.deepEqual(sent.slice(before).map((m) => m.text.body), ['Bem-vindo de volta, Maria! Sobre Medicina:']);
+});
+
+test('nome confirmado pelo atendente conta; nome do perfil não', async () => {
+  await agent.post('/api/automation-flows').send({
+    name: 'Só nome',
+    trigger_type: 'keyword',
+    trigger_config: { keyword: 'oi' },
+    steps: [
+      { client_id: 'n', step_type: 'ask_question', config: { text: 'Seu nome?', save_to: 'name', skip_if_known: true }, next_step_id: 'f' },
+      { client_id: 'f', step_type: 'send_message', config: { text: 'Olá, {{nome}}!' } },
+    ],
+  });
+
+  const waId = '5544900000031';
+  await leadSays(waId, 'oi');
+  assert.equal(sent.at(-1).text.body, 'Seu nome?', 'nome do perfil não pula a pergunta');
+  await leadSays(waId, 'Ana');
+
+  const contact = await contactByWaId(waId);
+  await agent.patch(`/api/contacts/${contact.id}`).send({ name: 'Ana Paula' });
+  const updated = await contactByWaId(waId);
+  assert.ok(updated.confirmed_fields.includes('name'));
+
+  await leadSays(waId, 'oi de novo');
+  assert.equal(sent.at(-1).text.body, 'Olá, Ana Paula!');
 });

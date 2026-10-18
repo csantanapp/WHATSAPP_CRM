@@ -27,14 +27,27 @@ export async function findOrCreateContactByWaId(waId, { name, phoneDisplay } = {
   return inserted.rows[0];
 }
 
+// Cadastro manual (atendente): nome/e-mail informados já contam como confirmados.
 export async function createContact({ waId, name, phoneDisplay, source, email }) {
   const tenantId = await getDefaultTenantId();
+  const confirmed = [name && 'name', email && 'email'].filter(Boolean);
   const inserted = await query(
-    `INSERT INTO contacts (tenant_id, wa_id, name, phone_display, avatar_initials, source, email)
-     VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-    [tenantId, waId, name || null, phoneDisplay || waId, initialsOf(name, waId), source || null, email || null]
+    `INSERT INTO contacts (tenant_id, wa_id, name, phone_display, avatar_initials, source, email, confirmed_fields)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+    [tenantId, waId, name || null, phoneDisplay || waId, initialsOf(name, waId), source || null, email || null, confirmed]
   );
   return inserted.rows[0];
+}
+
+// Marca (ou desmarca) nome/e-mail como confirmado por uma pessoa — ver
+// migration 013_campos_confirmados.sql.
+export async function setFieldConfirmed(contactId, field, confirmed) {
+  await query(
+    confirmed
+      ? 'UPDATE contacts SET confirmed_fields = array_append(array_remove(confirmed_fields, $2), $2) WHERE id = $1'
+      : 'UPDATE contacts SET confirmed_fields = array_remove(confirmed_fields, $2) WHERE id = $1',
+    [contactId, field]
+  );
 }
 
 // Só atualiza os campos explicitamente passados (undefined = "não mexer");
@@ -45,10 +58,14 @@ export async function updateContact(id, fields) {
 
   const setClause = columns.map((col, i) => `${col} = $${i + 2}`).join(', ');
   const values = columns.map((col) => fields[col] || null);
-  const result = await query(
-    `UPDATE contacts SET ${setClause}, updated_at = now() WHERE id = $1 RETURNING *`,
-    [id, ...values]
-  );
+  await query(`UPDATE contacts SET ${setClause}, updated_at = now() WHERE id = $1`, [id, ...values]);
+
+  // Nome/e-mail editados por atendente passam a valer como confirmados
+  // (apagar o campo desfaz a confirmação).
+  for (const field of ['name', 'email']) {
+    if (fields[field] !== undefined) await setFieldConfirmed(id, field, Boolean(fields[field]));
+  }
+  const result = await query('SELECT * FROM contacts WHERE id = $1', [id]);
   return result.rows[0];
 }
 

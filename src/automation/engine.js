@@ -8,7 +8,8 @@ import { scheduleJob } from '../jobs/scheduledJobs.js';
 import { broadcast } from '../realtime.js';
 import { logger } from '../logger.js';
 import { classifyForAutomation } from '../services/ai/AIService.js';
-import { sendQuestion, handleQuestionReply, sendText } from './formQuestion.js';
+import { sendQuestion, handleQuestionReply, sendText, knownAnswer, nextStepForAnswer } from './formQuestion.js';
+import { renderTemplate } from './variables.js';
 
 async function isFirstMessageOfConversation(conversationId) {
   const result = await query(
@@ -101,7 +102,7 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
           logger.info('automation_skip_opted_out', { contactId: contact.id, stepId: current.id });
           break;
         }
-        const text = current.config?.text || '';
+        const text = renderTemplate(current.config?.text || '', contact);
         const sent = await sendText(contact, text);
         const saved = await insertMessage({
           conversationId: conversation.id,
@@ -193,6 +194,13 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
           await updateRun(run.id, { currentStepId: null, status: 'stopped' });
           return;
         }
+        // Lead já conhecido: não pergunta de novo, segue (pelo ramo da opção
+        // que ele já tinha escolhido, se o nó ramifica por opção).
+        const known = knownAnswer(contact, current.config);
+        if (known !== null) {
+          nextOverride = nextStepForAnswer(current, known) || null;
+          break;
+        }
         await sendQuestion({ flow, conversation, contact, step: current });
         await updateRun(run.id, { currentStepId: current.id, status: 'waiting_reply' });
         return;
@@ -255,6 +263,8 @@ function isWithinBusinessHours(config) {
 // Agentes de IA ficam em silêncio, pra não responder junto com o fluxo.
 export async function runTriggersForInboundMessage({ conversation, contact, message }) {
   // Trigger: primeira mensagem da conversa dispara fluxos configurados como "first_message".
+  // Se nenhum disparar, cai na checagem de palavra-chave abaixo — senão um
+  // lead novo que chega mandando a palavra de uma campanha seria ignorado.
   if (await isFirstMessageOfConversation(conversation.id)) {
     const flows = await getActiveFlowsByTrigger('first_message', conversation.funnel_id);
     let handled = false;
@@ -265,7 +275,7 @@ export async function runTriggersForInboundMessage({ conversation, contact, mess
       handled = true;
       await runFlowFromStep({ flow, conversation, contact, step: firstStep, run });
     }
-    return handled;
+    if (handled) return true;
   }
 
   // Se há uma automação aguardando resposta nesta conversa, continua o fluxo a partir dela.

@@ -2140,29 +2140,29 @@ button{font-family:'Inter',sans-serif;}
       id: 'formulario-qualificacao',
       icon: '📝',
       title: 'Formulário de qualificação',
-      description: 'Na primeira mensagem, pergunta nome, e-mail e interesse (com botões), grava tudo na ficha do lead e marca a tag "lead-qualificado".',
+      description: 'Na primeira mensagem, pergunta nome, e-mail e interesse (com botões), grava tudo na ficha do lead e marca a tag "lead-qualificado". Lead que já respondeu antes não é perguntado de novo.',
       trigger_type: 'first_message',
       trigger_config: {},
       steps: [
         {
           client_id: 'nome', step_type: 'ask_question', x: 380, y: 160,
-          config: { text: 'Olá! 👋 Pra eu te atender melhor, qual é o seu nome?', reply_type: 'text', validate: 'none', save_to: 'name' },
+          config: { text: 'Olá! 👋 Pra eu te atender melhor, qual é o seu nome?', reply_type: 'text', validate: 'none', save_to: 'name', skip_if_known: true },
           next_step_id: 'email',
         },
         {
           client_id: 'email', step_type: 'ask_question', x: 680, y: 160,
-          config: { text: 'Prazer! Qual o seu melhor e-mail?', reply_type: 'text', validate: 'email', save_to: 'email' },
+          config: { text: 'Prazer, {{primeiro_nome}}! Qual o seu melhor e-mail?', reply_type: 'text', validate: 'email', save_to: 'email', skip_if_known: true },
           next_step_id: 'interesse',
         },
         {
           client_id: 'interesse', step_type: 'ask_question', x: 980, y: 160,
-          config: { text: 'Perfeito! E qual desses serviços te interessa?', reply_type: 'buttons', options: ['Tráfego pago', 'Redes sociais', 'Site / Landing'], save_to: 'custom', custom_field: 'Interesse' },
+          config: { text: 'Perfeito! E qual desses serviços te interessa?', reply_type: 'buttons', options: ['Tráfego pago', 'Redes sociais', 'Site / Landing'], save_to: 'custom', custom_field: 'Interesse', skip_if_known: true },
           next_step_id: 'tag',
         },
         { client_id: 'tag', step_type: 'add_tag', x: 1280, y: 160, config: { tag: 'lead-qualificado' }, next_step_id: 'obrigado' },
         {
           client_id: 'obrigado', step_type: 'send_message', x: 1540, y: 160,
-          config: { text: 'Obrigado! Já anotei tudo aqui e um especialista vai falar com você em instantes. 🚀' },
+          config: { text: 'Obrigado, {{primeiro_nome}}! Já anotei tudo aqui e um especialista vai falar com você em instantes. 🚀' },
           next_step_id: 'end',
         },
         { client_id: 'end', step_type: 'end', x: 1800, y: 160, config: { label: 'Lead qualificado' } },
@@ -2389,7 +2389,8 @@ button{font-family:'Inter',sans-serif;}
         var optCount = optLimit ? Math.min((c.options || []).length, optLimit.count) : 0;
         return escapeHtml((c.text || '(sem texto)').slice(0, 60)) +
           ' <span style="color:#9A9D96;">· ' + (optCount ? optCount + ' opções' : 'aguarda resposta') +
-          (saveLabel ? ' → salva em <b>' + escapeHtml(saveLabel) + '</b>' : '') + '</span>';
+          (saveLabel ? ' → salva em <b>' + escapeHtml(saveLabel) + '</b>' : '') +
+          (c.skip_if_known && saveLabel ? ' · pula se já souber' : '') + '</span>';
       }
       case 'wait': return 'Esperar ' + (c.minutes || 0) + ' min';
       case 'condition':
@@ -2772,6 +2773,7 @@ button{font-family:'Inter',sans-serif;}
       var saveTo = c.save_to || '';
       body.innerHTML =
         flowFieldHtml('f-text', 'Pergunta', flowTextareaHtml('f-text', c.text)) +
+        '<div style="font-size:11.5px;color:#9A9D96;line-height:1.45;margin-top:-4px;">Personalize com <b>{{nome}}</b>, <b>{{primeiro_nome}}</b>, <b>{{email}}</b>, <b>{{telefone}}</b> ou um campo do formulário, ex: <b>{{Interesse}}</b>. Se o lead não tiver o dado, a variável some do texto.</div>' +
         flowFieldHtml('f-reply-type', 'Como o lead responde', flowSelectHtml('f-reply-type', [
           { value: 'text', label: 'Resposta livre (texto)' },
           { value: 'buttons', label: 'Botões (até 3 opções)' },
@@ -2807,6 +2809,10 @@ button{font-family:'Inter',sans-serif;}
         '<div id="f-custom-wrap" style="display:' + (saveTo === 'custom' ? 'block' : 'none') + ';">' +
           flowFieldHtml('f-custom-field', 'Nome do campo (ex: Interesse, Orçamento, Cidade)', flowInputHtml('f-custom-field', c.custom_field || '')) +
         '</div>' +
+        '<label id="f-skip-wrap" style="display:' + (saveTo ? 'flex' : 'none') + ';align-items:flex-start;gap:8px;font-size:12.5px;color:#3A3D38;line-height:1.4;">' +
+          '<input type="checkbox" id="f-skip-known" style="margin-top:2px;" ' + (c.skip_if_known ? 'checked' : '') + '/>' +
+          '<span>Pular esta pergunta se o lead já tiver esse dado <span style="display:block;color:#9A9D96;font-size:11.5px;">Nome e e-mail só contam se confirmados (respondidos num formulário ou editados por um atendente) — o nome do perfil do WhatsApp não conta. Com caminho por opção, segue o ramo que o lead já tinha escolhido.</span></span>' +
+        '</label>' +
         '<div style="display:grid;grid-template-columns:1fr 110px;gap:10px;">' +
           flowFieldHtml('f-retry-text', 'Mensagem se a resposta for inválida (opcional)', flowInputHtml('f-retry-text', c.retry_text || '')) +
           flowFieldHtml('f-max-retries', 'Tentativas', flowInputHtml('f-max-retries', c.max_retries != null ? c.max_retries : 2, 'number')) +
@@ -2832,6 +2838,7 @@ button{font-family:'Inter',sans-serif;}
       document.getElementById('f-options').addEventListener('input', updateOptionsHint);
       document.getElementById('f-save-to').addEventListener('change', function () {
         document.getElementById('f-custom-wrap').style.display = this.value === 'custom' ? 'block' : 'none';
+        document.getElementById('f-skip-wrap').style.display = this.value ? 'flex' : 'none';
         if (this.value === 'email') document.getElementById('f-validate').value = 'email';
       });
       updateOptionsHint();
@@ -2839,6 +2846,7 @@ button{font-family:'Inter',sans-serif;}
       title.textContent = 'Resposta (texto)';
       body.innerHTML =
         flowFieldHtml('f-text', 'Mensagem', flowTextareaHtml('f-text', c.text)) +
+        '<div style="font-size:11.5px;color:#9A9D96;line-height:1.45;margin-top:-4px;">Personalize com <b>{{nome}}</b>, <b>{{primeiro_nome}}</b>, <b>{{email}}</b>, <b>{{telefone}}</b> ou um campo do formulário, ex: <b>{{Interesse}}</b>. Se o lead não tiver o dado, a variável some do texto.</div>' +
         '<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#5B5F58;">' +
           '<input type="checkbox" id="f-wait-reply" ' + (node.step_type === 'ask_question' ? 'checked' : '') + '/> Pausar o fluxo esperando a resposta do lead' +
         '</label>';
@@ -2965,6 +2973,7 @@ button{font-family:'Inter',sans-serif;}
         validate: replyTypeVal === 'text' ? val('f-validate') : 'none',
         save_to: saveToVal,
         custom_field: saveToVal === 'custom' ? (val('f-custom-field') || '').trim() : undefined,
+        skip_if_known: Boolean(saveToVal) && document.getElementById('f-skip-known').checked,
         retry_text: val('f-retry-text') || undefined,
         max_retries: isNaN(maxRetriesVal) ? 2 : Math.max(0, Math.min(5, maxRetriesVal)),
         branch_by_option: replyTypeVal !== 'text' && document.getElementById('f-branch').checked,
