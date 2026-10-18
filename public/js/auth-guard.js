@@ -16,6 +16,8 @@
       if (avatarEl) {
         avatarEl.textContent = (user.name || '').split(' ').filter(Boolean).slice(0, 2).map((p) => p[0].toUpperCase()).join('') || '?';
       }
+      const roleEl = document.getElementById('ds-user-role');
+      if (roleEl) roleEl.textContent = { admin: 'Admin', supervisor: 'Supervisor', atendente: 'Atendente' }[user.role] || '';
       const usersLink = document.getElementById('ds-users-link');
       if (usersLink && user.role !== 'admin' && !user.isPlatformAdmin) usersLink.style.display = 'none';
     } catch (err) {
