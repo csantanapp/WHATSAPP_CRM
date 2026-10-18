@@ -7,6 +7,7 @@ import { broadcast } from '../realtime.js';
 import { renderTemplate } from './variables.js';
 import { simulateTyping } from '../services/typing.js';
 import { addInterest } from '../repositories/contactInterests.js';
+import { extractName } from './nameExtract.js';
 
 // Formulário em conversa: o nó "Perguntar" (ask_question) pode
 //   - oferecer opções: botões (até 3), lista (até 10, atrás do botão "Ver
@@ -34,7 +35,7 @@ const DEFAULT_RETRY_TEXT = {
   email: 'Hmm, esse e-mail não parece válido. Pode enviar de novo? (ex: nome@empresa.com)',
   phone: 'Não consegui entender o telefone. Pode enviar com DDD? (ex: 44 99999-9999)',
   number: 'Pode responder só com o número, por favor?',
-  name: 'Pode me dizer seu nome, por favor?',
+  name: 'Pode me dizer só o seu nome, por favor? 🙂',
   none: 'Não entendi, pode responder de novo?',
 };
 
@@ -125,9 +126,9 @@ export function parseAnswer(config, rawBody) {
     return match ? match[0] : null;
   }
   if (config?.save_to === 'name') {
-    // Nome precisa ter pelo menos 2 letras e não ser um textão.
-    const letters = answer.replace(/[^a-zA-ZÀ-ÿ]/g, '');
-    return letters.length >= 2 && answer.length <= 80 ? answer : null;
+    // Grava só o nome: "me chamo cristiano, tudo bem?" → "Cristiano". Se não
+    // parecer um nome ("quero saber o preço"), a pergunta é refeita.
+    return extractName(answer);
   }
   return answer;
 }

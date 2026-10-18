@@ -3400,6 +3400,7 @@ hydrateIcons(document);
           { value: 'email', label: 'E-mail do lead' },
           { value: 'custom', label: 'Campo personalizado' },
         ], saveTo)) +
+        '<div id="f-name-hint" style="display:' + (saveTo === 'name' ? 'block' : 'none') + ';font-size:11.5px;color:#6E7076;line-height:1.45;margin-top:-4px;">O sistema grava <b>só o nome</b>: “me chamo cristiano, tudo bem?” vira <b>Cristiano</b>. Se a resposta não parecer um nome (“quero saber o preço”), a pergunta é refeita.</div>' +
         '<div id="f-custom-wrap" style="display:' + (saveTo === 'custom' ? 'block' : 'none') + ';">' +
           flowFieldHtml('f-custom-field', 'Nome do campo (ex: Interesse, Orçamento, Cidade)', flowInputHtml('f-custom-field', c.custom_field || '')) +
         '</div>' +
@@ -3436,6 +3437,7 @@ hydrateIcons(document);
       document.getElementById('f-options').addEventListener('input', updateOptionsHint);
       document.getElementById('f-save-to').addEventListener('change', function () {
         document.getElementById('f-custom-wrap').style.display = this.value === 'custom' ? 'block' : 'none';
+        document.getElementById('f-name-hint').style.display = this.value === 'name' ? 'block' : 'none';
         document.getElementById('f-skip-wrap').style.display = this.value ? 'flex' : 'none';
         if (this.value === 'email') document.getElementById('f-validate').value = 'email';
       });
