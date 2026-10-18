@@ -153,10 +153,12 @@ export async function moveStage(stageId, direction) {
   return result.rows;
 }
 
-export async function renameStage(stageId, { name, color }) {
+export async function renameStage(stageId, { name, color, metaEvent }) {
   const result = await query(
-    `UPDATE funnel_stages SET name = COALESCE($2, name), color = COALESCE($3, color) WHERE id = $1 RETURNING *`,
-    [stageId, name ?? null, color ?? null]
+    `UPDATE funnel_stages SET name = COALESCE($2, name), color = COALESCE($3, color),
+       meta_event = CASE WHEN $4 THEN $5 ELSE meta_event END
+     WHERE id = $1 RETURNING *`,
+    [stageId, name ?? null, color ?? null, metaEvent !== undefined, metaEvent || null]
   );
   return result.rows[0];
 }

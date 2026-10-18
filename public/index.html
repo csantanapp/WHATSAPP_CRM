@@ -932,6 +932,9 @@ button{font-family:'Inter',sans-serif;}
             <div style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Radar diário</div>
             <div id="config-radar-box" style="background:#FFFFFF;border:1px solid #E5E9F0;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#94A3B8;">Carregando...</div>
 
+            <div style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Conversões de anúncios (Meta)</div>
+            <div id="config-capi-box" style="background:#FFFFFF;border:1px solid #E5E9F0;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#94A3B8;">Carregando...</div>
+
             <div style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Distribuição automática</div>
             <div id="config-distribuicao-box" style="background:#FFFFFF;border:1px solid #E5E9F0;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#94A3B8;">Carregando...</div>
           </div>
@@ -3866,6 +3869,7 @@ button{font-family:'Inter',sans-serif;}
     loadIaSection();
     loadRadarSection();
     loadDistribuicaoSection();
+    loadCapiSection();
   }
 
   var IA_KEY_HELP = {
@@ -3968,6 +3972,77 @@ button{font-family:'Inter',sans-serif;}
     });
   }
 
+  var CAPI_EVENT_LABELS = { QualifiedLead: '🎯 Lead qualificado', Purchase: '💰 Venda' };
+  var CAPI_STATUS = {
+    sent: { label: 'Enviado', bg: '#E8F5EE', fg: '#15803D' },
+    failed: { label: 'Falhou', bg: '#FEF2F2', fg: '#B91C1C' },
+    skipped: { label: 'Não enviado', bg: '#F1F5F9', fg: '#475569' },
+    pending: { label: 'Enviando', bg: '#EFF4FF', fg: '#1D4ED8' },
+  };
+
+  // Conversions API da Meta: liga/desliga, dataset e o histórico do que foi
+  // (ou não) reportado — a fonte de verdade, já que o Gerenciador de Eventos
+  // da Meta demora e não mostra eventos de mensagens direito.
+  async function loadCapiSection() {
+    var box = document.getElementById('config-capi-box');
+    var data;
+    try {
+      data = await api('/settings/meta-conversions');
+    } catch (e) {
+      box.innerHTML = '<div style="color:#64748B;">Disponível só para administradores.</div>';
+      return;
+    }
+    var rows = (data.events || []).map(function (ev) {
+      var st = CAPI_STATUS[ev.status] || CAPI_STATUS.pending;
+      return '<tr style="border-top:1px solid #EEF2F6;">' +
+        '<td style="padding:8px 8px 8px 0;color:#64748B;white-space:nowrap;">' + new Date(ev.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + '</td>' +
+        '<td style="padding:8px;color:#0F172A;font-weight:600;">' + escapeHtml(ev.contact_name || ev.phone_display || '—') + '</td>' +
+        '<td style="padding:8px;color:#334155;white-space:nowrap;">' + (CAPI_EVENT_LABELS[ev.event_name] || escapeHtml(ev.event_name)) + (ev.value ? ' · R$ ' + Number(ev.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '') + '</td>' +
+        '<td style="padding:8px;"><span style="font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px;background:' + st.bg + ';color:' + st.fg + ';">' + st.label + '</span></td>' +
+        '<td style="padding:8px 0 8px 8px;color:#64748B;font-size:11.5px;">' + escapeHtml(ev.error || ev.trigger || '') + '</td>' +
+      '</tr>';
+    }).join('');
+
+    box.innerHTML =
+      '<div style="color:#475569;line-height:1.5;margin-bottom:12px;">Avisa a Meta quando um lead que veio de anúncio <b>Click-to-WhatsApp</b> vira <b>lead qualificado</b> ou <b>venda</b> — assim os anúncios passam a buscar quem compra, não só quem manda mensagem. Nunca envia telefone, nome ou mensagens do contato.</div>' +
+      '<label style="display:flex;align-items:center;gap:8px;font-weight:600;color:#0F172A;margin-bottom:12px;cursor:pointer;"><input type="checkbox" id="capi-enabled" ' + (data.enabled ? 'checked' : '') + '/> Enviar conversões para a Meta</label>' +
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;">' +
+        '<input id="capi-dataset" value="' + escapeHtml(data.datasetId || '') + '" placeholder="ID do dataset (conjunto de dados) da Meta" style="flex:1 1 260px;background:#F5F7FA;border:1px solid #E2E8F0;border-radius:8px;padding:8px 10px;font-size:12.5px;color:#0F172A;font-family:\'Inter\',sans-serif;"/>' +
+        '<button id="capi-dataset-save" style="font-size:12px;font-weight:600;color:#334155;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:8px 12px;cursor:pointer;">Salvar</button>' +
+        '<button id="capi-dataset-auto" ' + (data.wabaId && data.hasToken ? '' : 'disabled title="Conecte o WhatsApp primeiro"') + ' style="font-size:12px;font-weight:600;color:#FFFFFF;background:#2563EB;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;">Obter da conta do WhatsApp</button>' +
+      '</div>' +
+      '<div id="capi-msg" style="font-size:11.5px;color:#64748B;margin-bottom:12px;">O dataset de mensagens é o da sua própria conta do WhatsApp — o botão azul busca (ou cria) automaticamente.</div>' +
+      '<div style="background:#F8FAFC;border:1px solid #EEF2F6;border-radius:10px;padding:10px 12px;color:#475569;line-height:1.5;margin-bottom:14px;">' +
+        '<b>O que dispara cada evento:</b><br>' +
+        '🎯 <b>Lead qualificado</b> e 💰 <b>Venda</b>: em <b>Funis</b>, escolha em cada etapa qual evento ela envia ao receber um lead.<br>' +
+        '💰 Marcar uma <b>oportunidade como ganha</b> também envia a venda, com o valor da oportunidade.<br>' +
+        'Cada evento é enviado <b>uma vez por conversa</b>. Só leads que clicaram num anúncio são reportados — os demais aparecem abaixo como "Não enviado".' +
+      '</div>' +
+      '<div style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Atividade recente</div>' +
+      (rows
+        ? '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">' + rows + '</table></div>'
+        : '<div style="color:#94A3B8;">Nenhum evento ainda. Eles aparecem aqui quando um lead entrar numa etapa marcada ou uma oportunidade for ganha.</div>');
+
+    var msg = document.getElementById('capi-msg');
+    document.getElementById('capi-enabled').addEventListener('change', async function () {
+      await api('/settings/meta-conversions', { method: 'PATCH', body: JSON.stringify({ enabled: this.checked }) });
+    });
+    document.getElementById('capi-dataset-save').addEventListener('click', async function () {
+      await api('/settings/meta-conversions', { method: 'PATCH', body: JSON.stringify({ dataset_id: document.getElementById('capi-dataset').value }) });
+      msg.style.color = '#15803D'; msg.textContent = 'Dataset salvo.';
+    });
+    document.getElementById('capi-dataset-auto').addEventListener('click', async function () {
+      msg.style.color = '#64748B'; msg.textContent = 'Consultando a Meta...';
+      try {
+        var r = await api('/settings/meta-conversions/dataset', { method: 'POST' });
+        document.getElementById('capi-dataset').value = r.dataset_id;
+        msg.style.color = '#15803D'; msg.textContent = 'Dataset obtido da conta do WhatsApp: ' + r.dataset_id;
+      } catch (e) {
+        msg.style.color = '#B91C1C'; msg.textContent = 'A Meta recusou: ' + (e.message || 'erro desconhecido');
+      }
+    });
+  }
+
   async function loadDistribuicaoSection() {
     var box = document.getElementById('config-distribuicao-box');
     try {
@@ -4031,6 +4106,11 @@ button{font-family:'Inter',sans-serif;}
             '<button data-move-stage="' + s.id + '" data-direction="down" ' + (isLast ? 'disabled' : '') + ' style="background:none;border:none;padding:0;line-height:1;font-size:10px;cursor:' + (isLast ? 'default' : 'pointer') + ';color:' + (isLast ? '#CBD5E1' : '#475569') + ';">▼</button>' +
           '</div>' +
           '<span data-rename-stage="' + s.id + '" data-stage-name="' + escapeHtml(s.name) + '" style="flex-grow:1;cursor:pointer;font-size:12.5px;font-weight:600;color:#334155;">' + escapeHtml(s.name) + '</span>' +
+          '<select data-stage-meta="' + s.id + '" title="Evento enviado à Meta quando um lead de anúncio entra nesta etapa (Configurações → Conversões de anúncios)" style="font-size:11px;border:1px solid ' + (s.meta_event ? '#C7D7FE' : '#E2E8F0') + ';background:' + (s.meta_event ? '#EFF4FF' : '#FFFFFF') + ';color:' + (s.meta_event ? '#1D4ED8' : '#64748B') + ';border-radius:6px;padding:3px 6px;cursor:pointer;font-family:\'Inter\',sans-serif;">' +
+            '<option value=""' + (!s.meta_event ? ' selected' : '') + '>Meta: —</option>' +
+            '<option value="QualifiedLead"' + (s.meta_event === 'QualifiedLead' ? ' selected' : '') + '>🎯 Lead qualificado</option>' +
+            '<option value="Purchase"' + (s.meta_event === 'Purchase' ? ' selected' : '') + '>💰 Venda</option>' +
+          '</select>' +
           '<button data-delete-stage="' + s.id + '" title="Remover etapa" style="background:none;border:none;cursor:pointer;color:#94A3B8;font-size:14px;line-height:1;padding:0 4px;">×</button>' +
         '</div>';
       }).join('');
@@ -4168,6 +4248,14 @@ button{font-family:'Inter',sans-serif;}
         await api('/stages/' + stageId, { method: 'PATCH', body: JSON.stringify({ name: name }) });
         loadFunnelsSection();
         loadKanban();
+      });
+    });
+
+    listEl.querySelectorAll('[data-stage-meta]').forEach(function (sel) {
+      sel.addEventListener('click', function (e) { e.stopPropagation(); });
+      sel.addEventListener('change', async function () {
+        await api('/stages/' + sel.getAttribute('data-stage-meta'), { method: 'PATCH', body: JSON.stringify({ meta_event: sel.value || null }) });
+        loadFunnelsSection();
       });
     });
 

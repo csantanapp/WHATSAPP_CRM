@@ -90,6 +90,10 @@ import {
 } from '../repositories/funnels.js';
 import { getDashboardSummary, getRecentConversations } from '../repositories/dashboard.js';
 import { getSetting, setSetting } from '../repositories/settings.js';
+import {
+  SUPPORTED_EVENTS, getConversionsConfig, updateConversionsConfig, ensureDataset,
+  listConversionEvents, reportOpportunityWon,
+} from '../services/metaConversions.js';
 import { listTags, createTag, deleteTag } from '../repositories/tags.js';
 import { getActivityLogForContact } from '../repositories/activityLog.js';
 
@@ -201,7 +205,11 @@ apiRouter.post('/funnels/:id/stages', asyncHandler(async (req, res) => {
 }));
 
 apiRouter.patch('/stages/:id', asyncHandler(async (req, res) => {
-  res.json(await renameStage(req.params.id, { name: req.body.name, color: req.body.color }));
+  const { meta_event: metaEvent } = req.body;
+  if (metaEvent !== undefined && metaEvent !== null && metaEvent !== '' && !SUPPORTED_EVENTS.includes(metaEvent)) {
+    return res.status(400).json({ error: `meta_event deve ser um de: ${SUPPORTED_EVENTS.join(', ')}` });
+  }
+  res.json(await renameStage(req.params.id, { name: req.body.name, color: req.body.color, metaEvent }));
 }));
 
 apiRouter.delete('/stages/:id', asyncHandler(async (req, res) => {
@@ -438,6 +446,24 @@ apiRouter.get('/ai/providers', requireRole('admin'), asyncHandler(async (_req, r
   res.json(Object.entries(AI_PROVIDERS).map(([id, def]) => ({ id, label: def.label })));
 }));
 
+// --- Conversões de anúncios (Conversions API da Meta) ---
+
+apiRouter.get('/settings/meta-conversions', requireRole('admin'), asyncHandler(async (req, res) => {
+  res.json({ ...(await getConversionsConfig()), events: await listConversionEvents(30) });
+}));
+
+apiRouter.patch('/settings/meta-conversions', requireRole('admin'), asyncHandler(async (req, res) => {
+  res.json(await updateConversionsConfig({ enabled: req.body.enabled, datasetId: req.body.dataset_id }));
+}));
+
+apiRouter.post('/settings/meta-conversions/dataset', requireRole('admin'), asyncHandler(async (req, res) => {
+  try {
+    res.json({ dataset_id: await ensureDataset() });
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+}));
+
 apiRouter.get('/ai/settings', requireRole('admin'), asyncHandler(async (req, res) => {
   res.json(await getAiSettings(req.tenantId));
 }));
@@ -656,6 +682,7 @@ apiRouter.post('/opportunities/:id/won', asyncHandler(async (req, res) => {
   const updated = await markOpportunityWon(req.tenantId, req.params.id, req.body.value);
   if (!updated) return res.status(404).json({ error: 'Oportunidade não encontrada' });
   broadcast({ type: 'opportunity:updated', opportunity: updated });
+  reportOpportunityWon(updated); // Conversions API: não espera a Meta
   res.json(updated);
 }));
 

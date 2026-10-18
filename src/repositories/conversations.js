@@ -1,6 +1,7 @@
 import { query } from '../db/pool.js';
 import { logActivity } from './activityLog.js';
 import { getDefaultTenantId } from '../tenant.js';
+import { reportStageChange } from '../services/metaConversions.js';
 
 // Apesar do nome (mantido por compatibilidade com os imports existentes),
 // retorna a conversa mais recente do contato INDEPENDENTE do status — uma
@@ -130,6 +131,9 @@ export async function moveConversationToStage(conversationId, funnelStageId) {
     });
   }
 
+  // Conversions API da Meta: não espera — a etapa muda mesmo se a Meta cair.
+  if (conversation) reportStageChange(conversation.id, funnelStageId);
+
   return conversation;
 }
 
@@ -152,6 +156,8 @@ export async function moveConversationToFunnel(conversationId, funnelId, funnelS
       description: `Redirecionado para o funil "${funnelName}"`,
     });
   }
+
+  if (conversation && funnelStageId) reportStageChange(conversation.id, funnelStageId);
 
   return conversation;
 }
