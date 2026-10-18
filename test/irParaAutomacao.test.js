@@ -9,7 +9,7 @@ import { getDefaultTenantId } from '../src/tenant.js';
 import { createUser, findUserByEmail } from '../src/repositories/users.js';
 import { query } from '../src/db/pool.js';
 
-// Nó "Ir para outra automação" (start_flow): encerra o fluxo atual e
+// Nó "Conectar Automação" (start_flow): encerra o fluxo atual e
 // continua a conversa no primeiro passo de outro fluxo ativo.
 
 const APP_SECRET = 'test-secret';

@@ -73,7 +73,7 @@ const MAX_FLOW_HOPS = 5;
 
 // Executa passos em sequência até encontrar um que precise de resposta do
 // contato (ask_question) ou de tempo (wait) — os dois pausam a run.
-// `hops` conta os "Ir para automação" seguidos desta execução.
+// `hops` conta os "Conectar Automação" seguidos desta execução.
 async function runFlowFromStep({ flow, conversation, contact, step, run, hops = 0 }) {
   const cursor = { current: step };
 
@@ -218,7 +218,7 @@ async function executeSteps({ flow, conversation, contact, run, cursor, hops = 0
         return;
       }
       case 'start_flow': {
-        // "Ir para outra automação": encerra esta run e começa o outro fluxo
+        // "Conectar Automação": encerra esta run e começa o outro fluxo
         // do primeiro passo, na mesma conversa. Nó terminal (sem saída).
         const target = await getStartableFlow(current.config?.flow_id, flow);
         if (!target) {
@@ -253,7 +253,7 @@ async function executeSteps({ flow, conversation, contact, run, cursor, hops = 0
   await updateRun(run.id, { currentStepId: null, status: 'completed' });
 }
 
-// Fluxo de destino de um "Ir para automação": precisa existir, ser do mesmo
+// Fluxo de destino de um "Conectar Automação": precisa existir, ser do mesmo
 // tenant e estar ativo (pausar a automação de destino desliga o atalho).
 async function getStartableFlow(flowId, fromFlow) {
   if (!flowId) return null;
