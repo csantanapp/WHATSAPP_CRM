@@ -106,6 +106,7 @@
 
   <div class="toast-stack" id="toast-stack"></div>
 
+  <script src="/js/dialogs.js"></script>
   <script>
     function toast(message, kind) {
       const el = document.createElement('div');
@@ -201,14 +202,16 @@
 
       tbody.querySelectorAll('.reset-pw-btn').forEach((btn) => {
         btn.addEventListener('click', async () => {
-          const newPassword = prompt('Nova senha provisória (mínimo 8 caracteres):');
-          if (!newPassword) return;
-          try {
-            await api('/users/' + btn.dataset.id + '/reset-password', { method: 'POST', body: JSON.stringify({ newPassword }) });
-            toast('Senha redefinida.', 'success');
-          } catch (err) {
-            toast(err.message, 'danger');
-          }
+          const done = await ctForm({
+            title: 'Redefinir senha',
+            description: 'Passe a senha provisória para a pessoa — ela pode trocá-la depois de entrar.',
+            icon: 'pencil',
+            submitLabel: 'Redefinir senha',
+            fields: [{ name: 'password', label: 'Nova senha provisória', required: true, optionalHint: false, help: 'Mínimo de 8 caracteres.' }],
+            validate: (v) => (v.password.length < 8 ? 'A senha precisa ter pelo menos 8 caracteres.' : null),
+            onSubmit: (v) => api('/users/' + btn.dataset.id + '/reset-password', { method: 'POST', body: JSON.stringify({ newPassword: v.password }) }),
+          });
+          if (done) toast('Senha redefinida.', 'success');
         });
       });
     }

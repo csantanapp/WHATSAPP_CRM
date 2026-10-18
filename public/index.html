@@ -1108,6 +1108,7 @@ button{font-family:var(--font-body);}
   </div>
 </dialog>
 <script src="/js/icons.js"></script>
+<script src="/js/dialogs.js"></script>
 <script>
 // Ícones declarados no HTML como <span data-icon="nome" data-icon-size="16">.
 window.hydrateIcons = function (root) {
@@ -1407,17 +1408,33 @@ hydrateIcons(document);
     if (state.currentFunnelId) renderFunnel(state.currentFunnelId);
   });
 
+  // Novo contato (Kanban e Contatos): telefone obrigatório, nome/e-mail opcionais.
+  function openNewContactForm() {
+    return ctForm({
+      title: 'Novo contato',
+      description: 'Cadastre um lead manualmente pelo WhatsApp dele.',
+      icon: 'user-plus',
+      submitLabel: 'Criar contato',
+      fields: [
+        { name: 'phone', label: 'Telefone (WhatsApp)', type: 'tel', required: true, placeholder: '55 11 99999-8888', help: 'Com DDI (55) e DDD.' },
+        { name: 'name', label: 'Nome', placeholder: 'Ex: Maria Souza' },
+        { name: 'email', label: 'E-mail', type: 'email', placeholder: 'nome@empresa.com' },
+      ],
+      validate: function (v) {
+        var digits = v.phone.replace(/\D/g, '');
+        if (digits.length < 10 || digits.length > 15) return 'Telefone inválido — use DDI + DDD + número, ex: 55 11 99999-8888.';
+        if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) return 'E-mail inválido.';
+      },
+      onSubmit: function (v) {
+        return api('/contacts', { method: 'POST', body: JSON.stringify({ wa_id: v.phone.replace(/\D/g, ''), name: v.name, email: v.email }) });
+      },
+    });
+  }
+
   document.getElementById('kanban-novo-contato-btn').addEventListener('click', async function () {
-    var phone = prompt('Telefone do lead (com DDI e DDD, só números, ex: 5511999998888):');
-    if (!phone) return;
-    var name = prompt('Nome do lead (opcional):') || '';
-    var email = prompt('E-mail do lead (opcional):') || '';
-    try {
-      await api('/contacts', { method: 'POST', body: JSON.stringify({ wa_id: phone.replace(/\D/g, ''), name: name, email: email }) });
-      alert('Lead criado. Para ele aparecer no Kanban, é preciso que uma conversa seja iniciada (pela primeira mensagem recebida dele).');
-    } catch (err) {
-      alert('Não foi possível criar: ' + err.message);
-    }
+    var created = await openNewContactForm();
+    if (!created) return;
+    ctAlert({ tone: 'success', title: 'Contato criado', message: 'Ele aparece no Kanban assim que a conversa começar — quando chegar a primeira mensagem dele.' });
   });
 
   document.getElementById('kanban-export-btn').addEventListener('click', async function () {
@@ -1722,12 +1739,28 @@ hydrateIcons(document);
     }).catch(function () { sugeridasEl.innerHTML = ''; });
   }
 
+  // Editar um campo da ficha do lead (nome ou e-mail) num pop-up.
+  function editContactField(contactId, field, current) {
+    var isEmail = field === 'email';
+    return ctForm({
+      title: isEmail ? 'E-mail do lead' : 'Nome do lead',
+      icon: isEmail ? 'mail' : 'user-round',
+      fields: [{ name: 'value', label: isEmail ? 'E-mail' : 'Nome', type: isEmail ? 'email' : 'text', value: current || '', required: !isEmail, optionalHint: false, placeholder: isEmail ? 'nome@empresa.com' : 'Ex: Maria Souza' }],
+      validate: function (v) {
+        if (isEmail && v.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.value)) return 'E-mail inválido.';
+      },
+      onSubmit: function (v) {
+        var body = {};
+        body[field] = v.value;
+        return api('/contacts/' + contactId, { method: 'PATCH', body: JSON.stringify(body) });
+      },
+    });
+  }
+
   document.getElementById('painel-nome').addEventListener('click', async function () {
     var conv = state.currentConversationDetail;
     if (!conv) return;
-    var name = prompt('Nome do lead:', conv.contact_name || '');
-    if (name === null) return;
-    await api('/contacts/' + conv.contact_id, { method: 'PATCH', body: JSON.stringify({ name: name }) });
+    if (!(await editContactField(conv.contact_id, 'name', conv.contact_name))) return;
     refreshConversationPanel();
     loadKanban();
   });
@@ -1735,9 +1768,7 @@ hydrateIcons(document);
   document.getElementById('painel-email').addEventListener('click', async function () {
     var conv = state.currentConversationDetail;
     if (!conv) return;
-    var email = prompt('E-mail do lead:', conv.contact_email || '');
-    if (email === null) return;
-    await api('/contacts/' + conv.contact_id, { method: 'PATCH', body: JSON.stringify({ email: email }) });
+    if (!(await editContactField(conv.contact_id, 'email', conv.contact_email))) return;
     refreshConversationPanel();
   });
 
@@ -1774,12 +1805,19 @@ hydrateIcons(document);
   document.getElementById('painel-redirecionar-funil').addEventListener('click', async function () {
     var conv = state.currentConversationDetail;
     if (!conv) return;
-    var options = state.funnels.map(function (f, i) { return (i + 1) + '. ' + f.name; }).join('\n');
-    var choice = prompt('Redirecionar para qual funil?\n' + options + '\n\nDigite o número:');
-    if (!choice) return;
-    var index = parseInt(choice, 10) - 1;
-    var target = state.funnels[index];
-    if (!target) { alert('Opção inválida.'); return; }
+    var picked = await ctForm({
+      title: 'Redirecionar para outro funil',
+      description: 'O lead entra na primeira etapa do funil escolhido.',
+      icon: 'filter',
+      submitLabel: 'Redirecionar',
+      fields: [{ name: 'funnel', type: 'choice', required: true, value: conv.funnel_id,
+        options: state.funnels.map(function (f) {
+          return { value: f.id, label: f.name, description: f.stages.length + (f.stages.length === 1 ? ' etapa' : ' etapas') + (String(f.id) === String(conv.funnel_id) ? ' · funil atual' : '') };
+        }) }],
+    });
+    if (!picked) return;
+    var target = state.funnels.find(function (f) { return String(f.id) === String(picked.funnel); });
+    if (!target) return;
     var firstStage = target.stages[0];
     await api('/conversations/' + state.currentConversationId + '/funnel', {
       method: 'PATCH',
@@ -1787,7 +1825,7 @@ hydrateIcons(document);
     });
     refreshConversationPanel();
     if (state.currentFunnelId) renderFunnel(state.currentFunnelId);
-    alert('Lead movido para "' + target.name + '".');
+    ctAlert({ tone: 'success', title: 'Lead redirecionado', message: 'Agora ele está no funil “' + target.name + '”.' });
   });
 
   function renderMessages(messages) {
@@ -1901,7 +1939,7 @@ hydrateIcons(document);
         input.value = text;
         openTemplatePicker();
       } else {
-        alert('Não foi possível enviar: ' + err.message);
+        ctAlert('Não foi possível enviar: ' + err.message);
         input.value = text;
       }
     }
@@ -2012,7 +2050,7 @@ hydrateIcons(document);
         document.getElementById('conversa-messages').scrollTop = document.getElementById('conversa-messages').scrollHeight;
         document.getElementById('template-picker-overlay').style.display = 'none';
       } catch (err) {
-        alert('Não foi possível enviar o template: ' + err.message);
+        ctAlert('Não foi possível enviar o template: ' + err.message);
       }
       btn.disabled = false;
       btn.textContent = 'Enviar template';
@@ -2047,7 +2085,7 @@ hydrateIcons(document);
       document.getElementById('conversa-messages').appendChild(renderBubble(data));
       document.getElementById('conversa-messages').scrollTop = 1e9;
     } catch (err) {
-      alert('Não foi possível enviar o arquivo: ' + err.message);
+      ctAlert('Não foi possível enviar o arquivo: ' + err.message);
     } finally {
       sendBtn.disabled = false;
     }
@@ -2082,17 +2120,23 @@ hydrateIcons(document);
   document.getElementById('conversa-resposta-rapida-btn').addEventListener('click', async function () {
     try {
       var replies = await api('/quick-replies');
-      if (!replies.length) { alert('Nenhuma resposta rápida cadastrada ainda.'); return; }
-      var options = replies.map(function (r, i) { return (i + 1) + '. /' + r.shortcut + ' — ' + r.title; }).join(String.fromCharCode(10));
-      var choice = prompt('Qual resposta rápida?' + String.fromCharCode(10) + options + String.fromCharCode(10) + String.fromCharCode(10) + 'Digite o número:');
+      if (!replies.length) { ctAlert({ title: 'Nenhuma resposta rápida', message: 'Cadastre respostas rápidas em Configurações para usá-las aqui.' }); return; }
+      var choice = await ctForm({
+        title: 'Resposta rápida',
+        description: 'O texto entra na caixa de mensagem para você revisar antes de enviar.',
+        icon: 'message-square-text',
+        submitLabel: 'Usar resposta',
+        fields: [{ name: 'reply', type: 'choice', required: true, value: replies[0].id,
+          options: replies.map(function (r) { return { value: r.id, label: '/' + r.shortcut + ' — ' + r.title, description: (r.body || '').slice(0, 140) }; }) }],
+      });
       if (!choice) return;
-      var picked = replies[parseInt(choice, 10) - 1];
-      if (!picked) { alert('Opção inválida.'); return; }
+      var picked = replies.find(function (r) { return String(r.id) === String(choice.reply); });
+      if (!picked) return;
       var input = document.getElementById('conversa-input');
       input.value = picked.body;
       input.focus();
     } catch (err) {
-      alert('Não foi possível carregar respostas rápidas: ' + err.message);
+      ctAlert('Não foi possível carregar respostas rápidas: ' + err.message);
     }
   });
 
@@ -2132,16 +2176,22 @@ hydrateIcons(document);
     });
     document.getElementById('oportunidade-perder-btn').addEventListener('click', async function () {
       try {
+        var oppId = this.getAttribute('data-id');
         var reasons = await api('/loss-reasons');
-        var options = reasons.map(function (r, i) { return (i + 1) + '. ' + r.name; }).join(String.fromCharCode(10));
-        var choice = prompt('Motivo da perda?' + String.fromCharCode(10) + options + String.fromCharCode(10) + String.fromCharCode(10) + 'Digite o número:');
-        if (!choice) return;
-        var picked = reasons[parseInt(choice, 10) - 1];
-        if (!picked) { alert('Opção inválida.'); return; }
-        await api('/opportunities/' + this.getAttribute('data-id') + '/lost', { method: 'POST', body: JSON.stringify({ loss_reason_id: picked.id }) });
+        var lost = await ctForm({
+          title: 'Marcar como perdida',
+          description: 'Qual foi o motivo? Isso alimenta os relatórios de perda.',
+          icon: 'circle-alert',
+          submitLabel: 'Marcar como perdida',
+          fields: [{ name: 'reason', type: 'choice', required: true, options: reasons.map(function (r) { return { value: r.id, label: r.name }; }) }],
+          onSubmit: function (v) {
+            return api('/opportunities/' + oppId + '/lost', { method: 'POST', body: JSON.stringify({ loss_reason_id: parseInt(v.reason, 10) }) });
+          },
+        });
+        if (!lost) return;
         loadOpportunityBox(contactId);
       } catch (err) {
-        alert('Não foi possível marcar como perdida: ' + err.message);
+        ctAlert('Não foi possível marcar como perdida: ' + err.message);
       }
     });
   }
@@ -2187,7 +2237,7 @@ hydrateIcons(document);
       var insight = await api('/conversations/' + state.currentConversationId + '/summarize', { method: 'POST' });
       renderResumoBox(insight);
     } catch (err) {
-      alert('Não foi possível gerar o resumo: ' + err.message);
+      ctAlert('Não foi possível gerar o resumo: ' + err.message);
     } finally {
       btn.textContent = 'Gerar resumo';
       btn.disabled = false;
@@ -2197,20 +2247,26 @@ hydrateIcons(document);
   document.getElementById('oportunidade-nova-btn').addEventListener('click', async function () {
     var conv = state.currentConversationDetail;
     if (!conv) return;
-    var title = prompt('Título da oportunidade:');
-    if (!title) return;
-    var valueStr = prompt('Valor estimado (R$, opcional):');
-    var value = valueStr ? parseFloat(valueStr.replace(',', '.')) : null;
-    try {
-      await api('/opportunities', {
-        method: 'POST',
-        body: JSON.stringify({ contact_id: conv.contact_id, conversation_id: conv.id, title: title, value: value }),
-      });
-      loadOpportunityBox(conv.contact_id);
+    var created = await ctForm({
+      title: 'Nova oportunidade',
+      description: 'Registre o que está sendo negociado com ' + (conv.contact_name || 'este lead') + '. Ao ganhar, o valor entra na Receita por origem do Dashboard.',
+      icon: 'dollar-sign',
+      submitLabel: 'Criar oportunidade',
+      fields: [
+        { name: 'title', label: 'O que está sendo vendido', required: true, placeholder: 'Ex: Curso de Medicina — turma 2027' },
+        { name: 'value', label: 'Valor estimado', type: 'money' },
+      ],
+      validate: function (v) { if (v.value !== null && v.value < 0) return 'O valor não pode ser negativo.'; },
+      onSubmit: function (v) {
+        return api('/opportunities', {
+          method: 'POST',
+          body: JSON.stringify({ contact_id: conv.contact_id, conversation_id: conv.id, title: v.title, value: v.value }),
+        });
+      },
+    });
+    if (!created) return;
+    loadOpportunityBox(conv.contact_id);
     loadResumoBox();
-    } catch (err) {
-      alert('Não foi possível criar: ' + err.message);
-    }
   });
 
   function radarCriticalCount(radar) {
@@ -2582,7 +2638,7 @@ hydrateIcons(document);
         try {
           await useAutomationTemplate(btn.getAttribute('data-use-template'));
         } catch (err) {
-          alert('Não foi possível criar a partir desse modelo: ' + err.message);
+          ctAlert('Não foi possível criar a partir desse modelo: ' + err.message);
           btn.disabled = false;
           btn.textContent = 'Usar modelo';
         }
@@ -2633,12 +2689,20 @@ hydrateIcons(document);
   });
 
   document.getElementById('automacao-nova-btn').addEventListener('click', async function () {
-    var name = prompt('Nome do novo fluxo (ex: "Boas-vindas evento"):');
-    if (!name) return;
-    var created = await api('/automation-flows', {
-      method: 'POST',
-      body: JSON.stringify({ name: name, trigger_type: 'first_message', trigger_config: {}, steps: [] }),
+    var created = await ctForm({
+      title: 'Nova automação',
+      description: 'Depois você escolhe o gatilho e monta os passos no editor.',
+      icon: 'zap',
+      submitLabel: 'Criar e abrir editor',
+      fields: [{ name: 'name', label: 'Nome da automação', required: true, placeholder: 'Ex: Boas-vindas evento' }],
+      onSubmit: function (v) {
+        return api('/automation-flows', {
+          method: 'POST',
+          body: JSON.stringify({ name: v.name, trigger_type: 'first_message', trigger_config: {}, steps: [] }),
+        });
+      },
     });
+    if (!created) return;
     openFlowCanvas(created.id);
   });
 
@@ -3534,7 +3598,7 @@ hydrateIcons(document);
         if (parseInt(k, 10) >= keptBranches) delete node.option_next[k];
       });
       if (saveToVal === 'custom' && !node.config.custom_field) {
-        alert('Dê um nome ao campo personalizado (ex: Interesse).');
+        ctAlert({ title: 'Falta o nome do campo', message: 'Dê um nome ao campo personalizado (ex: Interesse).' });
         return;
       }
     } else if (node.step_type === 'send_message') {
@@ -3732,13 +3796,13 @@ hydrateIcons(document);
   }
 
   document.getElementById('flow-save-btn').addEventListener('click', async function () {
-    try { await flowSave(); } catch (err) { alert('Não foi possível salvar: ' + err.message); }
+    try { await flowSave(); } catch (err) { ctAlert('Não foi possível salvar: ' + err.message); }
   });
   document.getElementById('flow-publish-btn').addEventListener('click', async function () {
-    try { await flowSave({ activate: true }); } catch (err) { alert('Não foi possível publicar: ' + err.message); }
+    try { await flowSave({ activate: true }); } catch (err) { ctAlert('Não foi possível publicar: ' + err.message); }
   });
   document.getElementById('flow-deactivate-btn').addEventListener('click', async function () {
-    try { await flowSave({ activate: false }); } catch (err) { alert('Não foi possível desativar: ' + err.message); }
+    try { await flowSave({ activate: false }); } catch (err) { ctAlert('Não foi possível desativar: ' + err.message); }
   });
   document.getElementById('flow-discard-btn').addEventListener('click', async function () {
     if (!flowCanvas.dirty || await ctConfirm({ title: 'Descartar alterações?', message: 'As mudanças não salvas deste fluxo serão perdidas.', confirmLabel: 'Descartar' })) {
@@ -3747,10 +3811,14 @@ hydrateIcons(document);
     }
   });
 
-  document.getElementById('flow-canvas-name').addEventListener('click', function () {
-    var name = prompt('Nome do fluxo:', flowCanvas.flow.name);
-    if (!name) return;
-    flowCanvas.flow.name = name;
+  document.getElementById('flow-canvas-name').addEventListener('click', async function () {
+    var renamed = await ctForm({
+      title: 'Renomear automação',
+      icon: 'pencil',
+      fields: [{ name: 'name', label: 'Nome da automação', required: true, value: flowCanvas.flow.name }],
+    });
+    if (!renamed || renamed.name === flowCanvas.flow.name) return;
+    flowCanvas.flow.name = renamed.name;
     flowCanvas.dirty = true;
     flowUpdateHeader();
     flowUpdateDirtyUI();
@@ -3814,7 +3882,7 @@ hydrateIcons(document);
     try {
       flow = await api('/automation-flows/' + flowId);
     } catch (err) {
-      alert('Não foi possível carregar esse fluxo.');
+      ctAlert('Não foi possível carregar esse fluxo.');
       return;
     }
     await flowLoadIntoCanvas(flow);
@@ -4084,11 +4152,11 @@ hydrateIcons(document);
         try {
           var detail = await api('/contacts/' + btn.getAttribute('data-open-contact'));
           var conv = (detail.conversations || [])[0];
-          if (!conv) { alert('Esse contato ainda não tem conversa — ela começa quando ele mandar a primeira mensagem.'); return; }
+          if (!conv) { ctAlert({ title: 'Ainda sem conversa', message: 'Esse contato ainda não tem conversa — ela começa quando ele mandar a primeira mensagem.' }); return; }
           openConversation(conv.id);
           window.__goto && window.__goto('inbox');
         } catch (err) {
-          alert('Não foi possível abrir a conversa: ' + err.message);
+          ctAlert('Não foi possível abrir a conversa: ' + err.message);
         }
       });
     });
@@ -4102,7 +4170,7 @@ hydrateIcons(document);
           await api('/contacts/' + btn.getAttribute('data-delete-contact'), { method: 'DELETE' });
           loadContacts(document.getElementById('contatos-search').value.trim());
         } catch (err) {
-          alert('Não foi possível excluir: ' + err.message);
+          ctAlert('Não foi possível excluir: ' + err.message);
         }
       });
     });
@@ -4146,16 +4214,7 @@ hydrateIcons(document);
   });
 
   document.getElementById('contatos-novo-btn').addEventListener('click', async function () {
-    var phone = prompt('Telefone do lead (com DDI e DDD, só números, ex: 5511999998888):');
-    if (!phone) return;
-    var name = prompt('Nome do lead (opcional):') || '';
-    var email = prompt('E-mail do lead (opcional):') || '';
-    try {
-      await api('/contacts', { method: 'POST', body: JSON.stringify({ wa_id: phone.replace(/\D/g, ''), name: name, email: email }) });
-      loadContacts();
-    } catch (err) {
-      alert('Não foi possível criar: ' + err.message);
-    }
+    if (await openNewContactForm()) loadContacts();
   });
 
   document.getElementById('contatos-duplicados-btn').addEventListener('click', function () {
@@ -4216,7 +4275,7 @@ hydrateIcons(document);
     var phoneIdx = header.indexOf('phone') !== -1 ? header.indexOf('phone') : (header.indexOf('telefone') !== -1 ? header.indexOf('telefone') : header.indexOf('wa_id'));
     var emailIdx = header.indexOf('email');
     if (phoneIdx === -1) {
-      alert('O CSV precisa ter uma coluna "telefone" (ou "phone"/"wa_id"). Colunas opcionais: "nome", "email".');
+      ctAlert({ tone: 'error', title: 'CSV sem coluna de telefone', message: 'O arquivo precisa ter uma coluna "telefone" (ou "phone"/"wa_id"). Colunas opcionais: "nome", "email".' });
       return;
     }
     var rows = lines.slice(1).map(function (l) { return l.split(','); });
@@ -4239,7 +4298,7 @@ hydrateIcons(document);
         failed++;
       }
     }
-    alert('Importação concluída: ' + success + ' criado(s), ' + failed + ' ignorado(s) (duplicado ou inválido).');
+    ctAlert({ tone: failed && !success ? 'error' : 'success', title: 'Importação concluída', message: success + (success === 1 ? ' contato criado' : ' contatos criados') + (failed ? ' · ' + failed + ' ignorado(s) (duplicado ou inválido)' : '') + '.' });
     loadContacts();
   });
 
@@ -4310,16 +4369,12 @@ hydrateIcons(document);
       '</div>';
 
     document.getElementById('modal-lead-name').addEventListener('click', async function () {
-      var name = prompt('Nome do lead:', lead.name || '');
-      if (name === null) return;
-      await api('/contacts/' + contactId, { method: 'PATCH', body: JSON.stringify({ name: name }) });
+      if (!(await editContactField(contactId, 'name', lead.name))) return;
       openLeadDetail(contactId);
       loadContacts(document.getElementById('contatos-search').value.trim());
     });
     document.getElementById('modal-lead-email').addEventListener('click', async function () {
-      var email = prompt('E-mail do lead:', lead.email || '');
-      if (email === null) return;
-      await api('/contacts/' + contactId, { method: 'PATCH', body: JSON.stringify({ email: email }) });
+      if (!(await editContactField(contactId, 'email', lead.email))) return;
       openLeadDetail(contactId);
       loadContacts(document.getElementById('contatos-search').value.trim());
     });
@@ -4468,7 +4523,7 @@ hydrateIcons(document);
         await api('/ai/settings', { method: 'PUT', body: JSON.stringify(payload) });
         loadIaSection();
       } catch (err) {
-        alert('Não foi possível salvar: ' + err.message);
+        ctAlert('Não foi possível salvar: ' + err.message);
         btn.disabled = false;
       }
     });
@@ -4495,7 +4550,7 @@ hydrateIcons(document);
         await api('/ai/radar/run', { method: 'POST' });
         loadRadarSection();
       } catch (err) {
-        alert('Não foi possível rodar o radar: ' + err.message);
+        ctAlert('Não foi possível rodar o radar: ' + err.message);
       }
     });
   }
@@ -4628,7 +4683,7 @@ hydrateIcons(document);
         await api('/distribution-rule', { method: 'PUT', body: JSON.stringify({ mode: 'round_robin', participant_user_ids: ids, is_active: active }) });
         loadDistribuicaoSection();
       } catch (err) {
-        alert('Não foi possível salvar: ' + err.message);
+        ctAlert('Não foi possível salvar: ' + err.message);
       }
     });
   }
@@ -4728,7 +4783,7 @@ hydrateIcons(document);
           await api('/funnels/' + funnelId + '/set-default', { method: 'POST' });
           loadFunnelsSection();
         } catch (err) {
-          alert('Não foi possível definir como padrão: ' + err.message);
+          ctAlert('Não foi possível definir como padrão: ' + err.message);
         }
       });
     });
@@ -4747,9 +4802,18 @@ hydrateIcons(document);
 
     listEl.querySelectorAll('[data-add-funnel-tag]').forEach(function (btn) {
       btn.addEventListener('click', async function () {
-        var tag = prompt('Nome da tag automática (aplicada a todo lead que entrar neste funil):');
-        if (!tag) return;
-        await api('/funnels/' + btn.getAttribute('data-add-funnel-tag') + '/default-tags', { method: 'POST', body: JSON.stringify({ tag: tag }) });
+        var funnelIdForTag = btn.getAttribute('data-add-funnel-tag');
+        var added = await ctForm({
+          title: 'Tag automática',
+          description: 'Aplicada a todo lead que entrar neste funil.',
+          icon: 'tag',
+          submitLabel: 'Adicionar tag',
+          fields: [{ name: 'tag', label: 'Nome da tag', required: true, placeholder: 'Ex: evento-sp' }],
+          onSubmit: function (v) {
+            return api('/funnels/' + funnelIdForTag + '/default-tags', { method: 'POST', body: JSON.stringify({ tag: v.tag }) });
+          },
+        });
+        if (!added) return;
         loadFunnelsSection();
         loadTags();
       });
@@ -4781,18 +4845,34 @@ hydrateIcons(document);
       btn.addEventListener('click', async function () {
         var funnelId = btn.getAttribute('data-edit-welcome');
         var current = funnels.find(function (f) { return String(f.id) === funnelId; });
-        var text = prompt('Mensagem de boas-vindas desta campanha (deixe vazio pra remover):', current?.welcome_message || '');
-        if (text === null) return;
-        await api('/funnels/' + funnelId, { method: 'PATCH', body: JSON.stringify({ welcome_message: text }) });
+        var saved = await ctForm({
+          title: 'Mensagem de boas-vindas',
+          description: 'Enviada a quem chega por este link de captação. Deixe vazio para não enviar nenhuma.',
+          icon: 'message-square-text',
+          fields: [{ name: 'text', label: 'Mensagem', type: 'textarea', rows: 4, value: (current && current.welcome_message) || '', placeholder: 'Ex: Que bom te ver no stand! Em que posso ajudar?' }],
+          onSubmit: function (v) {
+            return api('/funnels/' + funnelId, { method: 'PATCH', body: JSON.stringify({ welcome_message: v.text }) });
+          },
+        });
+        if (!saved) return;
         loadFunnelsSection();
       });
     });
 
     listEl.querySelectorAll('[data-add-stage]').forEach(function (btn) {
       btn.addEventListener('click', async function () {
-        var name = prompt('Nome da nova etapa:');
-        if (!name) return;
-        await api('/funnels/' + btn.getAttribute('data-add-stage') + '/stages', { method: 'POST', body: JSON.stringify({ name: name }) });
+        var funnelIdForStage = btn.getAttribute('data-add-stage');
+        var stageCreated = await ctForm({
+          title: 'Nova etapa',
+          description: 'Ela entra no fim do funil — depois é só arrastar para reordenar.',
+          icon: 'plus',
+          submitLabel: 'Criar etapa',
+          fields: [{ name: 'name', label: 'Nome da etapa', required: true, placeholder: 'Ex: Proposta enviada' }],
+          onSubmit: function (v) {
+            return api('/funnels/' + funnelIdForStage + '/stages', { method: 'POST', body: JSON.stringify({ name: v.name }) });
+          },
+        });
+        if (!stageCreated) return;
         loadFunnelsSection();
         loadKanban();
       });
@@ -4802,9 +4882,16 @@ hydrateIcons(document);
       el.addEventListener('click', async function () {
         var stageId = el.getAttribute('data-rename-stage');
         var current = el.getAttribute('data-stage-name');
-        var name = prompt('Renomear etapa:', current);
-        if (!name || name === current) return;
-        await api('/stages/' + stageId, { method: 'PATCH', body: JSON.stringify({ name: name }) });
+        var renamedStage = await ctForm({
+          title: 'Renomear etapa',
+          icon: 'pencil',
+          fields: [{ name: 'name', label: 'Nome da etapa', required: true, value: current }],
+          onSubmit: function (v) {
+            if (v.name === current) return;
+            return api('/stages/' + stageId, { method: 'PATCH', body: JSON.stringify({ name: v.name }) });
+          },
+        });
+        if (!renamedStage) return;
         loadFunnelsSection();
         loadKanban();
       });
@@ -4839,7 +4926,7 @@ hydrateIcons(document);
           await api('/stages/' + stageId + '/move', { method: 'PATCH', body: JSON.stringify({ direction: direction }) });
         }
       } catch (err) {
-        alert('Não foi possível reordenar: ' + err.message);
+        ctAlert('Não foi possível reordenar: ' + err.message);
       }
       loadFunnelsSection();
       loadKanban();
@@ -4884,12 +4971,22 @@ hydrateIcons(document);
   }
 
   document.getElementById('funis-novo-funil-btn').addEventListener('click', async function () {
-    var name = prompt('Nome do novo funil (ex: "Evento SP 2026"):');
-    if (!name) return;
-    var welcome = prompt('Mensagem de boas-vindas pra quem entrar por esse funil (opcional, pode deixar vazio):') || undefined;
-    var tagsRaw = prompt('Tags automáticas pra todo lead que entrar aqui (separe por vírgula, opcional):') || '';
-    var defaultTags = tagsRaw.split(',').map(function (t) { return t.trim(); }).filter(Boolean);
-    await api('/funnels', { method: 'POST', body: JSON.stringify({ name: name, welcome_message: welcome, default_tags: defaultTags }) });
+    var createdFunnel = await ctForm({
+      title: 'Novo funil',
+      description: 'Um funil por campanha, evento ou fluxo de vendas.',
+      icon: 'filter',
+      submitLabel: 'Criar funil',
+      fields: [
+        { name: 'name', label: 'Nome do funil', required: true, placeholder: 'Ex: Evento SP 2026' },
+        { name: 'welcome', label: 'Mensagem de boas-vindas', type: 'textarea', rows: 3, placeholder: 'Ex: Que bom te ver no stand!', help: 'Enviada a quem entrar por este funil.' },
+        { name: 'tags', label: 'Tags automáticas', placeholder: 'Ex: evento, sp-2026', help: 'Separe por vírgula. Aplicadas a todo lead que entrar aqui.' },
+      ],
+      onSubmit: function (v) {
+        var defaultTags = v.tags.split(',').map(function (t) { return t.trim(); }).filter(Boolean);
+        return api('/funnels', { method: 'POST', body: JSON.stringify({ name: v.name, welcome_message: v.welcome.trim() || undefined, default_tags: defaultTags }) });
+      },
+    });
+    if (!createdFunnel) return;
     loadFunnelsSection();
     loadKanban();
     loadTags();
@@ -4929,9 +5026,15 @@ hydrateIcons(document);
   }
 
   document.getElementById('tags-novo-btn').addEventListener('click', async function () {
-    var name = prompt('Nome da nova tag:');
-    if (!name) return;
-    await api('/tags', { method: 'POST', body: JSON.stringify({ name: name }) });
+    var createdTag = await ctForm({
+      title: 'Nova tag',
+      description: 'Fica disponível para classificar leads no Kanban e nos Contatos.',
+      icon: 'tag',
+      submitLabel: 'Criar tag',
+      fields: [{ name: 'name', label: 'Nome da tag', required: true, placeholder: 'Ex: vip' }],
+      onSubmit: function (v) { return api('/tags', { method: 'POST', body: JSON.stringify({ name: v.name }) }); },
+    });
+    if (!createdTag) return;
     loadTags();
   });
 
@@ -5276,7 +5379,7 @@ hydrateIcons(document);
     var item = radarScheduling;
     if (!item) return;
     var when = new Date(document.getElementById('radar-schedule-when').value);
-    if (isNaN(when.getTime()) || when <= new Date()) { alert('Escolha uma data no futuro.'); return; }
+    if (isNaN(when.getTime()) || when <= new Date()) { ctAlert({ title: 'Data inválida', message: 'Escolha uma data no futuro.' }); return; }
     try {
       await api('/tasks', { method: 'POST', body: JSON.stringify({
         contact_id: item.contact_id, conversation_id: item.id,
@@ -5287,7 +5390,7 @@ hydrateIcons(document);
       loadRadar();
       if (typeof updateSidebarBadges === 'function') updateSidebarBadges();
     } catch (err) {
-      alert('Não foi possível agendar: ' + err.message);
+      ctAlert('Não foi possível agendar: ' + err.message);
     }
   });
 
@@ -5481,7 +5584,7 @@ hydrateIcons(document);
 
     if (id) {
       var ag;
-      try { ag = await api('/ai-agents/' + id); } catch (err) { alert('Não foi possível carregar esse agente.'); return; }
+      try { ag = await api('/ai-agents/' + id); } catch (err) { ctAlert('Não foi possível carregar esse agente.'); return; }
       document.getElementById('aa-name').value = ag.name || '';
       document.getElementById('aa-description').value = ag.description || '';
       document.getElementById('aa-prompt').value = ag.system_prompt || '';
@@ -5518,8 +5621,8 @@ hydrateIcons(document);
   document.getElementById('ai-agent-modal-save').addEventListener('click', async function () {
     var name = document.getElementById('aa-name').value.trim();
     var prompt = document.getElementById('aa-prompt').value.trim();
-    if (!name) { alert('Dê um nome pro agente.'); return; }
-    if (!prompt) { alert('Escreva o prompt do sistema — é o que define como o agente se comporta.'); return; }
+    if (!name) { ctAlert({ title: 'Falta o nome', message: 'Dê um nome pro agente.' }); return; }
+    if (!prompt) { ctAlert({ title: 'Falta o prompt', message: 'Escreva o prompt do sistema — é o que define como o agente se comporta.' }); return; }
 
     var payload = {
       name: name,
@@ -5550,7 +5653,7 @@ hydrateIcons(document);
       closeAiAgentModal();
       loadAiAgents();
     } catch (err) {
-      alert('Não foi possível salvar: ' + err.message);
+      ctAlert('Não foi possível salvar: ' + err.message);
     }
   });
 
@@ -5704,7 +5807,7 @@ hydrateIcons(document);
 
   document.getElementById('conexoes-refresh-btn').addEventListener('click', loadConexoes);
   document.getElementById('conexoes-novo-btn').addEventListener('click', function () {
-    alert('Hoje o CRM se conecta a 1 número oficial do WhatsApp por vez, configurado pelo servidor (variáveis WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_ACCESS_TOKEN e WHATSAPP_BUSINESS_ACCOUNT_ID). Pra conectar um segundo número, fale com quem administra o servidor — não é algo que dá pra fazer por aqui ainda.');
+    ctAlert({ title: 'Conectar outro número', message: 'Hoje o CRM se conecta a 1 número oficial do WhatsApp por vez, configurado pelo servidor (variáveis WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_ACCESS_TOKEN e WHATSAPP_BUSINESS_ACCOUNT_ID). Pra conectar um segundo número, fale com quem administra o servidor — não é algo que dá pra fazer por aqui ainda.' });
   });
 
 
