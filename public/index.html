@@ -159,6 +159,13 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 .ct-filter-card{text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:10px;min-height:0;font:inherit;transition:border-color .15s ease,transform .15s ease,box-shadow .15s ease;}
 .ct-filter-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-raised);}
 .ct-filter-card[aria-selected="true"]{border:1.5px solid var(--ink);}
+.kb-board{flex:1;min-height:0;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,1fr);gap:14px;overflow-x:auto;padding-bottom:6px;}
+.kb-col{background:var(--surface-sunken);border-radius:18px;padding:12px;display:flex;flex-direction:column;min-height:0;overflow-y:auto;}
+.kb-col-head{display:flex;align-items:center;gap:8px;padding:2px 4px 12px;}
+.kb-count{font-size:12px;font-weight:500;color:var(--text-2);background:#FFFFFF;border-radius:999px;padding:1px 8px;font-variant-numeric:tabular-nums;}
+.kb-card{display:block;background:#FFFFFF;border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-decoration:none;color:inherit;transition:transform .15s ease,box-shadow .15s ease;}
+.kb-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-raised);}
+.ct-tag{display:inline-flex;align-items:center;font-size:11px;font-weight:500;background:var(--surface-muted);color:var(--text-2);border-radius:999px;padding:2px 8px;}
 .ct-tile{display:inline-flex;align-items:center;justify-content:center;border-radius:7px;flex-shrink:0;}
 
 :root{
@@ -279,36 +286,26 @@ button{font-family:var(--font-body);}
         </aside>
 
         <section class="screen active" id="screen-kanban">
-
-          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;min-width:0;">
-            <div style="margin-bottom:16px;">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <div style="font-family:var(--font-display);font-weight:600;font-size:32px;letter-spacing:-0.025em;color:#111214;">Kanban de Atendimento</div>
-                <div style="display:flex;align-items:center;gap:10px;">
-                  <div style="display:flex;align-items:center;gap:8px;background:#FFFFFF;border:1px solid #E3E3DC;border-radius:10px;padding:9px 14px;width:220px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E7076" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
-                    <input id="kanban-search" name="kanban-search-q" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" placeholder="Buscar contato ou telefone" style="border:none;outline:none;font-size:13px;color:#111214;flex-grow:1;font-family:var(--font-body);background:transparent;"/>
-                  </div>
-                  <button id="kanban-export-btn" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#3e4046;border:1px solid #E3E3DC;border-radius:10px;padding:10px 14px;font-weight:600;font-size:13px;cursor:pointer;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5b5d63" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"></path><path d="m7 10 5 5 5-5"></path><path d="M4 19h16"></path></svg>
-                    Exportar contatos
-                  </button>
-                  <button id="kanban-novo-contato-btn" style="display:flex;align-items:center;gap:6px;background:#111214;color:#FFFFFF;border:none;border-radius:10px;padding:10px 16px;font-weight:600;font-size:13px;cursor:pointer;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
-                    Novo contato
-                  </button>
+          <div class="ct-page" style="display:flex;flex-direction:column;">
+            <header class="ct-page-header" style="margin-bottom:18px;">
+              <div style="display:flex;flex-direction:column;gap:10px;min-width:0;">
+                <h1 class="ct-h1">Kanban</h1>
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                  <div id="funnel-tabs" class="ct-segmented" role="tablist" aria-label="Funis" style="grid-auto-columns:auto;"></div>
+                  <span id="funnel-summary" style="font-size:13px;color:var(--text-muted);font-variant-numeric:tabular-nums;"></span>
                 </div>
               </div>
-              <div style="display:flex;align-items:center;justify-content:space-between;">
-                <div id="funnel-tabs" style="display:flex;align-items:center;gap:8px;">
-                  <span style="font-size:12.5px;color:#6E7076;">Carregando funis...</span>
-                </div>
-                <div id="funnel-summary" style="font-size:13px;color:#5B5D63;"></div>
+              <div class="ct-page-actions">
+                <label class="ib-search" style="width:240px;background:#FFFFFF;border:1px solid var(--border-input);height:38px;">
+                  <span data-icon="search"></span>
+                  <input id="kanban-search" name="kanban-search-q" type="search" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-bwignore="true" placeholder="Buscar contato ou telefone…" aria-label="Buscar no Kanban"/>
+                </label>
+                <button type="button" id="kanban-export-btn" class="ct-btn ct-btn-secondary"><span data-icon="download"></span>Exportar</button>
+                <button type="button" id="kanban-novo-contato-btn" class="ct-btn ct-btn-primary"><span data-icon="plus"></span>Novo contato</button>
               </div>
-            </div>
-
-            <div id="kanban-columns" style="display:flex;gap:16px;flex-grow:1;min-height:0;overflow-x:auto;">
-              <div style="padding:24px;color:#6E7076;font-size:13px;">Carregando conversas...</div>
+            </header>
+            <div id="kanban-columns" class="kb-board">
+              <div style="padding:24px;color:var(--text-subtle);font-size:13px;">Carregando conversas…</div>
             </div>
           </div>
         </section>
@@ -1343,20 +1340,21 @@ hydrateIcons(document);
 
   function renderFunnelTabs() {
     var tabs = document.getElementById('funnel-tabs');
-    var current = state.funnels.find(function (f) { return f.id === state.currentFunnelId; });
     tabs.innerHTML = '';
-    var label = document.createElement('span');
-    label.style.cssText = 'display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:20px;background:#F0FBD2;color:#111214;';
-    label.textContent = current ? current.name : '';
-    tabs.appendChild(label);
-
-    if (state.funnels.length > 1) {
-      var switchLink = document.createElement('span');
-      switchLink.style.cssText = 'font-size:12px;color:#5B5D63;cursor:pointer;text-decoration:underline;';
-      switchLink.textContent = 'Ver outros funis';
-      switchLink.addEventListener('click', function () { window.__goto && window.__goto('funis'); });
-      tabs.appendChild(switchLink);
-    }
+    state.funnels.forEach(function (f) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', f.id === state.currentFunnelId ? 'true' : 'false');
+      btn.textContent = f.name;
+      btn.style.padding = '0 14px';
+      btn.addEventListener('click', function () {
+        state.currentFunnelId = f.id;
+        renderFunnelTabs();
+        renderFunnel(f.id);
+      });
+      tabs.appendChild(btn);
+    });
   }
 
   // Chamado pela tela de Funis quando o usuário clica pra abrir o Kanban de um funil específico.
@@ -1416,51 +1414,51 @@ hydrateIcons(document);
           (c.phone_display || '').toLowerCase().indexOf(kanbanSearchTerm) !== -1;
       });
     }
-    document.getElementById('funnel-summary').textContent = funnel.stages.length + ' etapas · ' + conversations.length + ' conversas ativas';
+    document.getElementById('funnel-summary').textContent = funnel.stages.length + (funnel.stages.length === 1 ? ' etapa · ' : ' etapas · ') + conversations.length + (conversations.length === 1 ? ' conversa' : ' conversas');
     var board = document.getElementById('kanban-columns');
     board.innerHTML = '';
 
+    var KB_STAGE_DOTS = ['var(--success)', 'var(--info)', 'var(--warning)', 'var(--ai)', 'var(--danger)', 'var(--text-subtle)'];
+    var dayFmt = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
     funnel.stages.forEach(function (stage, i) {
-      var col = document.createElement('div');
-      col.style.cssText = 'flex:1 1 296px;min-width:280px;max-width:380px;display:flex;flex-direction:column;background:#EEEEE8;border-radius:14px;padding:14px;overflow-y:auto;';
-
+      var col = document.createElement('section');
+      col.className = 'kb-col';
+      col.setAttribute('aria-label', stage.name);
       var stageConvs = conversations.filter(function (c) { return c.funnel_stage_id === stage.id; });
 
-      var header = document.createElement('div');
-      header.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:0 2px;';
-      header.innerHTML =
-        '<span style="width:8px;height:8px;border-radius:50%;background:' + (stage.color || STAGE_COLORS[i % STAGE_COLORS.length]) + ';display:inline-block;"></span>' +
-        '<span style="font-family:var(--font-body);font-weight:600;font-size:13.5px;color:#111214;">' + escapeHtml(stage.name) + '</span>' +
-        '<span style="font-size:12px;color:#6E7076;background:#E3E3DC;border-radius:20px;padding:1px 8px;margin-left:2px;">' + stageConvs.length + '</span>';
-      col.appendChild(header);
+      col.innerHTML =
+        '<div class="kb-col-head">' +
+          '<span style="width:8px;height:8px;border-radius:50%;background:' + KB_STAGE_DOTS[i % KB_STAGE_DOTS.length] + ';flex-shrink:0;"></span>' +
+          '<span style="font-weight:600;font-size:14px;color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(stage.name) + '</span>' +
+          '<span class="kb-count">' + stageConvs.length + '</span>' +
+        '</div>';
 
       var list = document.createElement('div');
       list.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
-
       if (!stageConvs.length) {
-        var empty = document.createElement('div');
-        empty.style.cssText = 'font-size:12px;color:#6E7076;padding:8px 2px;';
-        empty.textContent = 'Sem conversas nesta etapa.';
-        list.appendChild(empty);
+        list.innerHTML = '<div class="ct-empty" style="padding:18px 12px;">Sem conversas nesta etapa</div>';
       }
 
       stageConvs.forEach(function (conv) {
         var card = document.createElement('a');
         card.href = '#conversa';
-        card.dataset.goto = 'conversa';
+        card.className = 'kb-card';
         card.dataset.conversationId = conv.id;
-        card.style.cssText = 'display:block;background:#FFFFFF;border:1px solid #E6E6E0;border-radius:12px;padding:13px;cursor:pointer;';
+        var isIg = conv.contact_channel === 'instagram';
+        var tags = (conv.contact_tags || []).slice(0, 3).map(function (t) { return '<span class="ct-tag">' + escapeHtml(t) + '</span>'; }).join('');
         card.innerHTML =
-          '<div style="display:flex;align-items:center;gap:9px;margin-bottom:8px;">' +
-            '<div style="position:relative;width:30px;height:30px;flex-shrink:0;">' + avatarHtml(conv.avatar_url, conv.avatar_initials, conv.contact_name, 30, 11.5, 'Inter') + '' + channelBadge(conv.contact_channel) + '</div>' +
-            '<div style="flex-grow:1;min-width:0;"><div style="font-weight:600;font-size:13.5px;color:#111214;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(conv.contact_name || 'Sem nome') + '</div></div>' +
-            '<div style="font-size:11px;color:#6E7076;flex-shrink:0;">' + formatTime(conv.last_message_at) + '</div>' +
+          '<div style="display:flex;align-items:center;gap:10px;">' +
+            avatarHtml(conv.avatar_url, conv.avatar_initials, conv.contact_name, 32, 12) +
+            '<div style="flex:1;min-width:0;font-weight:600;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(conv.contact_name || 'Sem nome') + '</div>' +
+            (conv.unread_count > 0 ? '<span class="ib-unread">' + conv.unread_count + '</span>' : '') +
           '</div>' +
-          '<div style="font-size:11.5px;color:#5B5D63;margin-bottom:7px;">' + escapeHtml(conv.phone_display || '') + '</div>' +
-          (conv.unread_count > 0
-            ? '<div style="display:flex;align-items:center;gap:6px;"><div style="flex-grow:1;"></div><span style="width:18px;height:18px;border-radius:50%;background:#111214;color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;">' + conv.unread_count + '</span></div>'
-            : '');
-
+          '<div style="display:flex;align-items:center;gap:5px;font-size:13px;color:var(--text-muted);margin-top:8px;font-variant-numeric:tabular-nums;">' +
+            '<span style="color:' + (isIg ? 'var(--instagram)' : 'var(--whatsapp)') + ';display:inline-flex;">' + ICON(isIg ? 'instagram' : 'message-circle', 13) + '</span>' + escapeHtml(conv.phone_display || '') +
+          '</div>' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;">' +
+            '<div style="display:flex;gap:4px;flex-wrap:wrap;min-width:0;">' + tags + '</div>' +
+            (conv.last_message_at ? '<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--text-subtle);flex-shrink:0;font-variant-numeric:tabular-nums;">' + ICON('clock', 12) + dayFmt.format(new Date(conv.last_message_at)) + '</span>' : '') +
+          '</div>';
         card.addEventListener('click', function (e) {
           e.preventDefault();
           openConversation(conv.id);

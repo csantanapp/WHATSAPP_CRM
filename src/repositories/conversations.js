@@ -226,7 +226,7 @@ export async function listConversationsByFunnel(funnelId, viewer) {
 
   const result = await query(
     `SELECT c.*, ct.name AS contact_name, ct.phone_display, ct.avatar_initials, ct.avatar_url, ct.channel AS contact_channel,
-            u.name AS assigned_user_name
+            ct.tags AS contact_tags, u.name AS assigned_user_name
      FROM conversations c
      JOIN contacts ct ON ct.id = c.contact_id
      LEFT JOIN users u ON u.id = c.assigned_user_id
