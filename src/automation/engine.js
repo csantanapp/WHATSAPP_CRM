@@ -103,7 +103,7 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
           break;
         }
         const text = renderTemplate(current.config?.text || '', contact);
-        const sent = await sendText(contact, text);
+        const sent = await sendText(contact, text, conversation.id);
         const saved = await insertMessage({
           conversationId: conversation.id,
           waMessageId: sent?.messages?.[0]?.id || sent?.message_id,

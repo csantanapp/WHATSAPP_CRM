@@ -19,6 +19,7 @@ import { saveMediaFile } from '../services/mediaStorage.js';
 import { transcribeAudio } from '../services/transcription/TranscriptionService.js';
 import { getDefaultTenantId } from '../tenant.js';
 import { broadcast } from '../realtime.js';
+import { simulateTyping } from '../services/typing.js';
 import { runTriggersForInboundMessage } from '../automation/engine.js';
 import { runAiAgentsForInboundMessage } from '../automation/aiAgents.js';
 
@@ -243,6 +244,7 @@ async function handleOptOutIfRequested(conversation, contact, body) {
 
 async function sendCampaignWelcome(conversation, contact, funnel) {
   try {
+    await simulateTyping({ conversationId: conversation.id, contact, text: funnel.welcome_message });
     const sent = await sendTextMessage(contact.wa_id, funnel.welcome_message);
     const saved = await insertMessage({
       conversationId: conversation.id,

@@ -5,6 +5,7 @@ import { insertMessage } from '../repositories/messages.js';
 import { logActivity } from '../repositories/activityLog.js';
 import { broadcast } from '../realtime.js';
 import { renderTemplate } from './variables.js';
+import { simulateTyping } from '../services/typing.js';
 
 // Formulário em conversa: o nó "Perguntar" (ask_question) pode
 //   - oferecer opções: botões (até 3), lista (até 10, atrás do botão "Ver
@@ -48,8 +49,10 @@ function questionOptions(config) {
     .slice(0, limits.count);
 }
 
-// Envia texto simples pelo canal do contato (WhatsApp ou Instagram).
-export async function sendText(contact, text) {
+// Envia texto simples pelo canal do contato (WhatsApp ou Instagram). Com
+// `conversationId`, mostra "digitando..." antes (mensagem automática).
+export async function sendText(contact, text, conversationId = null) {
+  if (conversationId) await simulateTyping({ conversationId, contact, text });
   if (contact.channel === 'instagram') return sendInstagramMessage(contact.ig_user_id, text);
   return sendTextMessage(contact.wa_id, text);
 }
@@ -64,6 +67,7 @@ export async function sendQuestion({ flow, conversation, contact, step, textOver
 
   const textWithOptions = options.length ? `${text}\n\n${numbered}` : text;
   const type = config.reply_type;
+  await simulateTyping({ conversationId: conversation.id, contact, text: textWithOptions });
 
   let sent;
   if (options.length && contact.channel !== 'instagram' && type === 'buttons') {

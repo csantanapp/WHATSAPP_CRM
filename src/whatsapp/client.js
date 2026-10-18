@@ -76,6 +76,19 @@ export async function markMessageAsRead(waMessageId) {
   });
 }
 
+// Mostra "digitando..." pro contato (some quando a próxima mensagem sai, ou
+// em até 25s). A Meta exige o id de uma mensagem recebida do contato e, no
+// mesmo comando, marca essa mensagem como lida.
+export async function sendTypingIndicator(waMessageId) {
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  return callGraphApi(`${phoneNumberId}/messages`, {
+    messaging_product: 'whatsapp',
+    status: 'read',
+    message_id: waMessageId,
+    typing_indicator: { type: 'text' },
+  });
+}
+
 // Faz uma chamada de leitura simples (GET) contra o número configurado, só pra
 // confirmar que o token/phone_number_id são válidos — usado na tela de Configurações.
 export async function checkConnectionStatus() {

@@ -36,6 +36,23 @@ export async function sendInstagramMessage(igsid, text) {
   return data; // { recipient_id, message_id }
 }
 
+// "Digitando..." no Instagram DM (sender_action da mesma Messaging API).
+export async function sendInstagramTyping(igsid) {
+  const igToken = process.env.INSTAGRAM_PAGE_ACCESS_TOKEN;
+  const igBusinessId = process.env.INSTAGRAM_PAGE_ID;
+  if (!igToken || !igBusinessId) return null;
+  const res = await fetch(igApiUrl(`${igBusinessId}/messages`), {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${igToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ recipient: { id: igsid }, sender_action: 'typing_on' }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data?.error?.message || `Instagram API error (${res.status})`);
+  }
+  return true;
+}
+
 // Busca nome/username/foto do remetente — o webhook do Instagram não manda o
 // perfil junto (diferente do WhatsApp), então enriquecemos num passo à parte,
 // melhor esforço (nunca derruba o processamento da mensagem se falhar).

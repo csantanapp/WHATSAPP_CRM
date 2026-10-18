@@ -97,7 +97,7 @@ export async function resumeAiForConversation(conversationId) {
 }
 
 async function sendAsAgent(conversation, contact, text) {
-  const sent = await sendText(contact, text);
+  const sent = await sendText(contact, text, conversation.id);
   const saved = await insertMessage({
     conversationId: conversation.id,
     waMessageId: sent?.messages?.[0]?.id || sent?.message_id,

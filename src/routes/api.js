@@ -50,6 +50,7 @@ import {
 import { getSourceForConversation } from '../repositories/conversationSources.js';
 import { runTriggersForTagAdded, runTriggersForStageEntered } from '../automation/engine.js';
 import { pauseAiForConversation, resumeAiForConversation } from '../automation/aiAgents.js';
+import { getTypingConfig, updateTypingConfig } from '../services/typing.js';
 import { getDistributionRule, upsertDistributionRule } from '../services/distribution.js';
 import { summarizeConversation, getLatestInsight, getAiSettings, updateAiSettings, AI_PROVIDERS } from '../services/ai/AIService.js';
 import { runRadarNow } from '../jobs/dailyRadarJob.js';
@@ -449,6 +450,16 @@ apiRouter.get('/conversations/:id/insight', asyncHandler(async (req, res) => {
 
 apiRouter.get('/ai/providers', requireRole('admin'), asyncHandler(async (_req, res) => {
   res.json(Object.entries(AI_PROVIDERS).map(([id, def]) => ({ id, label: def.label })));
+}));
+
+// --- "Digitando..." nas mensagens automáticas ---
+
+apiRouter.get('/settings/typing', requireRole('admin'), asyncHandler(async (req, res) => {
+  res.json(await getTypingConfig());
+}));
+
+apiRouter.patch('/settings/typing', requireRole('admin'), asyncHandler(async (req, res) => {
+  res.json(await updateTypingConfig({ enabled: req.body.enabled, maxSeconds: req.body.max_seconds }));
 }));
 
 // --- Conversões de anúncios (Conversions API da Meta) ---

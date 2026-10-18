@@ -964,6 +964,9 @@ button{font-family:'Inter',sans-serif;}
             <div style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Radar diário</div>
             <div id="config-radar-box" style="background:#FFFFFF;border:1px solid #E5E9F0;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#94A3B8;">Carregando...</div>
 
+            <div style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Mensagens automáticas</div>
+            <div id="config-typing-box" style="background:#FFFFFF;border:1px solid #E5E9F0;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#94A3B8;">Carregando...</div>
+
             <div style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Conversões de anúncios (Meta)</div>
             <div id="config-capi-box" style="background:#FFFFFF;border:1px solid #E5E9F0;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#94A3B8;">Carregando...</div>
 
@@ -3915,6 +3918,7 @@ button{font-family:'Inter',sans-serif;}
     loadRadarSection();
     loadDistribuicaoSection();
     loadCapiSection();
+    loadTypingSection();
   }
 
   var IA_KEY_HELP = {
@@ -4015,6 +4019,34 @@ button{font-family:'Inter',sans-serif;}
         alert('Não foi possível rodar o radar: ' + err.message);
       }
     });
+  }
+
+  // "Digitando..." antes das mensagens automáticas.
+  async function loadTypingSection() {
+    var box = document.getElementById('config-typing-box');
+    var cfg;
+    try { cfg = await api('/settings/typing'); } catch (e) {
+      box.innerHTML = '<div style="color:#64748B;">Disponível só para administradores.</div>';
+      return;
+    }
+    box.innerHTML =
+      '<label style="display:flex;align-items:flex-start;gap:9px;cursor:pointer;">' +
+        '<input type="checkbox" id="typing-enabled" ' + (cfg.enabled ? 'checked' : '') + ' style="margin-top:2px;"/>' +
+        '<span><span style="font-weight:600;color:#0F172A;">Simular "digitando..." antes de responder</span>' +
+        '<span style="display:block;color:#64748B;line-height:1.5;margin-top:2px;">Antes de cada mensagem automática (fluxos, formulários, agente de IA, boas-vindas), o lead vê "digitando..." por um tempo proporcional ao tamanho do texto — a conversa parece atendida por uma pessoa. No WhatsApp, isso também marca a mensagem do lead como lida (✓✓ azul).</span></span>' +
+      '</label>' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding-left:24px;color:#475569;">' +
+        'Tempo máximo digitando: <input id="typing-max" type="number" min="1" max="15" value="' + cfg.maxSeconds + '" style="width:64px;background:#F5F7FA;border:1px solid #E2E8F0;border-radius:8px;padding:6px 8px;font-size:12.5px;"/> segundos' +
+        '<span id="typing-saved" style="color:#15803D;font-size:11.5px;"></span>' +
+      '</div>';
+    var saved = document.getElementById('typing-saved');
+    async function save(body) {
+      await api('/settings/typing', { method: 'PATCH', body: JSON.stringify(body) });
+      saved.textContent = 'Salvo.';
+      setTimeout(function () { saved.textContent = ''; }, 1500);
+    }
+    document.getElementById('typing-enabled').addEventListener('change', function () { save({ enabled: this.checked }); });
+    document.getElementById('typing-max').addEventListener('change', function () { save({ max_seconds: parseInt(this.value, 10) }); });
   }
 
   var CAPI_EVENT_LABELS = { QualifiedLead: '🎯 Lead qualificado', Purchase: '💰 Venda' };

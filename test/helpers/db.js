@@ -24,6 +24,10 @@ function assertTestDatabase() {
 
 assertTestDatabase();
 
+// Simulação de "digitando..." desligada na suíte: cada mensagem automática
+// esperaria 1–5s. O teste específico dela liga de volta.
+if (!process.env.TYPING_SIMULATION) process.env.TYPING_SIMULATION = 'off';
+
 export async function resetDb() {
   await pool.query(`
     TRUNCATE TABLE
