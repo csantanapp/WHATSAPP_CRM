@@ -1,3 +1,4 @@
+import { addInterest, listInterests, deleteInterest, listInterestProducts } from '../repositories/contactInterests.js';
 import { Router } from 'express';
 import { query } from '../db/pool.js';
 import {
@@ -160,6 +161,28 @@ apiRouter.post('/contacts/:id/tags', asyncHandler(async (req, res) => {
       console.error('Falha no gatilho tag_added:', err.message);
     });
   }
+}));
+
+apiRouter.get('/contacts/:id/interests', asyncHandler(async (req, res) => {
+  res.json(await listInterests(req.tenantId, req.params.id));
+}));
+
+apiRouter.post('/contacts/:id/interests', asyncHandler(async (req, res) => {
+  const product = String(req.body.product || '').trim();
+  if (!product) return res.status(400).json({ error: 'Informe o produto' });
+  const contact = await getContactById(req.tenantId, req.params.id);
+  if (!contact) return res.status(404).json({ error: 'Contato não encontrado' });
+  res.status(201).json(await addInterest({ contactId: contact.id, product, source: 'manual', userId: req.user.id }));
+}));
+
+apiRouter.delete('/contact-interests/:id', asyncHandler(async (req, res) => {
+  const deleted = await deleteInterest(req.tenantId, req.params.id);
+  if (!deleted) return res.status(404).json({ error: 'Registro não encontrado' });
+  res.status(204).end();
+}));
+
+apiRouter.get('/interest-products', asyncHandler(async (req, res) => {
+  res.json(await listInterestProducts(req.tenantId));
 }));
 
 apiRouter.delete('/contacts/:id/tags/:tag', asyncHandler(async (req, res) => {
@@ -690,6 +713,8 @@ apiRouter.post('/opportunities', asyncHandler(async (req, res) => {
     contactId: contact_id, conversationId: conversation_id, funnelId: funnel_id, stageId: stage_id,
     title, value, product, ownerUserId: owner_user_id || req.user.id, expectedCloseDate: expected_close_date,
   });
+  // O que está sendo vendido entra no histórico de interesse do lead.
+  await addInterest({ contactId: contact_id, product: product || title, source: 'opportunity', sourceLabel: title !== (product || title) ? title : null, conversationId: conversation_id || null, userId: req.user.id });
   res.status(201).json(opp);
 }));
 

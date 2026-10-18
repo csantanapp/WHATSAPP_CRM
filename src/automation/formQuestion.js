@@ -6,6 +6,7 @@ import { logActivity } from '../repositories/activityLog.js';
 import { broadcast } from '../realtime.js';
 import { renderTemplate } from './variables.js';
 import { simulateTyping } from '../services/typing.js';
+import { addInterest } from '../repositories/contactInterests.js';
 
 // Formulário em conversa: o nó "Perguntar" (ask_question) pode
 //   - oferecer opções: botões (até 3), lista (até 10, atrás do botão "Ver
@@ -213,6 +214,10 @@ export async function handleQuestionReply({ flow, run, step, conversation, conta
   }
 
   await saveAnswerToContact({ contact, conversation, config, value });
+  // "Registrar como produto de interesse": a resposta entra no histórico do lead.
+  if (config.track_interest) {
+    await addInterest({ contactId: contact.id, product: value, source: 'form', sourceLabel: flow.name, conversationId: conversation.id });
+  }
   return { outcome: 'next', nextStepId: nextStepForAnswer(step, value) };
 }
 

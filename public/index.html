@@ -218,6 +218,7 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 @media (max-width:1100px){.fn-body.has-link{grid-template-columns:1fr;}}
 .fn-link{background:var(--ink);border-radius:16px;padding:18px;margin-top:16px;color:#FFFFFF;}
 .fn-link input{flex:1;min-width:0;height:38px;border:1px solid #2B2D33;background:#1E1F23;color:#FFFFFF;border-radius:10px;padding:0 12px;font-family:var(--font-mono);font-size:12.5px;}
+.li-row{display:flex;align-items:center;gap:10px;background:#FAFAF7;border:1px solid var(--divider);border-radius:11px;padding:8px 8px 8px 10px;text-align:left;}
 .ct-link{font-size:14px;font-weight:500;color:var(--ink);display:inline-flex;align-items:center;gap:4px;text-decoration:underline;text-underline-offset:3px;}
 .radar-row{display:flex;align-items:center;gap:14px;padding:18px 22px;flex-wrap:wrap;}
 .radar-list .radar-row + .radar-row{border-top:1px solid var(--divider);}
@@ -635,6 +636,7 @@ button{font-family:var(--font-body);}
                   <input id="contatos-search" name="contatos-search-q" type="search" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-bwignore="true" placeholder="Nome, e-mail ou telefone…" aria-label="Buscar contatos"/>
                 </label>
                 <select id="contatos-tag-filter" class="ct-select" aria-label="Filtrar por tag"><option value="">Todas as tags</option></select>
+                <select id="contatos-produto-filter" class="ct-select" aria-label="Filtrar por produto de interesse"><option value="">Todos os produtos</option></select>
                 <select id="contatos-origem-filter" class="ct-select" aria-label="Filtrar por origem"><option value="">Todas as origens</option></select>
                 <select id="contatos-page-size" class="ct-select" aria-label="Itens por página" hidden>
                   <option value="25">25 por página</option>
@@ -652,13 +654,14 @@ button{font-family:var(--font-body);}
                       <th data-sort="email" style="cursor:pointer;">E-mail <span data-sort-arrow="email"></span></th>
                       <th data-sort="phone_display" style="cursor:pointer;">Telefone <span data-sort-arrow="phone_display"></span></th>
                       <th>Tags</th>
+                      <th>Interesse</th>
                       <th data-sort="created_at" style="cursor:pointer;">Última atividade <span data-sort-arrow="created_at"></span></th>
                       <th>Status</th>
                       <th class="num"><span class="ct-sr">Ações</span></th>
                     </tr>
                   </thead>
                   <tbody id="contatos-table-body">
-                    <tr><td colspan="7" style="color:var(--text-subtle);">Carregando contatos…</td></tr>
+                    <tr><td colspan="8" style="color:var(--text-subtle);">Carregando contatos…</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -2582,7 +2585,7 @@ hydrateIcons(document);
         },
         {
           client_id: 'interesse', step_type: 'ask_question', x: 980, y: 160,
-          config: { text: 'Perfeito! E qual desses serviços te interessa?', reply_type: 'buttons', options: ['Tráfego pago', 'Redes sociais', 'Site / Landing'], save_to: 'custom', custom_field: 'Interesse', skip_if_known: true },
+          config: { text: 'Perfeito! E qual desses serviços te interessa?', reply_type: 'buttons', options: ['Tráfego pago', 'Redes sociais', 'Site / Landing'], save_to: 'custom', custom_field: 'Interesse', skip_if_known: true, track_interest: true },
           next_step_id: 'tag',
         },
         { client_id: 'tag', step_type: 'add_tag', x: 1280, y: 160, config: { tag: 'lead-qualificado' }, next_step_id: 'obrigado' },
@@ -2826,6 +2829,7 @@ hydrateIcons(document);
         return escapeHtml((c.text || '(sem texto)').slice(0, 60)) +
           ' <span style="color:#6E7076;">· ' + (optCount ? optCount + ' opções' : 'aguarda resposta') +
           (saveLabel ? ' → salva em <b>' + escapeHtml(saveLabel) + '</b>' : '') +
+          (c.track_interest ? ' · registra interesse' : '') +
           (c.skip_if_known && saveLabel ? ' · pula se já souber' : '') + '</span>';
       }
       case 'wait': return 'Esperar ' + (c.minutes || 0) + ' min';
@@ -3394,6 +3398,10 @@ hydrateIcons(document);
         '<div id="f-custom-wrap" style="display:' + (saveTo === 'custom' ? 'block' : 'none') + ';">' +
           flowFieldHtml('f-custom-field', 'Nome do campo (ex: Interesse, Orçamento, Cidade)', flowInputHtml('f-custom-field', c.custom_field || '')) +
         '</div>' +
+        '<label style="display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:#3e4046;line-height:1.4;">' +
+          '<input type="checkbox" id="f-track-interest" style="margin-top:2px;" ' + (c.track_interest ? 'checked' : '') + '/>' +
+          '<span>Registrar a resposta como <b>produto de interesse</b> <span style="display:block;color:#6E7076;font-size:11.5px;">A resposta entra no histórico de produtos do lead (seção Contatos), com data e o nome desta automação. Ideal para perguntas como “Qual curso te interessa?”.</span></span>' +
+        '</label>' +
         '<label id="f-skip-wrap" style="display:' + (saveTo ? 'flex' : 'none') + ';align-items:flex-start;gap:8px;font-size:12.5px;color:#3e4046;line-height:1.4;">' +
           '<input type="checkbox" id="f-skip-known" style="margin-top:2px;" ' + (c.skip_if_known ? 'checked' : '') + '/>' +
           '<span>Pular esta pergunta se o lead já tiver esse dado <span style="display:block;color:#6E7076;font-size:11.5px;">Nome e e-mail só contam se confirmados (respondidos num formulário ou editados por um atendente) — o nome do perfil do WhatsApp não conta. Com caminho por opção, segue o ramo que o lead já tinha escolhido.</span></span>' +
@@ -3591,6 +3599,7 @@ hydrateIcons(document);
         retry_text: val('f-retry-text') || undefined,
         max_retries: isNaN(maxRetriesVal) ? 2 : Math.max(0, Math.min(5, maxRetriesVal)),
         branch_by_option: replyTypeVal !== 'text' && document.getElementById('f-branch').checked,
+        track_interest: document.getElementById('f-track-interest').checked || undefined,
       };
       // Remove ligações de opções que deixaram de existir (lista encurtada ou ramo desligado).
       var keptBranches = flowNodeBranchOptions(node).length;
@@ -4035,6 +4044,25 @@ hydrateIcons(document);
     select.value = currentValue;
   }
 
+  // Produtos do histórico de interesse (sem diferenciar maiúsculas).
+  function populateContatosProdutoFilter(contacts) {
+    var select = document.getElementById('contatos-produto-filter');
+    var currentValue = select.value;
+    var byKey = {};
+    contacts.forEach(function (c) {
+      (c.interests || []).forEach(function (p) { if (p && !byKey[p.toLowerCase()]) byKey[p.toLowerCase()] = p; });
+    });
+    var produtos = Object.keys(byKey).map(function (k) { return byKey[k]; }).sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
+    select.innerHTML = '<option value="">Todos os produtos</option>';
+    produtos.forEach(function (p) {
+      var opt = document.createElement('option');
+      opt.value = p.toLowerCase();
+      opt.textContent = p;
+      select.appendChild(opt);
+    });
+    select.value = byKey[currentValue] ? currentValue : '';
+  }
+
   function populateContatosOrigemFilter(contacts) {
     var select = document.getElementById('contatos-origem-filter');
     var currentValue = select.value;
@@ -4059,25 +4087,37 @@ hydrateIcons(document);
       if (searchTerm) params.set('q', searchTerm);
       contacts = await api('/contacts' + (params.toString() ? '?' + params.toString() : ''));
     } catch (err) {
-      tbody.innerHTML = '<tr><td colspan="7" style="padding:20px 16px;color:#B4381A;font-size:12.5px;">Não foi possível carregar os contatos.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="padding:20px 16px;color:#B4381A;font-size:12.5px;">Não foi possível carregar os contatos.</td></tr>';
       return;
     }
     state.contatosAll = contacts;
     populateContatosOrigemFilter(contacts);
+    populateContatosProdutoFilter(contacts);
     summaryEl.textContent = contacts.length + (contacts.length === 1 ? ' contato encontrado' : ' contatos encontrados');
     state.contatosPage = 1;
     renderContatosTable();
+  }
+
+  function interestCellHtml(c) {
+    if (!c.latest_interest) return '<span style="color:var(--text-subtle);">—</span>';
+    var others = (c.interests || []).filter(function (p) { return p.toLowerCase() !== c.latest_interest.toLowerCase(); });
+    return '<span style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;">' +
+      '<span class="ct-pill ct-pill-acc" title="Interesse mais recente">' + ICON('target', 12) + escapeHtml(c.latest_interest) + '</span>' +
+      (others.length ? '<span style="font-size:12px;color:var(--text-subtle);" title="' + escapeHtml(others.join(', ')) + '">+' + others.length + '</span>' : '') +
+    '</span>';
   }
 
   function renderContatosTable() {
     var tbody = document.getElementById('contatos-table-body');
     var tagFilter = document.getElementById('contatos-tag-filter').value;
     var origemFilter = document.getElementById('contatos-origem-filter').value;
+    var produtoFilter = document.getElementById('contatos-produto-filter').value;
     var pageSize = parseInt(document.getElementById('contatos-page-size').value, 10);
 
     var filtered = state.contatosAll.filter(function (c) {
       if (tagFilter && (!c.tags || c.tags.indexOf(tagFilter) === -1)) return false;
       if (origemFilter && c.source !== origemFilter) return false;
+      if (produtoFilter && !(c.interests || []).some(function (p) { return p.toLowerCase() === produtoFilter; })) return false;
       return true;
     });
 
@@ -4115,7 +4155,7 @@ hydrateIcons(document);
 
     tbody.innerHTML = '';
     if (!pageItems.length) {
-      tbody.innerHTML = '<tr><td colspan="7"><div class="ct-empty">Nenhum contato encontrado. Ajuste a busca ou os filtros.</div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8"><div class="ct-empty">Nenhum contato encontrado. Ajuste a busca ou os filtros.</div></td></tr>';
       return;
     }
 
@@ -4128,10 +4168,11 @@ hydrateIcons(document);
       var tagsHtml = (c.tags || []).slice(0, 2).map(function (tag) { return '<span class="ct-tag">' + escapeHtml(tag) + '</span>'; }).join(' ') +
         (c.tags && c.tags.length > 2 ? ' <span style="font-size:12px;color:var(--text-subtle);">+' + (c.tags.length - 2) + '</span>' : '');
       tr.innerHTML =
-        '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml(c.avatar_url, c.avatar_initials, c.name, 32, 12) + '<span style="font-weight:500;">' + escapeHtml(c.name || 'Sem nome') + '</span></div></td>' +
+        '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml(c.avatar_url, c.avatar_initials, c.name, 32, 12) + '<span style="font-weight:500;white-space:nowrap;">' + escapeHtml(c.name || 'Sem nome') + '</span></div></td>' +
         '<td style="color:var(--text-muted);">' + (c.email ? escapeHtml(c.email) : '<span style="color:var(--text-subtle);">—</span>') + '</td>' +
         '<td style="white-space:nowrap;font-variant-numeric:tabular-nums;"><span style="display:inline-flex;align-items:center;gap:6px;"><span style="color:' + (isIg ? 'var(--instagram)' : 'var(--whatsapp)') + ';display:inline-flex;">' + ICON(isIg ? 'instagram' : 'message-circle', 14) + '</span>' + escapeHtml(c.phone_display || '') + '</span></td>' +
-        '<td>' + (tagsHtml || '<span style="color:var(--text-subtle);">—</span>') + '</td>' +
+        '<td style="white-space:nowrap;">' + (tagsHtml || '<span style="color:var(--text-subtle);">—</span>') + '</td>' +
+        '<td style="white-space:nowrap;">' + interestCellHtml(c) + '</td>' +
         '<td style="color:var(--text-muted);white-space:nowrap;font-variant-numeric:tabular-nums;">' + dateFmt.format(new Date(c.updated_at || c.created_at)) + '</td>' +
         '<td><span class="ct-pill ct-pill-success"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);"></span>Ativo</span></td>' +
         '<td class="num" style="white-space:nowrap;">' +
@@ -4209,6 +4250,10 @@ hydrateIcons(document);
     renderContatosTable();
   });
   document.getElementById('contatos-origem-filter').addEventListener('change', function () {
+    state.contatosPage = 1;
+    renderContatosTable();
+  });
+  document.getElementById('contatos-produto-filter').addEventListener('change', function () {
     state.contatosPage = 1;
     renderContatosTable();
   });
@@ -4308,10 +4353,11 @@ hydrateIcons(document);
     overlay.style.display = 'flex';
     body.innerHTML = 'Carregando...';
 
-    var lead, history;
+    var lead, history, interests;
     try {
       lead = await api('/contacts/' + contactId);
       history = await api('/contacts/' + contactId + '/history');
+      interests = await api('/contacts/' + contactId + '/interests');
     } catch (err) {
       body.innerHTML = '<div style="color:#B4381A;font-size:12.5px;">Não foi possível carregar este lead.</div>';
       return;
@@ -4330,6 +4376,19 @@ hydrateIcons(document);
         '<span style="font-size:11px;font-weight:600;color:#5b5d63;background:#EEEEE8;padding:2px 8px;border-radius:20px;">' + escapeHtml(c.stage_name || '--') + '</span>' +
       '</div>';
     }).join('') || '<div style="font-size:12.5px;color:#6E7076;">Nenhuma conversa ainda.</div>';
+
+    var INTEREST_SOURCE = { manual: 'Manual', form: 'Formulário', opportunity: 'Oportunidade' };
+    var interestsHtml = (interests || []).map(function (it, idx) {
+      var origin = INTEREST_SOURCE[it.source] || it.source;
+      if (it.source_label) origin += ': ' + it.source_label;
+      else if (it.source === 'manual' && it.created_by_name) origin += ' · ' + it.created_by_name;
+      return '<div class="li-row">' +
+        '<span class="ct-tile" style="width:28px;height:28px;border-radius:8px;background:' + (idx === 0 ? 'var(--acc)' : '#EEEEE8') + ';color:var(--ink);">' + ICON('target', 14) + '</span>' +
+        '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:var(--ink);">' + escapeHtml(it.product) + (idx === 0 ? ' <span style="font-size:11px;font-weight:500;color:var(--acc-ink);background:var(--acc-soft);border-radius:999px;padding:1px 7px;margin-left:4px;">mais recente</span>' : '') + '</div>' +
+          '<div style="font-size:12px;color:var(--text-muted);margin-top:1px;">' + new Date(it.created_at).toLocaleDateString('pt-BR') + ' · ' + escapeHtml(origin) + '</div></div>' +
+        '<button type="button" class="ct-icon-btn danger" data-remove-interest="' + it.id + '" data-interest-name="' + escapeHtml(it.product) + '" aria-label="Remover ' + escapeHtml(it.product) + ' do histórico" title="Remover do histórico" style="width:28px;height:28px;">' + ICON('x', 14) + '</button>' +
+      '</div>';
+    }).join('') || '<div style="font-size:12.5px;color:#6E7076;">Nenhum produto registrado ainda.</div>';
 
     var historyHtml = (history || []).map(function (h) {
       return '<div style="display:flex;gap:8px;padding:6px 0;">' +
@@ -4355,6 +4414,13 @@ hydrateIcons(document);
         '<div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Dados do formulário</div>' +
         customFieldsHtml(lead.custom_fields) +
       '</div>' : '') +
+      '<div style="margin-bottom:18px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+          '<div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;">Produtos de interesse</div>' +
+          '<button type="button" id="modal-add-interest" style="background:none;border:none;color:#111214;font-size:12px;font-weight:600;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:4px;">' + ICON('plus', 13) + 'produto</button>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:6px;">' + interestsHtml + '</div>' +
+      '</div>' +
       '<div style="margin-bottom:18px;">' +
         '<div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Presença em funis</div>' +
         conversationsHtml +
@@ -4384,6 +4450,30 @@ hydrateIcons(document);
     });
     document.getElementById('modal-lead-notes').addEventListener('blur', async function () {
       await api('/contacts/' + contactId, { method: 'PATCH', body: JSON.stringify({ notes: this.value }) });
+    });
+    document.getElementById('modal-add-interest').addEventListener('click', async function () {
+      var known = [];
+      try { known = (await api('/interest-products')).map(function (p) { return p.product; }); } catch (err) {}
+      var added = await ctForm({
+        title: 'Produto de interesse',
+        description: 'Entra no histórico de ' + (lead.name || 'este lead') + ' com a data de hoje.',
+        icon: 'target',
+        submitLabel: 'Registrar interesse',
+        fields: [{ name: 'product', label: 'Produto ou serviço', required: true, suggestions: known, placeholder: 'Ex: Curso de Medicina', help: known.length ? 'Comece a digitar para ver os produtos já usados.' : '' }],
+        onSubmit: function (v) { return api('/contacts/' + contactId + '/interests', { method: 'POST', body: JSON.stringify({ product: v.product }) }); },
+      });
+      if (!added) return;
+      openLeadDetail(contactId);
+      loadContacts(document.getElementById('contatos-search').value.trim());
+    });
+    body.querySelectorAll('[data-remove-interest]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        var okRemove = await ctConfirm({ title: 'Remover “' + btn.getAttribute('data-interest-name') + '” do histórico?', message: 'Só este registro sai do histórico do lead.', confirmLabel: 'Remover' });
+        if (!okRemove) return;
+        await api('/contact-interests/' + btn.getAttribute('data-remove-interest'), { method: 'DELETE' });
+        openLeadDetail(contactId);
+        loadContacts(document.getElementById('contatos-search').value.trim());
+      });
     });
     document.getElementById('modal-add-tag').addEventListener('click', function () {
       openTagPicker(contactId, lead.tags, function () {

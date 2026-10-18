@@ -110,7 +110,14 @@ export async function listContacts(tenantId, searchTerm, funnelId) {
   }
 
   const where = `WHERE ${conditions.join(' AND ')}`;
-  const result = await query(`SELECT c.* FROM contacts c ${where} ORDER BY c.created_at DESC`, params);
+  // interests: produtos distintos do histórico; latest_interest: o mais recente.
+  const result = await query(
+    `SELECT c.*,
+            (SELECT array_agg(DISTINCT ci.product) FROM contact_interests ci WHERE ci.contact_id = c.id) AS interests,
+            (SELECT ci.product FROM contact_interests ci WHERE ci.contact_id = c.id ORDER BY ci.created_at DESC, ci.id DESC LIMIT 1) AS latest_interest
+     FROM contacts c ${where} ORDER BY c.created_at DESC`,
+    params
+  );
   return result.rows;
 }
 

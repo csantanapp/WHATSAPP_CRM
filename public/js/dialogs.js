@@ -2,7 +2,7 @@
 //
 //   ctForm({ title, description, icon, fields, submitLabel, validate, onSubmit })
 //     → Promise com os valores ({ nome_do_campo: valor }) ou null se cancelou.
-//     fields: [{ name, label, type, value, placeholder, required, help, options, rows }]
+//     fields: [{ name, label, type, value, placeholder, required, help, options, rows, suggestions }]
 //       type: text | email | tel | textarea | money | select | choice
 //       choice = lista de opções em cartões (options: [{ value, label, description }])
 //     validate(values) → texto do erro (mostrado no pop-up) ou nada.
@@ -131,7 +131,10 @@
       control = '<div class="cd-money"><span aria-hidden="true">R$</span><input class="cd-input" id="' + id + '" name="' + esc(f.name) + '" inputmode="decimal" autocomplete="off" value="' + esc(formatMoneyInput(f.value)) + '"' + (ph || ' placeholder="0,00"') + req + describedby + '/></div>';
     } else {
       var type = f.type === 'email' ? 'email' : f.type === 'tel' ? 'tel' : 'text';
-      control = '<input class="cd-input" type="' + type + '" id="' + id + '" name="' + esc(f.name) + '" value="' + esc(f.value) + '" autocomplete="off"' + (type === 'tel' ? ' inputmode="tel"' : '') + ph + req + describedby + (f.maxLength ? ' maxlength="' + f.maxLength + '"' : '') + '/>';
+      // suggestions: lista de valores já usados (vira <datalist>, o navegador sugere ao digitar).
+      var list = f.suggestions && f.suggestions.length ? id + '-list' : '';
+      control = '<input class="cd-input" type="' + type + '" id="' + id + '" name="' + esc(f.name) + '" value="' + esc(f.value) + '" autocomplete="off"' + (list ? ' list="' + list + '"' : '') + (type === 'tel' ? ' inputmode="tel"' : '') + ph + req + describedby + (f.maxLength ? ' maxlength="' + f.maxLength + '"' : '') + '/>' +
+        (list ? '<datalist id="' + list + '">' + f.suggestions.map(function (v) { return '<option value="' + esc(v) + '"></option>'; }).join('') + '</datalist>' : '');
     }
     return '<div class="cd-field">' + label + control + help + '</div>';
   }
