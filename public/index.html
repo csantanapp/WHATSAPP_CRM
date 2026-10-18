@@ -184,6 +184,8 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 .flow-chip-trigger{background:var(--acc-soft);border-color:var(--acc-soft);color:var(--acc-ink);}
 .flow-chain-sep{color:var(--text-subtle);font-size:13px;}
 .fe-toolbar{height:60px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 16px;background:#FFFFFF;border-bottom:1px solid var(--border);}
+.fe-toolbar .ct-btn{height:36px;padding:0 12px;font-size:14px;}
+.fe-toolbar #flow-draft-badge{flex-shrink:0;}
 .fe-palette{width:236px;flex-shrink:0;border-right:1px solid var(--border);background:var(--surface-2);padding:14px 12px;overflow-y:auto;}
 .pal-group{display:flex;flex-direction:column;gap:2px;margin-bottom:14px;}
 .pal-grip{margin-left:auto;color:var(--text-subtle);display:inline-flex;}
@@ -743,16 +745,16 @@ button{font-family:var(--font-body);}
           <div style="flex-grow:1;display:flex;flex-direction:column;min-width:0;">
 
             <div class="fe-toolbar">
-              <div style="display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 auto;">
                 <button type="button" class="ct-icon-btn" data-goto="automacao" aria-label="Voltar para Automações" title="Voltar"><span data-icon="arrow-left" data-icon-size="18"></span></button>
                 <div id="flow-canvas-name" style="display:flex;align-items:center;gap:4px;min-width:0;">
                   <span style="font-family:var(--font-display);font-weight:600;font-size:18px;letter-spacing:-0.01em;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;">--</span>
                   <button type="button" class="ct-icon-btn" aria-label="Renomear automação" title="Renomear" style="width:30px;height:30px;"><span data-icon="pencil" data-icon-size="14"></span></button>
                 </div>
                 <span id="flow-draft-badge" class="ct-pill ct-pill-neutral">Rascunho</span>
-                <button type="button" id="flow-trigger-summary-btn" class="ct-pill ct-pill-acc" style="border:none;cursor:pointer;"></button>
+                <button type="button" id="flow-trigger-summary-btn" class="ct-pill ct-pill-acc" style="border:none;cursor:pointer;min-width:0;max-width:260px;overflow:hidden;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;flex-shrink:1;"></button>
               </div>
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
                 <button type="button" id="flow-metrics-btn" class="ct-btn ct-btn-secondary" title="Ver métricas de cada nó (envios, entregas, leituras, respostas)"><span data-icon="chart-column"></span>Métricas</button>
                 <button type="button" id="flow-organize-btn" class="ct-btn ct-btn-ghost"><span data-icon="wand-sparkles"></span>Organizar</button>
                 <button type="button" id="flow-discard-btn" class="ct-btn ct-btn-ghost">Descartar</button>
@@ -786,7 +788,7 @@ button{font-family:var(--font-body);}
                     <button type="button" class="flow-palette-btn" data-add-node="wait"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" /> <polyline points="12 6 12 12 16 14" /></svg></span><span>Aguardar</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="condition"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 3h5v5" /> <path d="M8 3H3v5" /> <path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3" /> <path d="m15 9 6-6" /></svg></span><span>Condição</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="repeat"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m17 2 4 4-4 4" /> <path d="M3 11v-1a4 4 0 0 1 4-4h14" /> <path d="m7 22-4-4 4-4" /> <path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg></span><span>Repetir</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="classify_ai"><span class="ct-tile" style="width:26px;height:26px;background:#F1EBFF;color:#4A2C99;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /> <path d="M20 3v4" /> <path d="M22 5h-4" /> <path d="M4 17v2" /> <path d="M5 18H3" /></svg></span><span>Classificar (IA)</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button>
                   </div>
                   <div class="pal-group"><div class="ct-group-label" style="margin:0 4px 6px;">Ações</div>
-                    <button type="button" class="flow-palette-btn" data-add-node="action"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg></span><span>Ação</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="create_task"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.268 21a2 2 0 0 0 3.464 0" /> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></svg></span><span>Lembrete interno</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="move_stage"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16 3 4 4-4 4" /> <path d="M20 7H4" /> <path d="m8 21-4-4 4-4" /> <path d="M4 17h16" /></svg></span><span>Mover lead no funil</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="tag"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" /> <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" /></svg></span><span>Editar tag do lead</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="end"><span class="ct-tile" style="width:26px;height:26px;background:#EEEEE8;color:#3E4046;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /> <line x1="4" x2="4" y1="22" y2="15" /></svg></span><span>Fim</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button>
+                    <button type="button" class="flow-palette-btn" data-add-node="action"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg></span><span>Ação</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="create_task"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.268 21a2 2 0 0 0 3.464 0" /> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></svg></span><span>Lembrete interno</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="move_stage"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16 3 4 4-4 4" /> <path d="M20 7H4" /> <path d="m8 21-4-4 4-4" /> <path d="M4 17h16" /></svg></span><span>Mover lead no funil</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="tag"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" /> <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" /></svg></span><span>Editar tag do lead</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="start_flow"><span class="ct-tile" style="width:26px;height:26px;background:#E5F8EA;color:#13662F;"><span data-icon="workflow" data-icon-size="14"></span></span><span>Ir para outra automação</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="end"><span class="ct-tile" style="width:26px;height:26px;background:#EEEEE8;color:#3E4046;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /> <line x1="4" x2="4" y1="22" y2="15" /></svg></span><span>Fim</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button>
                   </div>
                 </div>
               </div>
@@ -2292,6 +2294,7 @@ hydrateIcons(document);
     close_conversation: 'Fechar conversa',
     create_task: 'Lembrete interno',
     repeat: 'Repetir',
+    start_flow: 'Ir para outra automação',
     end: 'Fim',
   };
 
@@ -2329,7 +2332,7 @@ hydrateIcons(document);
   var STEP_SHORT = {
     send_message: 'Mensagem', ask_question: 'Pergunta', wait: 'Aguardar', condition: 'Condição', classify_ai: 'Classificar (IA)',
     add_tag: 'Tag', remove_tag: 'Tag', move_stage: 'Mover etapa', assign_user: 'Atribuir', assign_round_robin: 'Distribuir',
-    close_conversation: 'Fechar', create_task: 'Lembrete', repeat: 'Repetir', end: 'Fim',
+    close_conversation: 'Fechar', create_task: 'Lembrete', repeat: 'Repetir', start_flow: 'Ir p/ automação', end: 'Fim',
   };
   function flowChainHtml(flow) {
     var trig = TRIGGER_LABELS[flow.trigger_type] || flow.trigger_type;
@@ -2653,6 +2656,7 @@ hydrateIcons(document);
     close_conversation: { bg: '#FFE9E1', stroke: '#8A2E12', icon: 'zap', label: 'Fechar conversa' },
     create_task: { bg: '#FFE9E1', stroke: '#8A2E12', icon: 'bell', label: 'Lembrete interno' },
     repeat: { bg: '#FFF4DC', stroke: '#7A4E00', icon: 'repeat', label: 'Repetir' },
+    start_flow: { bg: '#E5F8EA', stroke: '#13662F', icon: 'workflow', label: 'Ir para outra automação' },
     end: { bg: '#EEEEE8', stroke: '#3E4046', icon: 'flag', label: 'Fim' },
   };
 
@@ -2683,7 +2687,7 @@ hydrateIcons(document);
   function flowNodeHandles(node) {
     if (node.kind === 'trigger') return ['out'];
     if (node.step_type === 'condition' || node.step_type === 'classify_ai') return ['true', 'false'];
-    if (node.step_type === 'end') return [];
+    if (node.step_type === 'end' || node.step_type === 'start_flow') return []; // terminais
     var branches = flowNodeBranchOptions(node);
     if (branches.length) return branches.map(function (_, i) { return 'opt_' + i; }).concat(['out']);
     return ['out'];
@@ -2766,9 +2770,19 @@ hydrateIcons(document);
       case 'close_conversation': return 'Fecha a conversa';
       case 'create_task': return escapeHtml(c.title || 'Follow-up') + (c.due_in_hours ? ' · em ' + c.due_in_hours + 'h' : '');
       case 'repeat': return 'Volta pra um nó anterior';
+      case 'start_flow': return flowTargetLabel(c.flow_id);
       case 'end': return escapeHtml(c.label || 'Fim do fluxo');
       default: return '';
     }
+  }
+
+  // Destino do "Ir para outra automação" (lista carregada ao abrir o editor).
+  function flowTargetLabel(flowId) {
+    if (!flowId) return '(escolher automação)';
+    var target = (flowCanvas.allFlows || []).find(function (f) { return String(f.id) === String(flowId); });
+    if (!target) return '<span style="color:#B4381A;">Automação removida — escolha outra</span>';
+    return 'Continua em <b>' + escapeHtml(target.name) + '</b>' +
+      (target.is_active ? '' : '<br><span style="color:#7A4E00;">Pausada — o lead não será levado até ela</span>');
   }
 
   function flowStageLabel(stageId) {
@@ -3190,6 +3204,7 @@ hydrateIcons(document);
     if (kind === 'repeat') { flowAddNode('repeat', {}); return; }
     if (kind === 'create_task') { flowAddNode('create_task', { title: 'Follow-up' }); return; }
     if (kind === 'move_stage') { flowAddNode('move_stage', {}); return; }
+    if (kind === 'start_flow') { flowAddNode('start_flow', { flow_id: null }); return; }
     if (kind === 'end') { flowAddNode('end', { label: 'Convertido' }); return; }
   });
 
@@ -3421,6 +3436,20 @@ hydrateIcons(document);
     } else if (node.step_type === 'repeat') {
       title.textContent = 'Repetir';
       body.innerHTML = '<div style="font-size:12.5px;color:#5b5d63;">Esse nó não precisa de configuração — arraste uma linha da sua bolinha de saída até um nó anterior do fluxo pra fazer ele repetir a partir dali.</div>';
+    } else if (node.step_type === 'start_flow') {
+      title.textContent = 'Ir para outra automação';
+      var others = (flowCanvas.allFlows || []).filter(function (f) { return String(f.id) !== String(flowCanvas.flow.id); });
+      if (!others.length) {
+        body.innerHTML = '<div class="ct-callout">Você ainda não tem outra automação. Crie a automação de destino primeiro e depois volte aqui para conectá-la.</div>';
+      } else {
+        var flowOpts = [{ value: '', label: 'Escolha a automação…' }].concat(others.map(function (f) {
+          return { value: f.id, label: f.name + (f.is_active ? '' : ' (pausada)') };
+        }));
+        body.innerHTML =
+          flowFieldHtml('f-target-flow', 'Automação de destino', flowSelectHtml('f-target-flow', flowOpts, c.flow_id || '')) +
+          '<div style="font-size:12.5px;color:#5b5d63;line-height:1.5;">Quando o lead chegar aqui, este fluxo termina e ele segue para a automação escolhida, a partir do primeiro passo dela (o gatilho dela é ignorado). Ela precisa estar <b>ativa</b>.</div>' +
+          '<div style="font-size:12.5px;color:#5b5d63;line-height:1.5;">Dica: para uma automação que só deve rodar quando for chamada por outra, use o gatilho “Disparo manual”.</div>';
+      }
     } else if (node.step_type === 'end') {
       title.textContent = 'Fim';
       body.innerHTML = flowFieldHtml('f-label', 'Rótulo (o que aconteceu aqui)', flowInputHtml('f-label', c.label || 'Convertido'));
@@ -3515,6 +3544,8 @@ hydrateIcons(document);
       node.config = node.step_type === 'assign_user' ? { user_id: val('f-user') ? parseInt(val('f-user'), 10) : null } : {};
     } else if (node.step_type === 'create_task') {
       node.config = { title: val('f-title'), description: val('f-description') || undefined, due_in_hours: parseInt(val('f-due'), 10) || 24 };
+    } else if (node.step_type === 'start_flow') {
+      if (document.getElementById('f-target-flow')) node.config = { flow_id: val('f-target-flow') ? parseInt(val('f-target-flow'), 10) : null };
     } else if (node.step_type === 'end') {
       node.config = { label: val('f-label') || 'Fim' };
     }
@@ -3700,6 +3731,11 @@ hydrateIcons(document);
 
   async function flowLoadIntoCanvas(flow) {
     flowCanvas.flow = flow;
+    try {
+      flowCanvas.allFlows = await api('/automation-flows');
+    } catch (err) {
+      flowCanvas.allFlows = [];
+    }
     flowCanvas.nodes = [{
       client_id: 'trigger', kind: 'trigger', step_type: 'trigger', config: {},
       x: flow.trigger_position_x || 60, y: flow.trigger_position_y || 160,

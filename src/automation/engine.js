@@ -67,13 +67,18 @@ async function isOptedOut(contactId) {
   return result.rows[0]?.opted_out_at != null;
 }
 
+// Quantas vezes um fluxo pode passar a conversa pra outro em sequência, sem
+// pausa (pergunta/aguardar) no meio — evita A → B → A → ... infinito.
+const MAX_FLOW_HOPS = 5;
+
 // Executa passos em sequência até encontrar um que precise de resposta do
 // contato (ask_question) ou de tempo (wait) — os dois pausam a run.
-async function runFlowFromStep({ flow, conversation, contact, step, run }) {
+// `hops` conta os "Ir para automação" seguidos desta execução.
+async function runFlowFromStep({ flow, conversation, contact, step, run, hops = 0 }) {
   const cursor = { current: step };
 
   try {
-    await executeSteps({ flow, conversation, contact, run, cursor });
+    await executeSteps({ flow, conversation, contact, run, cursor, hops });
   } catch (err) {
     // Evita deixar a run travada em "running" para sempre quando um passo falha
     // (ex: erro de credencial/permissão na Graph API).
@@ -82,7 +87,7 @@ async function runFlowFromStep({ flow, conversation, contact, step, run }) {
   }
 }
 
-async function executeSteps({ flow, conversation, contact, run, cursor }) {
+async function executeSteps({ flow, conversation, contact, run, cursor, hops = 0 }) {
   let iterations = 0;
   while (cursor.current) {
     iterations += 1;
@@ -212,6 +217,30 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
         await updateRun(run.id, { currentStepId: current.id, status: 'waiting_reply' });
         return;
       }
+      case 'start_flow': {
+        // "Ir para outra automação": encerra esta run e começa o outro fluxo
+        // do primeiro passo, na mesma conversa. Nó terminal (sem saída).
+        const target = await getStartableFlow(current.config?.flow_id, flow);
+        if (!target) {
+          logOutcome = 'skipped';
+          break;
+        }
+        if (hops >= MAX_FLOW_HOPS) {
+          logger.error('automation_flow_hops_exceeded', { flowId: flow.id, targetFlowId: target.id, runId: run.id });
+          logOutcome = 'skipped';
+          break;
+        }
+        const firstStep = await getFirstStep(target.id);
+        if (!firstStep) {
+          logOutcome = 'skipped';
+          break;
+        }
+        await logStep(flow.id, current.id, run.id, conversation.id, 'started_flow');
+        await updateRun(run.id, { currentStepId: null, status: 'completed' });
+        const newRun = await createRun(target.id, conversation.id, firstStep.id, 'running');
+        await runFlowFromStep({ flow: target, conversation, contact, step: firstStep, run: newRun, hops: hops + 1 });
+        return;
+      }
       default:
         break;
     }
@@ -222,6 +251,26 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
   }
 
   await updateRun(run.id, { currentStepId: null, status: 'completed' });
+}
+
+// Fluxo de destino de um "Ir para automação": precisa existir, ser do mesmo
+// tenant e estar ativo (pausar a automação de destino desliga o atalho).
+async function getStartableFlow(flowId, fromFlow) {
+  if (!flowId) return null;
+  const result = await query(
+    'SELECT * FROM automation_flows WHERE id = $1 AND tenant_id = $2',
+    [flowId, fromFlow.tenant_id]
+  );
+  const target = result.rows[0];
+  if (!target) {
+    logger.info('automation_start_flow_target_missing', { flowId: fromFlow.id, targetFlowId: flowId });
+    return null;
+  }
+  if (!target.is_active) {
+    logger.info('automation_start_flow_target_paused', { flowId: fromFlow.id, targetFlowId: flowId });
+    return null;
+  }
+  return target;
 }
 
 // Log leve de execução de nó, pra métricas do construtor. Nunca derruba o fluxo.
