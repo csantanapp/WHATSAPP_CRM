@@ -6,11 +6,11 @@
 
 :root {
   /* Marca Tractom */
-  --color-brand: #eb6d37;
-  --color-brand-hover: #d85a26;
+  --color-brand: #2563eb;
+  --color-brand-hover: #1d4ed8;
   --color-brand-ink: #ffffff;
   --color-gold: #ebaf47;
-  --color-ink: #111827;
+  --color-ink: #0f172a;
 
   /* Semânticas */
   --color-success: #16a34a;
@@ -23,14 +23,14 @@
   --color-info-bg: #eff6ff;
 
   /* Neutros */
-  --color-bg: #f9fafb;
+  --color-bg: #f5f7fa;
   --color-surface: #ffffff;
   --color-surface-raised: #ffffff;
-  --color-border: #e5e7eb;
-  --color-border-strong: #d1d5db;
-  --color-text: #111827;
-  --color-text-muted: #6b7280;
-  --color-text-subtle: #9ca3af;
+  --color-border: #e5e9f0;
+  --color-border-strong: #cbd5e1;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
   --color-text-on-brand: #ffffff;
 
   /* Tipografia */
@@ -66,12 +66,12 @@
   --shadow-lg: 0 12px 32px rgba(17, 24, 39, 0.14);
 
   /* Estados de foco */
-  --focus-ring: 0 0 0 3px rgba(235, 109, 55, 0.25);
+  --focus-ring: 0 0 0 3px rgba(37,99,235, 0.25);
 
-  --sidebar-bg: #111827;
-  --sidebar-ink: #ffffff;
-  --sidebar-muted: rgba(255, 255, 255, 0.45);
-  --sidebar-active-bg: rgba(235, 109, 55, 0.18);
+  --sidebar-bg: #ffffff;
+  --sidebar-ink: #0f172a;
+  --sidebar-muted: #475569;
+  --sidebar-active-bg: #eff4ff;
   --sidebar-active-ink: var(--color-brand);
 }
 
@@ -202,7 +202,7 @@ body.ds {
   line-height: 1.4;
 }
 .badge-neutral { background: var(--color-bg); color: var(--color-text-muted); border: 1px solid var(--color-border); }
-.badge-brand { background: rgba(235, 109, 55, 0.12); color: var(--color-brand); }
+.badge-brand { background: rgba(37,99,235, 0.12); color: var(--color-brand); }
 .badge-success { background: var(--color-success-bg); color: var(--color-success); }
 .badge-danger { background: var(--color-danger-bg); color: var(--color-danger); }
 .badge-warning { background: var(--color-warning-bg); color: var(--color-warning); }
@@ -284,7 +284,7 @@ body.ds {
 .ds-shell { display: flex; min-height: 100vh; background: var(--color-bg); }
 .ds-sidebar {
   width: 220px; flex-shrink: 0;
-  background: var(--sidebar-bg); color: var(--sidebar-ink);
+  background: var(--sidebar-bg); color: var(--sidebar-ink); border-right: 1px solid var(--color-border);
   display: flex; flex-direction: column; padding: var(--space-5) var(--space-3);
 }
 .ds-sidebar-logo { display: flex; align-items: center; gap: var(--space-2); padding: 0 var(--space-2); margin-bottom: var(--space-6); font-weight: var(--font-weight-bold); font-size: var(--font-size-md); }
@@ -296,7 +296,7 @@ body.ds {
   color: var(--sidebar-muted); font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);
   cursor: pointer; border: none; background: transparent; width: 100%; text-align: left;
 }
-.ds-nav-item:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+.ds-nav-item:hover { background: #f1f5f9; color: var(--color-text); }
 .ds-nav-item.active { background: var(--sidebar-active-bg); color: var(--sidebar-active-ink); }
 .ds-nav-item svg { flex-shrink: 0; }
 .ds-sidebar-spacer { flex-grow: 1; }
