@@ -42,7 +42,9 @@ export async function insertInternalNote({ conversationId, authorUserId, body })
 
 export async function listMessagesByConversation(conversationId) {
   const result = await query(
-    'SELECT * FROM messages WHERE conversation_id = $1 ORDER BY created_at ASC',
+    `SELECT m.*, af.name AS automation_flow_name FROM messages m
+     LEFT JOIN automation_flows af ON af.id = m.automation_flow_id
+     WHERE m.conversation_id = $1 ORDER BY m.created_at ASC`,
     [conversationId]
   );
   return result.rows;

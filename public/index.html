@@ -113,6 +113,45 @@ button,input,select,textarea{font-family:var(--font-body);}
 .ct-table .num{text-align:right;font-variant-numeric:tabular-nums;}
 .ct-list-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;text-decoration:none;color:inherit;cursor:pointer;transition:background-color .15s ease;}
 .ct-list-item:hover{background:#F6F6F2;}
+.ct-segmented{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:2px;background:var(--surface-muted);padding:3px;border-radius:11px;}
+.ct-segmented button{height:30px;border:none;border-radius:8px;background:transparent;color:var(--text-2);font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;padding:0 8px;transition:background-color .15s ease;}
+.ct-segmented button[aria-selected="true"]{background:#FFFFFF;color:var(--ink);box-shadow:0 1px 2px rgba(17,18,20,.08);}
+.ct-segmented .seg-count{font-size:11px;color:var(--text-subtle);font-variant-numeric:tabular-nums;}
+.ct-chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:999px;border:1px solid var(--border-input);background:#FFFFFF;color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background-color .15s ease,border-color .15s ease;}
+.ct-chip[aria-pressed="true"]{background:var(--acc-soft);border-color:var(--acc);color:var(--ink);}
+.ct-chip-select{appearance:auto;padding-right:6px;background-color:#FFFFFF;color:var(--ink);}
+.ct-select-sm{height:32px;border:1px solid var(--border-input);border-radius:9px;background-color:#FFFFFF;color:var(--ink);font-size:13px;padding:0 8px;cursor:pointer;}
+kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);background:#FFFFFF;border:1px solid var(--border-input);border-radius:5px;padding:1px 5px;}
+.ib-list-col{width:360px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;background:#FFFFFF;min-height:0;}
+.ib-list-head{padding:22px 16px 12px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--divider);}
+.ib-search{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:11px;height:40px;padding:0 12px;color:var(--text-subtle);cursor:text;}
+.ib-search input{flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:14px;color:var(--ink);}
+.ib-search:focus-within{box-shadow:0 0 0 2px var(--ink);}
+.ib-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.ib-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;padding:6px;gap:2px;}
+.ib-row{display:flex;align-items:flex-start;gap:11px;padding:12px 10px;border-radius:12px;cursor:pointer;text-decoration:none;color:inherit;transition:background-color .15s ease;}
+.ib-row:hover{background:#F6F6F2;}
+.ib-row.selected{background:var(--surface-muted);}
+.ib-unread{flex-shrink:0;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--ink);color:var(--acc);font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;}
+.ib-conv-head{height:68px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#FFFFFF;border-bottom:1px solid var(--border);}
+.ib-conv-toolbar{display:flex;align-items:center;gap:8px;padding:8px 20px;border-bottom:1px solid var(--border);background:var(--surface-2);flex-wrap:wrap;}
+.ib-sep{width:1px;height:18px;background:var(--border-input);}
+.ib-messages{flex:1;overflow-y:auto;padding:24px clamp(16px,4vw,56px);display:flex;flex-direction:column;gap:10px;background:var(--bg);}
+.ib-date{align-self:center;font-size:12px;color:var(--text-2);background:#EBEBE5;border-radius:999px;padding:3px 10px;margin:6px 0;}
+.ib-bubble{max-width:min(520px,80%);padding:10px 14px 6px;font-size:14px;line-height:1.5;}
+.ib-bubble-in{background:#FFFFFF;border:1px solid var(--border);border-radius:16px 16px 16px 4px;color:var(--ink);}
+.ib-bubble-bot{background:var(--acc-soft);border:1px solid var(--acc);border-radius:16px 16px 4px 16px;color:var(--ink);}
+.ib-bubble-agent{background:var(--ink);border-radius:16px 16px 4px 16px;color:#FFFFFF;}
+.ib-bubble-meta{display:flex;align-items:center;justify-content:flex-end;gap:5px;font-size:11px;margin-top:2px;font-variant-numeric:tabular-nums;opacity:.75;}
+.ib-bot-label{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--acc-ink);margin-bottom:4px;}
+.ib-composer-wrap{padding:10px 20px 16px;background:var(--bg);}
+.ib-composer{display:flex;align-items:center;gap:6px;background:#FFFFFF;border:1px solid var(--border);border-radius:16px;padding:6px 6px 6px 8px;transition:border-color .15s ease;}
+.ib-composer:focus-within{border-color:var(--ink);}
+.ib-composer input[type="file"]{display:none;}
+#conversa-input{flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:14px;color:var(--ink);padding:8px 4px;}
+.ib-send{width:38px;height:38px;border-radius:11px;border:none;background:var(--acc);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.ib-send:disabled{opacity:.5;}
+.ib-panel .ct-group-label{display:block;margin-bottom:8px;}
 .ct-tile{display:inline-flex;align-items:center;justify-content:center;border-radius:7px;flex-shrink:0;}
 
 :root{
@@ -269,91 +308,84 @@ button{font-family:var(--font-body);}
 
         <section class="screen" id="screen-inbox">
 
-          <div style="width:360px;flex-shrink:0;border-right:1px solid #E6E6E0;display:flex;flex-direction:column;background:#FFFFFF;">
-            <div style="padding:20px 18px 14px;border-bottom:1px solid #EEEEE8;">
-              <div style="font-family:var(--font-body);font-weight:600;font-size:19px;color:#111214;margin-bottom:12px;">Inbox</div>
-              <div style="display:flex;align-items:center;gap:8px;background:#F4F4F0;border:1px solid #E3E3DC;border-radius:10px;padding:8px 12px;margin-bottom:10px;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6E7076" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
-                <input id="inbox-search" name="inbox-search-q" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" placeholder="Buscar conversa" style="border:none;outline:none;font-size:13px;color:#111214;flex-grow:1;font-family:var(--font-body);background:transparent;"/>
-              </div>
-              <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
-                <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5b5d63;cursor:pointer;">
-                  <input type="checkbox" id="inbox-unread-toggle" style="cursor:pointer;"/> Não lidos
-                </label>
-                <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5b5d63;cursor:pointer;" title="Só conversas que começaram num anúncio Click-to-WhatsApp">
-                  <input type="checkbox" id="inbox-ads-toggle" style="cursor:pointer;"/> Anúncios
-                </label>
-                <select id="inbox-tag-filter" style="margin-left:auto;background:#F4F4F0;border:1px solid #E3E3DC;border-radius:8px;padding:5px 8px;font-size:11.5px;color:#5b5d63;font-family:var(--font-body);cursor:pointer;">
+          <div class="ib-list-col">
+            <div class="ib-list-head">
+              <h1 class="ct-h1" style="font-size:26px;letter-spacing:-0.02em;">Inbox</h1>
+              <label class="ib-search">
+                <span class="ib-search-ic" data-icon="search"></span>
+                <input id="inbox-search" name="inbox-search-q" type="search" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-bwignore="true" placeholder="Buscar conversa…" aria-label="Buscar conversa"/>
+                <kbd>/</kbd>
+              </label>
+              <div id="inbox-tabs" class="ct-segmented ib-tabs" role="tablist" aria-label="Filas do Inbox"></div>
+              <div class="ib-chips">
+                <button type="button" class="ct-chip" id="inbox-unread-toggle" aria-pressed="false"><span data-icon="inbox"></span>Não lidos</button>
+                <button type="button" class="ct-chip" id="inbox-ads-toggle" aria-pressed="false" title="Só conversas que começaram num anúncio Click-to-WhatsApp"><span data-icon="megaphone"></span>Anúncios</button>
+                <select id="inbox-tag-filter" class="ct-chip ct-chip-select" aria-label="Filtrar por tag">
                   <option value="">Todas as tags</option>
                 </select>
               </div>
-              <div id="inbox-tabs" style="display:flex;align-items:center;gap:4px;overflow-x:auto;padding-bottom:2px;"></div>
             </div>
-            <div id="inbox-list" style="flex-grow:1;overflow-y:auto;display:flex;flex-direction:column;">
-              <div style="padding:20px;font-size:12.5px;color:#6E7076;">Carregando...</div>
+            <div id="inbox-list" class="ib-list">
+              <div style="padding:20px;font-size:13px;color:var(--text-subtle);">Carregando…</div>
             </div>
           </div>
 
           <div id="inbox-conversation-area" style="flex-grow:1;display:flex;min-width:0;">
-            <div id="inbox-empty-state" style="flex-grow:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;background:#F4F4F0;">
-              <div style="font-size:14px;font-weight:600;color:#6E7076;">Selecione uma conversa</div>
-              <div style="font-size:12.5px;color:#A9AAA4;">Ou navegue com J e K</div>
+            <div id="inbox-empty-state" style="flex-grow:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;background:var(--bg);">
+              <span class="ct-tile" style="width:48px;height:48px;border-radius:14px;background:var(--surface-muted);color:var(--text-muted);margin-bottom:6px;" data-icon="inbox" data-icon-size="22"></span>
+              <div style="font-size:15px;font-weight:600;color:var(--ink);">Selecione uma conversa</div>
+              <div style="font-size:13px;color:var(--text-subtle);">Ou navegue com <kbd>J</kbd> e <kbd>K</kbd></div>
             </div>
 
             <div id="inbox-conversation-view" style="display:none;flex-grow:1;flex-direction:column;min-width:0;">
-              <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #E6E6E0;">
-                <div style="display:flex;align-items:center;gap:14px;">
-                  <div style="position:relative;width:38px;height:38px;flex-shrink:0;"><div id="conversa-avatar" style="width:38px;height:38px;border-radius:50%;background:#F0FBD2;color:#111214;display:flex;align-items:center;justify-content:center;font-family:var(--font-body);font-weight:600;font-size:13.5px;">--</div><span id="conversa-avatar-badge"></span></div>
-                  <div>
-                    <div id="conversa-nome" style="font-family:var(--font-body);font-weight:600;font-size:15px;color:#111214;">Selecione uma conversa</div>
-                    <div id="conversa-telefone" style="font-size:12px;color:#5B5D63;"></div>
+              <div class="ib-conv-head">
+                <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+                  <div style="position:relative;width:40px;height:40px;flex-shrink:0;"><div id="conversa-avatar" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13.5px;">--</div><span id="conversa-avatar-badge"></span></div>
+                  <div style="min-width:0;">
+                    <div id="conversa-nome" style="font-weight:600;font-size:15px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Selecione uma conversa</div>
+                    <div id="conversa-telefone" style="font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:5px;"></div>
                   </div>
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;background:#F0FBD2;border-radius:20px;padding:6px 12px;">
-                  <span style="width:7px;height:7px;border-radius:50%;background:#111214;display:inline-block;"></span>
-                  <span id="conversa-etapa" style="font-size:12px;font-weight:600;color:#111214;">--</span>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+                  <span id="conversa-posse" class="ct-pill ct-pill-neutral"></span>
+                  <span class="ct-pill ct-pill-acc" title="Etapa no funil"><span style="width:6px;height:6px;border-radius:50%;background:var(--acc-ink);"></span><span id="conversa-etapa">--</span></span>
+                  <button type="button" id="conversa-assumir-btn" class="ct-btn ct-btn-primary"><span data-icon="hand"></span>Assumir</button>
                 </div>
               </div>
-              <div style="display:flex;align-items:center;gap:8px;padding:10px 24px;border-bottom:1px solid #E6E6E0;background:#FBFBF8;flex-wrap:wrap;">
-                <button id="conversa-assumir-btn" style="background:#FFFFFF;border:1px solid #E3E3DC;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:#3e4046;cursor:pointer;">Assumir conversa</button>
-                <span id="conversa-atribuido" style="font-size:12px;color:#5B5D63;"></span>
-                <div style="width:1px;height:18px;background:#E3E3DC;margin:0 4px;"></div>
-                <button id="conversa-prioridade-btn" title="Marcar prioridade" style="background:#FFFFFF;border:1px solid #E3E3DC;border-radius:8px;padding:7px 10px;font-size:14px;cursor:pointer;line-height:1;">☆</button>
-                <select id="conversa-status-select" style="background:#FFFFFF;border:1px solid #E3E3DC;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:600;color:#3e4046;cursor:pointer;">
+              <div class="ib-conv-toolbar">
+                <span id="conversa-atribuido" style="font-size:13px;color:var(--text-muted);"></span>
+                <span class="ib-sep"></span>
+                <button type="button" id="conversa-prioridade-btn" class="ct-icon-btn" aria-label="Marcar prioridade" title="Marcar prioridade"></button>
+                <select id="conversa-status-select" class="ct-select-sm" aria-label="Status da conversa">
                   <option value="open">Aberta</option>
                   <option value="pending">Pendente</option>
                   <option value="closed">Fechada</option>
                 </select>
-                <div style="width:1px;height:18px;background:#E3E3DC;margin:0 4px;"></div>
-                <span id="conversa-janela" style="font-size:11.5px;color:#5B5D63;"></span>
-                <button type="button" id="conversa-template-btn" style="display:flex;align-items:center;gap:5px;background:#FFFFFF;border:1px solid #E3E3DC;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:600;color:#3e4046;cursor:pointer;">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5b5d63" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M9 13h6"></path><path d="M9 17h6"></path></svg>
-                  Template
-                </button>
+                <span class="ib-sep"></span>
+                <span id="conversa-janela" style="font-size:12px;display:inline-flex;align-items:center;gap:6px;"></span>
+                <button type="button" id="conversa-template-btn" class="ct-btn ct-btn-secondary" style="height:32px;padding:0 10px;font-size:13px;margin-left:auto;"><span data-icon="layout-template"></span>Template</button>
               </div>
-
               <div style="flex-grow:1;display:flex;min-height:0;">
                 <div style="flex-grow:1;display:flex;flex-direction:column;min-width:0;">
-                  <div id="conversa-messages" style="flex-grow:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:14px;"></div>
-                  <div style="display:flex;align-items:center;gap:10px;padding:8px 24px 0;">
-                    <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:#5B5D63;cursor:pointer;">
-                      <input type="checkbox" id="conversa-nota-toggle" style="cursor:pointer;"/> Nota interna (não envia pro WhatsApp)
+                  <div id="conversa-messages" class="ib-messages" aria-live="polite"></div>
+                  <div class="ib-composer-wrap">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);cursor:pointer;">
+                        <input type="checkbox" id="conversa-nota-toggle" style="cursor:pointer;"/> Nota interna (não envia ao cliente)
+                      </label>
+                    </div>
+                  <form id="conversa-form" class="ib-composer">
+                    <label id="conversa-anexo-label" class="ct-icon-btn" title="Anexar arquivo" aria-label="Anexar arquivo" style="cursor:pointer;">
+                      <input type="file" id="conversa-anexo-input" style="display:none;" accept="image/*,audio/*,video/*,application/pdf"/><span data-icon="paperclip" data-icon-size="17"></span>
                     </label>
-                    <button type="button" id="conversa-resposta-rapida-btn" style="background:none;border:none;color:#5b5d63;font-size:11.5px;font-weight:600;cursor:pointer;padding:0;">⚡ Resposta rápida</button>
-                  </div>
-                  <form id="conversa-form" style="display:flex;align-items:center;gap:10px;padding:10px 24px 16px;border-top:1px solid #E6E6E0;">
-                    <label id="conversa-anexo-label" style="cursor:pointer;display:flex;" title="Anexar arquivo">
-                      <input type="file" id="conversa-anexo-input" style="display:none;" accept="image/*,audio/*,video/*,application/pdf"/>
-                      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#6E7076" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05 12.25 20.24a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.5 3.5 0 0 1 4.95 4.95L9.42 17.4a1.5 1.5 0 0 1-2.12-2.12l8.49-8.49"></path></svg>
-                    </label>
-                    <input id="conversa-input" autocomplete="off" placeholder="Digite uma mensagem..." style="flex-grow:1;background:#F4F4F0;border:none;border-radius:20px;padding:10px 16px;font-size:13px;color:#111214;font-family:var(--font-body);"/>
-                    <button type="submit" id="conversa-send-btn" style="width:38px;height:38px;border-radius:50%;background:#111214;border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"></path><path d="M22 2 15 22l-4-9-9-4 20-7Z"></path></svg>
-                    </button>
+                    <button type="button" id="conversa-resposta-rapida-btn" class="ct-icon-btn" aria-label="Respostas rápidas" title="Respostas rápidas"><span data-icon="zap" data-icon-size="17"></span></button>
+                    <input id="conversa-input" name="mensagem" autocomplete="off" placeholder="Digite uma mensagem…" aria-label="Mensagem"/>
+                    <button type="submit" id="conversa-send-btn" class="ib-send" aria-label="Enviar"><span data-icon="send-horizontal" data-icon-size="18"></span></button>
                   </form>
+                  </div>
                 </div>
 
-                <div style="width:320px;flex-shrink:0;border-left:1px solid #E6E6E0;padding:22px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:20px;">
+                <div class="ib-panel" style="width:320px;flex-shrink:0;border-left:1px solid #E6E6E0;padding:22px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:20px;">
                   <div>
                     <div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Contato</div>
                     <div style="display:flex;flex-direction:column;align-items:center;text-align:center;">
@@ -659,7 +691,7 @@ button{font-family:var(--font-body);}
                 <svg width="56" height="24" viewBox="0 0 56 24" fill="none" style="flex-shrink:0;"><line x1="2" y1="12" x2="46" y2="12" stroke="#D6D6CF" stroke-width="2"></line><path d="M40 6 48 12 40 18" stroke="#D6D6CF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                 <div style="width:322px;flex-shrink:0;border:1px solid #E6E6E0;border-radius:12px;padding:16px;">
                   <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">
-                    <div style="width:28px;height:28px;border-radius:8px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4338CA" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"></path></svg></div>
+                    <div style="width:28px;height:28px;border-radius:8px;background:#F1F1EC;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3E4046" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"></path></svg></div>
                     <span style="font-size:11px;font-weight:600;color:#5B5D63;text-transform:uppercase;letter-spacing:.03em;">Ações</span>
                   </div>
                   <div style="font-size:13px;color:#111214;margin-bottom:10px;">Mover para <b>Qualificado</b> e notificar</div>
@@ -1043,6 +1075,18 @@ button{font-family:var(--font-body);}
 
 <script src="/js/icons.js"></script>
 <script>
+// Ícones declarados no HTML como <span data-icon="nome" data-icon-size="16">.
+window.hydrateIcons = function (root) {
+  var els = (root || document).querySelectorAll('[data-icon]');
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    if (el.getAttribute('data-icon-done')) continue;
+    el.innerHTML = ICON(el.getAttribute('data-icon'), parseInt(el.getAttribute('data-icon-size') || '15', 10));
+    el.style.display = el.style.display || 'inline-flex';
+    el.setAttribute('data-icon-done', '1');
+  }
+};
+hydrateIcons(document);
 (function(){
   var screens = document.querySelectorAll('.screen');
   var qnBtns = document.querySelectorAll('.qn-btn');
@@ -1479,7 +1523,8 @@ button{font-family:var(--font-body);}
     state.currentConversationDetail = conv;
 
     document.getElementById('conversa-nome').textContent = conv.contact_name || 'Sem nome';
-    document.getElementById('conversa-telefone').textContent = conv.phone_display || '';
+    var isIgConv = conv.contact_channel === 'instagram';
+    document.getElementById('conversa-telefone').innerHTML = '<span style="color:' + (isIgConv ? 'var(--instagram)' : 'var(--whatsapp)') + ';display:inline-flex;">' + ICON(isIgConv ? 'instagram' : 'message-circle', 13) + '</span>' + (isIgConv ? 'Instagram' : 'WhatsApp') + ' · ' + escapeHtml(conv.phone_display || '');
     applyAvatarEl(document.getElementById('conversa-avatar'), conv.avatar_url, conv.avatar_initials, conv.contact_name);
     document.getElementById('conversa-avatar-badge').innerHTML = channelBadge(conv.contact_channel, 15);
     document.getElementById('conversa-etapa').textContent = conv.stage_name || '--';
@@ -1495,7 +1540,7 @@ button{font-family:var(--font-body);}
     var iaPausada = document.getElementById('painel-ia-pausada');
     var showIaPausada = Boolean(conv.ai_agents_active && conv.ai_paused_at && !conv.contact_bot_paused);
     iaPausada.style.display = showIaPausada ? 'flex' : 'none';
-    if (showIaPausada) document.getElementById('painel-ia-pausada-texto').textContent = '🤖 IA pausada nesta conversa · ' + (conv.ai_paused_reason || 'pausada');
+    if (showIaPausada) document.getElementById('painel-ia-pausada-texto').innerHTML = ICON('bot', 14) + ' IA pausada nesta conversa · ' + escapeHtml(conv.ai_paused_reason || 'pausada');
     loadSourceBox(conv.id);
     var camposHtml = customFieldsHtml(conv.contact_custom_fields);
     document.getElementById('painel-campos').innerHTML = camposHtml;
@@ -1555,10 +1600,18 @@ button{font-family:var(--font-body);}
     }).catch(function () { leadsEl.innerHTML = ''; });
 
     document.getElementById('conversa-atribuido').textContent = conv.assigned_user_name ? ('Com: ' + conv.assigned_user_name) : 'Não atribuída';
+    var me = window.__currentUser;
+    var isMine = me && String(conv.assigned_user_id) === String(me.id);
+    var posse = document.getElementById('conversa-posse');
+    if (conv.status === 'closed') { posse.textContent = 'Fechada'; posse.className = 'ct-pill ct-pill-neutral'; }
+    else if (isMine) { posse.textContent = 'Com você'; posse.className = 'ct-pill ct-pill-acc'; }
+    else if (conv.assigned_user_id) { posse.textContent = 'Com ' + (conv.assigned_user_name || 'atendente'); posse.className = 'ct-pill ct-pill-info'; }
+    else { posse.textContent = 'Na fila'; posse.className = 'ct-pill ct-pill-warning'; }
+    document.getElementById('conversa-assumir-btn').hidden = Boolean(isMine) || conv.status === 'closed';
     document.getElementById('conversa-status-select').value = conv.status || 'open';
     var janelaEl = document.getElementById('conversa-janela');
-    janelaEl.textContent = conv.window_open ? '🟢 Janela aberta (24h)' : '🔴 Janela fechada — só com template';
-    janelaEl.style.color = conv.window_open ? '#157A3A' : '#A3300F';
+    janelaEl.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:' + (conv.window_open ? 'var(--success)' : 'var(--danger)') + ';"></span>' + (conv.window_open ? 'Janela de 24h aberta' : 'Janela fechada — só com template');
+    janelaEl.style.color = conv.window_open ? 'var(--success-ink)' : 'var(--danger-ink)';
     renderPriorityButton();
     loadOpportunityBox(conv.contact_id);
     loadResumoBox();
@@ -1568,9 +1621,9 @@ button{font-family:var(--font-body);}
 
     var tagsEl = document.getElementById('painel-tags');
     tagsEl.innerHTML = (conv.contact_tags || []).map(function (tag) {
-      return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:3px 4px 3px 9px;border-radius:20px;background:#EEF2FF;color:#4338CA;">' +
+      return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:3px 4px 3px 9px;border-radius:20px;background:#F1F1EC;color:#3E4046;">' +
         escapeHtml(tag) +
-        '<button data-painel-remove-tag="' + escapeHtml(tag) + '" style="background:none;border:none;cursor:pointer;color:#4338CA;opacity:.6;font-size:11px;line-height:1;padding:0 2px;">×</button>' +
+        '<button data-painel-remove-tag="' + escapeHtml(tag) + '" style="background:none;border:none;cursor:pointer;color:#3E4046;opacity:.6;font-size:11px;line-height:1;padding:0 2px;">×</button>' +
       '</span>';
     }).join('') + '<span id="painel-add-tag" style="font-size:11px;color:#6E7076;border:1px dashed #D6D6CF;border-radius:20px;padding:3px 9px;cursor:pointer;">+ tag</span>';
 
@@ -1672,10 +1725,24 @@ button{font-family:var(--font-body);}
     var box = document.getElementById('conversa-messages');
     box.innerHTML = '';
     if (!messages.length) {
-      box.innerHTML = '<div style="text-align:center;color:#6E7076;font-size:12.5px;padding:24px;">Nenhuma mensagem ainda.</div>';
+      box.innerHTML = '<div class="ct-empty" style="margin:auto;">Nenhuma mensagem ainda nesta conversa.</div>';
       return;
     }
-    messages.forEach(function (m) { box.appendChild(renderBubble(m)); });
+    var lastDay = null;
+    var dayFmt = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+    messages.forEach(function (m) {
+      var day = new Date(m.created_at).toDateString();
+      if (day !== lastDay) {
+        lastDay = day;
+        var sep = document.createElement('div');
+        sep.className = 'ib-date';
+        var today = new Date().toDateString();
+        var yesterday = new Date(Date.now() - 86400000).toDateString();
+        sep.textContent = day === today ? 'Hoje' : (day === yesterday ? 'Ontem' : dayFmt.format(new Date(m.created_at)));
+        box.appendChild(sep);
+      }
+      box.appendChild(renderBubble(m));
+    });
     box.scrollTop = box.scrollHeight;
   }
 
@@ -1688,7 +1755,7 @@ button{font-family:var(--font-body);}
       wrap.style.cssText += 'width:100%;';
       wrap.innerHTML =
         '<div style="max-width:520px;width:100%;background:#FFFBEB;border:1px solid #F0C77E;border-radius:10px;padding:10px 14px;margin:2px 0;">' +
-          '<div style="font-size:10.5px;font-weight:600;color:#7A4E00;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px;">📝 Nota interna</div>' +
+          '<div style="font-size:11px;font-weight:600;color:var(--warning-ink);display:flex;align-items:center;gap:5px;margin-bottom:3px;">' + ICON('sticky-note', 12) + 'Nota interna</div>' +
           '<div style="font-size:13px;color:#78350F;line-height:1.5;">' + escapeHtml(m.body) + '</div>' +
         '</div>' +
         '<div style="font-size:10.5px;color:#6E7076;margin-top:2px;">' + formatTime(m.created_at) + '</div>';
@@ -1696,38 +1763,34 @@ button{font-family:var(--font-body);}
     }
 
     var isAutomation = m.sender_type === 'automation';
-    var bubbleStyle = isOutbound
-      ? (isAutomation
-          ? 'max-width:420px;background:#FFFFFF;border:1.5px dashed #F0C77E;border-radius:14px 14px 4px 14px;padding:11px 15px;'
-          : 'max-width:420px;background:#111214;border-radius:14px 14px 4px 14px;padding:11px 15px;')
-      : 'max-width:420px;background:#FFFFFF;border:1px solid #E6E6E0;border-radius:14px 14px 14px 4px;padding:11px 15px;';
-    var textColor = (isOutbound && !isAutomation) ? '#FFFFFF' : '#111214';
-
-    var tagHtml = isAutomation
-      ? '<div style="font-size:11px;color:#7A4E00;font-style:italic;margin-bottom:4px;margin-right:4px;">Enviado automaticamente</div>'
+    var cls = !isOutbound ? 'ib-bubble-in' : (isAutomation ? 'ib-bubble-bot' : 'ib-bubble-agent');
+    var textColor = (isOutbound && !isAutomation) ? '#FFFFFF' : 'var(--ink)';
+    var botLabel = isAutomation
+      ? '<div class="ib-bot-label">' + ICON('zap', 12) + escapeHtml(m.automation_flow_name || 'Automação') + '</div>'
       : '';
-
     var mediaHtml = renderMediaContent(m, textColor);
-    var textHtml = m.body ? '<div style="font-size:13.5px;color:' + textColor + ';line-height:1.5;white-space:pre-wrap;word-break:break-word;' + (mediaHtml ? 'margin-top:6px;' : '') + '">' + escapeHtml(m.body) + '</div>' : '';
+    var textHtml = m.body ? '<div style="white-space:pre-wrap;word-break:break-word;' + (mediaHtml ? 'margin-top:6px;' : '') + '">' + escapeHtml(m.body) + '</div>' : '';
 
     if (isOutbound && m.wa_message_id) wrap.setAttribute('data-wa-id', m.wa_message_id);
+    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:' + (isOutbound ? 'flex-end' : 'flex-start') + ';';
     wrap.innerHTML =
-      tagHtml +
-      '<div style="' + bubbleStyle + '">' + mediaHtml + textHtml + '</div>' +
-      '<div style="font-size:10.5px;color:#6E7076;margin-top:4px;display:flex;align-items:center;gap:5px;' + (isOutbound ? 'margin-right' : 'margin-left') + ':4px;">' + formatTime(m.created_at) +
-        (isOutbound ? '<span class="msg-status">' + messageStatusHtml(m.status, m.error_message) + '</span>' : '') +
+      '<div class="ib-bubble ' + cls + '">' + botLabel + mediaHtml + textHtml +
+        '<div class="ib-bubble-meta"><span>' + formatTime(m.created_at) + '</span>' +
+          (isOutbound ? '<span class="msg-status">' + messageStatusHtml(m.status, m.error_message, !isAutomation) + '</span>' : '') +
+        '</div>' +
       '</div>';
     return wrap;
   }
 
   // Status de entrega da Meta: enviada ✓, entregue ✓✓, lida ✓✓ azul, falhou ⚠.
-  function messageStatusHtml(status, errorMessage) {
+  function messageStatusHtml(status, errorMessage, onDark) {
     if (status === 'failed') {
-      return '<span title="' + escapeHtml(errorMessage || 'A Meta não entregou esta mensagem') + '" style="color:#E8471F;font-weight:600;cursor:help;">⚠ Não entregue</span>';
+      return '<span title="' + escapeHtml(errorMessage || 'A Meta não entregou esta mensagem') + '" style="color:' + (onDark ? '#FFB4A0' : 'var(--danger-ink)') + ';font-weight:600;cursor:help;display:inline-flex;align-items:center;gap:3px;">' + ICON('circle-alert', 12) + 'Não entregue</span>';
     }
-    if (status === 'read') return '<span title="Lida" style="color:#111214;font-weight:600;letter-spacing:-3px;">✓✓</span>';
-    if (status === 'delivered') return '<span title="Entregue" style="color:#6E7076;font-weight:600;letter-spacing:-3px;">✓✓</span>';
-    return '<span title="Enviada" style="color:#6E7076;font-weight:600;">✓</span>';
+    var readColor = onDark ? 'var(--acc)' : 'var(--info)';
+    if (status === 'read') return '<span title="Lida" style="color:' + readColor + ';font-weight:600;letter-spacing:-3px;">✓✓</span>';
+    if (status === 'delivered') return '<span title="Entregue" style="font-weight:600;letter-spacing:-3px;">✓✓</span>';
+    return '<span title="Enviada" style="font-weight:600;">✓</span>';
   }
 
   function renderMediaContent(m, textColor) {
@@ -1967,9 +2030,10 @@ button{font-family:var(--font-body);}
   function renderPriorityButton() {
     var conv = state.currentConversationDetail;
     var btn = document.getElementById('conversa-prioridade-btn');
-    if (!conv) { btn.textContent = '☆'; return; }
-    btn.textContent = conv.is_priority ? '★' : '☆';
-    btn.style.color = conv.is_priority ? '#111214' : '#3e4046';
+    var on = conv && conv.is_priority;
+    btn.innerHTML = ICON('star', 17, on ? 'fill="currentColor"' : '');
+    btn.style.color = on ? 'var(--warning)' : 'var(--text-2)';
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
   }
 
   async function loadOpportunityBox(contactId) {
@@ -2124,7 +2188,7 @@ button{font-family:var(--font-body);}
       }
       if (data.type === 'message:status' && data.waMessageId) {
         var statusWrap = document.querySelector('#conversa-messages [data-wa-id="' + CSS.escape(data.waMessageId) + '"] .msg-status');
-        if (statusWrap) statusWrap.innerHTML = messageStatusHtml(data.status, data.errorMessage);
+        if (statusWrap) statusWrap.innerHTML = messageStatusHtml(data.status, data.errorMessage, !!statusWrap.closest('.ib-bubble-agent'));
       }
       if (data.type === 'conversation:updated' && data.conversation && String(data.conversation.id) === String(state.currentConversationId)) {
         refreshConversationPanel();
@@ -3959,9 +4023,9 @@ button{font-family:var(--font-body);}
     }
 
     var tagsHtml = (lead.tags || []).map(function (tag) {
-      return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:2px 4px 2px 8px;border-radius:20px;background:#EEF2FF;color:#4338CA;margin-right:4px;margin-top:4px;">' +
+      return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:2px 4px 2px 8px;border-radius:20px;background:#F1F1EC;color:#3E4046;margin-right:4px;margin-top:4px;">' +
         escapeHtml(tag) +
-        '<button data-modal-remove-tag="' + escapeHtml(tag) + '" style="background:none;border:none;cursor:pointer;color:#4338CA;opacity:.6;font-size:11px;line-height:1;padding:0 2px;">×</button>' +
+        '<button data-modal-remove-tag="' + escapeHtml(tag) + '" style="background:none;border:none;cursor:pointer;color:#3E4046;opacity:.6;font-size:11px;line-height:1;padding:0 2px;">×</button>' +
       '</span>';
     }).join('') + '<button id="modal-add-tag" style="font-size:10.5px;font-weight:600;color:#111214;background:none;border:1px dashed #D6D6CF;border-radius:20px;padding:2px 8px;cursor:pointer;margin-top:4px;">+ tag</button>';
 
@@ -4392,9 +4456,9 @@ button{font-family:var(--font-body);}
       }
 
       var tagsHtml = (f.default_tags || []).map(function (tag) {
-        return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:2px 4px 2px 8px;border-radius:20px;background:#EEF2FF;color:#4338CA;margin-right:4px;margin-top:4px;">' +
+        return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:2px 4px 2px 8px;border-radius:20px;background:#F1F1EC;color:#3E4046;margin-right:4px;margin-top:4px;">' +
           escapeHtml(tag) +
-          '<button data-remove-funnel-tag="' + f.id + '" data-tag-value="' + escapeHtml(tag) + '" style="background:none;border:none;cursor:pointer;color:#4338CA;opacity:.6;font-size:11px;line-height:1;padding:0 2px;">×</button>' +
+          '<button data-remove-funnel-tag="' + f.id + '" data-tag-value="' + escapeHtml(tag) + '" style="background:none;border:none;cursor:pointer;color:#3E4046;opacity:.6;font-size:11px;line-height:1;padding:0 2px;">×</button>' +
         '</span>';
       }).join('') + '<button data-add-funnel-tag="' + f.id + '" style="font-size:10.5px;font-weight:600;color:#111214;background:none;border:1px dashed #D6D6CF;border-radius:20px;padding:2px 8px;cursor:pointer;margin-top:4px;">+ tag automática</button>';
 
@@ -4637,9 +4701,10 @@ button{font-family:var(--font-body);}
     tabsDef.forEach(function (t) {
       var btn = document.createElement('button');
       var active = inboxState.tab === t.id;
-      btn.style.cssText = 'flex-shrink:0;appearance:none;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);' +
-        (active ? 'background:#111214;color:#FFFFFF;' : 'background:#F4F4F0;color:#5b5d63;');
-      btn.textContent = t.label + (typeof t.count === 'number' ? ' (' + t.count + ')' : '');
+      btn.type = 'button';
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      btn.innerHTML = escapeHtml(t.label) + (typeof t.count === 'number' ? '<span class="seg-count">' + t.count + '</span>' : '');
       btn.addEventListener('click', function () {
         inboxState.tab = t.id;
         loadInboxCounts();
@@ -4667,7 +4732,7 @@ button{font-family:var(--font-body);}
 
     listEl.innerHTML = '';
     if (!rows.length) {
-      listEl.innerHTML = '<div style="padding:20px;font-size:12.5px;color:#6E7076;">Nenhuma conversa aqui.</div>';
+      listEl.innerHTML = '<div class="ct-empty" style="margin:8px;">Nenhuma conversa aqui. Troque de fila ou limpe os filtros — novas mensagens aparecem sozinhas.</div>';
       return;
     }
 
@@ -4676,22 +4741,25 @@ button{font-family:var(--font-body);}
       var preview = c.last_message_body || (c.last_message_media_type ? mediaPlaceholder(c.last_message_media_type) : 'Sem mensagens');
       var row = document.createElement('a');
       row.href = '#conversa';
-      row.style.cssText = 'display:flex;align-items:flex-start;gap:10px;padding:12px 18px;border-bottom:1px solid #F4F4F0;cursor:pointer;text-decoration:none;' + (unread ? 'background:#FAFAF7;' : '');
+      row.className = 'ib-row' + (String(c.id) === String(state.currentConversationId) ? ' selected' : '');
+      row.setAttribute('data-conversation-id', c.id);
       row.innerHTML =
-        '<div style="position:relative;width:34px;height:34px;flex-shrink:0;">' + avatarHtml(c.avatar_url, c.avatar_initials, c.contact_name, 34, 12, null) + '' + channelBadge(c.contact_channel) + '</div>' +
-        '<div style="flex-grow:1;min-width:0;">' +
+        avatarWithChannel(c.avatar_url, c.avatar_initials, c.contact_name, c.contact_channel, 42, 13) +
+        '<div style="flex:1;min-width:0;">' +
           '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">' +
-            '<div style="font-weight:' + (unread ? '700' : '600') + ';font-size:13px;color:#111214;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(c.contact_name || c.phone_display || 'Sem nome') + '</div>' +
-            '<div style="font-size:11px;color:#6E7076;flex-shrink:0;">' + relativeTime(c.last_message_at) + '</div>' +
+            '<div style="font-weight:' + (unread ? '600' : '500') + ';font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(c.contact_name || c.phone_display || 'Sem nome') + '</div>' +
+            '<div style="font-size:12px;color:var(--text-subtle);flex-shrink:0;font-variant-numeric:tabular-nums;">' + relativeTime(c.last_message_at) + '</div>' +
           '</div>' +
           '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px;">' +
-            '<div style="font-size:12px;color:' + (unread ? '#3e4046' : '#5B5D63') + ';font-weight:' + (unread ? '600' : '400') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(preview) + '</div>' +
-            (unread ? '<span style="flex-shrink:0;background:#111214;color:#FFFFFF;font-size:10.5px;font-weight:600;border-radius:999px;padding:1px 7px;">' + c.unread_count + '</span>' : '') +
+            '<div style="font-size:13px;color:' + (unread ? 'var(--text-2)' : 'var(--text-muted)') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(preview) + '</div>' +
+            (unread ? '<span class="ib-unread">' + c.unread_count + '</span>' : '') +
           '</div>' +
           inboxRowBadges(c) +
         '</div>';
       row.addEventListener('click', function (e) {
         e.preventDefault();
+        document.querySelectorAll('#inbox-list .ib-row.selected').forEach(function (r) { r.classList.remove('selected'); });
+        row.classList.add('selected');
         openConversation(c.id);
         window.__goto && window.__goto('inbox');
       });
@@ -4703,13 +4771,12 @@ button{font-family:var(--font-body);}
   function inboxRowBadges(c) {
     var badges = [];
     if (c.source_type === 'referral_ad') {
-      var kind = c.ad_source_kind === 'post' ? 'Publicação' : 'Anúncio';
-      badges.push('<span title="' + escapeHtml(kind + (c.ad_headline ? ': ' + c.ad_headline : '')) + '" style="display:inline-flex;align-items:center;gap:4px;max-width:100%;font-size:10.5px;font-weight:600;color:#4A2C99;background:#F1EBFF;border-radius:6px;padding:2px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">📣 ' + kind + (c.ad_headline ? ' · ' + escapeHtml(c.ad_headline) : '') + '</span>');
+      badges.push('<span class="ct-pill ct-pill-warning" style="font-size:11px;padding:2px 8px;max-width:100%;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(c.ad_headline || '') + '">' + ICON('megaphone', 12) + 'Veio de anúncio</span>');
     }
     if (c.bot_paused) {
-      badges.push('<span title="IA e automações pausadas para este contato" style="font-size:10.5px;font-weight:600;color:#5b5d63;background:#EEEEE8;border-radius:6px;padding:2px 7px;white-space:nowrap;">👤 Só humano</span>');
+      badges.push('<span class="ct-pill ct-pill-neutral" style="font-size:11px;padding:2px 8px;" title="IA e automações pausadas para este contato">' + ICON('user-round', 12) + 'Só humano</span>');
     }
-    return badges.length ? '<div style="display:flex;gap:5px;margin-top:5px;min-width:0;">' + badges.join('') + '</div>' : '';
+    return badges.length ? '<div style="display:flex;gap:5px;margin-top:6px;min-width:0;flex-wrap:wrap;">' + badges.join('') + '</div>' : '';
   }
 
   function loadInbox() {
@@ -4728,13 +4795,32 @@ button{font-family:var(--font-body);}
         loadInboxList();
       }, 250);
     });
-    document.getElementById('inbox-unread-toggle').addEventListener('change', function (e) {
-      inboxState.unread = e.target.checked;
-      loadInboxList();
-    });
-    document.getElementById('inbox-ads-toggle').addEventListener('change', function (e) {
-      inboxState.ads = e.target.checked;
-      loadInboxList();
+    function bindChip(id, key) {
+      var chip = document.getElementById(id);
+      chip.addEventListener('click', function () {
+        inboxState[key] = !inboxState[key];
+        chip.setAttribute('aria-pressed', inboxState[key] ? 'true' : 'false');
+        loadInboxList();
+      });
+    }
+    bindChip('inbox-unread-toggle', 'unread');
+    bindChip('inbox-ads-toggle', 'ads');
+
+    // Atalhos: "/" busca; J/K próxima/anterior conversa.
+    document.addEventListener('keydown', function (e) {
+      var inboxOn = document.getElementById('screen-inbox').classList.contains('active');
+      if (!inboxOn || e.metaKey || e.ctrlKey || e.altKey) return;
+      var tag = (document.activeElement && document.activeElement.tagName) || '';
+      if (/INPUT|TEXTAREA|SELECT/.test(tag)) return;
+      if (e.key === '/') { e.preventDefault(); searchInput.focus(); return; }
+      if (e.key === 'j' || e.key === 'k') {
+        var rows = Array.from(document.querySelectorAll('#inbox-list .ib-row'));
+        if (!rows.length) return;
+        var idx = rows.findIndex(function (r) { return r.classList.contains('selected'); });
+        var next = e.key === 'j' ? Math.min(rows.length - 1, idx + 1) : Math.max(0, idx - 1);
+        rows[next].click();
+        rows[next].scrollIntoView({ block: 'nearest' });
+      }
     });
     document.getElementById('inbox-tag-filter').addEventListener('change', function (e) {
       inboxState.tag = e.target.value;
