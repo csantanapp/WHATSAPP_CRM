@@ -450,7 +450,7 @@ button{font-family:var(--font-body);}
                   </label>
 
                   <div id="painel-ia-pausada" style="display:none;align-items:center;justify-content:space-between;gap:10px;background:#FFF8EB;border:1px solid #FBE3B2;border-radius:10px;padding:9px 12px;">
-                    <span id="painel-ia-pausada-texto" style="font-size:12px;color:#92400E;line-height:1.35;">🤖 IA pausada nesta conversa</span>
+                    <span id="painel-ia-pausada-texto" style="font-size:12px;color:var(--warning-ink);line-height:1.35;display:inline-flex;align-items:center;gap:5px;">IA pausada nesta conversa</span>
                     <button id="painel-ia-reativar" style="flex-shrink:0;font-size:11.5px;font-weight:600;color:#111214;background:#FFFFFF;border:1px solid #C8F542;border-radius:7px;padding:5px 9px;cursor:pointer;">Reativar IA</button>
                   </div>
 
@@ -898,7 +898,7 @@ button{font-family:var(--font-body);}
 
               <div style="border:1px solid #F0FBD2;background:#FBFBF8;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px;">
                 <div>
-                  <div style="font-size:13px;font-weight:600;color:#111214;">📚 Base de conhecimento</div>
+                  <div style="font-size:14px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:7px;"><span data-icon="book-open" data-icon-size="16"></span>Base de conhecimento</div>
                   <div style="font-size:11.5px;color:#5B5D63;line-height:1.45;margin-top:2px;">O que o agente pode afirmar sobre a empresa: preços, horários, endereço, cursos, formas de pagamento, políticas. Quanto mais completo, menos ele precisa passar para um humano.</div>
                 </div>
                 <div id="aa-faq-list" style="display:flex;flex-direction:column;gap:8px;"></div>
@@ -986,12 +986,12 @@ button{font-family:var(--font-body);}
 
         <section class="screen" id="screen-conexoes">
 
-          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;overflow-y:auto;">
-            <div style="font-family:var(--font-display);font-weight:600;font-size:32px;letter-spacing:-0.025em;color:#111214;margin-bottom:4px;">Conexões</div>
+          <div class="ct-page"><div class="ct-page-inner">
+            <h1 class="ct-h1">Conexões</h1>
             <div style="font-size:13px;color:#5B5D63;margin-bottom:20px;">Por onde seu negócio fala com o cliente. Acompanhe a saúde do número oficial da Meta.</div>
 
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
-              <div style="display:flex;align-items:center;gap:4px;background:#FFFFFF;border:1px solid #E3E3DC;border-radius:10px;padding:4px;overflow-x:auto;">
+              <div role="tablist" aria-label="Tipos de conexão" style="display:flex;align-items:center;gap:2px;background:var(--surface-muted);border-radius:11px;padding:3px;overflow-x:auto;">
                 <button class="conexoes-tab-btn active" data-conexoes-tab="meta">Número oficial (Meta)</button>
                 <button class="conexoes-tab-btn" disabled title="Em breve">Números por QR</button>
                 <button class="conexoes-tab-btn" disabled title="Em breve">Provedor parceiro</button>
@@ -1000,56 +1000,50 @@ button{font-family:var(--font-body);}
                 <button class="conexoes-tab-btn" disabled title="Em breve">Chamada de voz</button>
               </div>
               <div style="display:flex;align-items:center;gap:8px;">
-                <button id="conexoes-refresh-btn" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#3e4046;border:1px solid #E3E3DC;border-radius:10px;padding:9px 14px;font-weight:600;font-size:12.5px;cursor:pointer;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5b5d63" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><path d="M21 3v6h-6"></path></svg>
-                  Atualizar saúde
-                </button>
-                <button id="conexoes-novo-btn" style="display:flex;align-items:center;gap:6px;background:#157A3A;color:#FFFFFF;border:none;border-radius:10px;padding:9px 16px;font-weight:600;font-size:12.5px;cursor:pointer;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
-                  Conectar novo WhatsApp
-                </button>
+                <button type="button" id="conexoes-refresh-btn" class="ct-btn ct-btn-secondary"><span data-icon="refresh-cw"></span>Atualizar saúde</button>
+                <button type="button" id="conexoes-novo-btn" class="ct-btn ct-btn-primary"><span data-icon="plus"></span>Conectar novo WhatsApp</button>
               </div>
             </div>
 
-            <div id="conexoes-card" style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:14px;padding:20px 22px;">
+            <div id="conexoes-card" class="ct-card">
               Carregando...
             </div>
 
-            <div style="font-size:11.5px;color:#6E7076;background:#FBFBF8;border:1px solid #EEEEE8;border-radius:10px;padding:10px 14px;margin-top:18px;">
+            <div class="ct-callout" style="margin-top:18px;">
               As demais abas (QR, provedor parceiro, telefone, chamada de voz) ainda não estão disponíveis nesta versão — hoje os canais suportados são o número oficial via API da Meta e o Instagram Direct.
             </div>
-          </div>
+          </div></div>
         </section>
 
         <style>
-          .conexoes-tab-btn{appearance:none;border:none;background:transparent;color:#6E7076;font-family:var(--font-body);font-weight:600;font-size:12px;padding:8px 13px;border-radius:7px;cursor:pointer;white-space:nowrap;}
-          .conexoes-tab-btn.active{background:#111214;color:#FFFFFF;}
+          .conexoes-tab-btn{appearance:none;border:none;background:transparent;color:var(--text-2);font-weight:500;font-size:13px;height:32px;padding:0 13px;border-radius:8px;cursor:pointer;white-space:nowrap;}
+          .conexoes-tab-btn.active{background:#FFFFFF;color:var(--ink);box-shadow:0 1px 2px rgba(17,18,20,.08);}
           .conexoes-tab-btn:disabled{cursor:not-allowed;opacity:.55;}
         </style>
 
         <section class="screen" id="screen-config">
 
-          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;overflow-y:auto;">
-            <div style="font-family:var(--font-display);font-weight:600;font-size:32px;letter-spacing:-0.025em;color:#111214;margin-bottom:22px;">Configurações</div>
+          <div class="ct-page"><div class="ct-page-inner">
+            <h1 class="ct-h1">Configurações</h1>
 
-            <div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Conexão com o WhatsApp</div>
-            <div id="config-whatsapp-status" style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#6E7076;">Verificando...</div>
+            <h2 class="ct-h2" style="margin:0 0 10px;">Conexão com o WhatsApp</h2>
+            <div id="config-whatsapp-status" style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:18px;padding:18px 20px;margin-bottom:28px;font-size:12.5px;color:#6E7076;">Verificando...</div>
 
-            <div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Assistente de IA</div>
-            <div id="config-ia-box" style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#6E7076;">Carregando...</div>
+            <h2 class="ct-h2" style="margin:0 0 10px;">Assistente de IA</h2>
+            <div id="config-ia-box" style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:18px;padding:18px 20px;margin-bottom:28px;font-size:12.5px;color:#6E7076;">Carregando...</div>
 
-            <div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Radar diário</div>
-            <div id="config-radar-box" style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#6E7076;">Carregando...</div>
+            <h2 class="ct-h2" style="margin:0 0 10px;">Radar diário</h2>
+            <div id="config-radar-box" style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:18px;padding:18px 20px;margin-bottom:28px;font-size:12.5px;color:#6E7076;">Carregando...</div>
 
-            <div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Mensagens automáticas</div>
-            <div id="config-typing-box" style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#6E7076;">Carregando...</div>
+            <h2 class="ct-h2" style="margin:0 0 10px;">Mensagens automáticas</h2>
+            <div id="config-typing-box" style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:18px;padding:18px 20px;margin-bottom:28px;font-size:12.5px;color:#6E7076;">Carregando...</div>
 
-            <div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Conversões de anúncios (Meta)</div>
-            <div id="config-capi-box" style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#6E7076;">Carregando...</div>
+            <h2 class="ct-h2" style="margin:0 0 10px;">Conversões de anúncios (Meta)</h2>
+            <div id="config-capi-box" style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:18px;padding:18px 20px;margin-bottom:28px;font-size:12.5px;color:#6E7076;">Carregando...</div>
 
-            <div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Distribuição automática</div>
-            <div id="config-distribuicao-box" style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:12px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;color:#6E7076;">Carregando...</div>
-          </div>
+            <h2 class="ct-h2" style="margin:0 0 10px;">Distribuição automática</h2>
+            <div id="config-distribuicao-box" style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:18px;padding:18px 20px;margin-bottom:28px;font-size:12.5px;color:#6E7076;">Carregando...</div>
+          </div></div>
         </section>
 
         <section class="screen" id="screen-funis">
@@ -1288,7 +1282,9 @@ hydrateIcons(document);
       document.getElementById('ct-confirm-title').textContent = opts.title || 'Tem certeza?';
       document.getElementById('ct-confirm-message').textContent = opts.message || '';
       var ok = document.getElementById('ct-confirm-ok');
-      ok.innerHTML = ICON('trash-2', 15) + escapeHtml(opts.confirmLabel || 'Excluir');
+      var neutral = opts.tone === 'neutral';
+      ok.style.background = neutral ? 'var(--ink)' : 'var(--danger)';
+      ok.innerHTML = ICON(neutral ? 'check' : 'trash-2', 15) + escapeHtml(opts.confirmLabel || 'Excluir');
       function done(value) {
         ok.removeEventListener('click', onOk);
         dlg.removeEventListener('close', onClose);
@@ -1549,7 +1545,7 @@ hydrateIcons(document);
   function sourceCardHtml(src) {
     if (!src) return '';
     if (src.source_type === 'campaign_keyword') {
-      return '<div style="font-size:12.5px;color:#3e4046;">🔗 Link de campanha' + (src.campaign_key ? ' · palavra-chave <b>' + escapeHtml(src.campaign_key) + '</b>' : '') + '</div>';
+      return '<div style="font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:6px;">' + ICON('link', 14) + 'Link de campanha' + (src.campaign_key ? ' · palavra-chave <b>' + escapeHtml(src.campaign_key) + '</b>' : '') + '</div>';
     }
     if (src.source_type !== 'referral_ad') {
       return '<div style="font-size:12.5px;color:#5B5D63;">Contato direto (sem anúncio ou link de campanha)</div>';
@@ -1562,7 +1558,7 @@ hydrateIcons(document);
     return '<div style="border:1px solid #E6E6E0;border-radius:10px;overflow:hidden;background:#FFFFFF;">' +
       (img ? '<img src="' + escapeHtml(img) + '" alt="" onerror="this.remove()" style="display:block;width:100%;max-height:150px;object-fit:cover;background:#F1F1EC;"/>' : '') +
       '<div style="padding:10px 12px;display:flex;flex-direction:column;gap:5px;">' +
-        '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span style="font-size:10.5px;font-weight:600;color:#4A2C99;background:#F1EBFF;border-radius:6px;padding:2px 7px;">📣 ' + kind + '</span>' +
+        '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="ct-pill ct-pill-warning" style="font-size:11px;">' + ICON('megaphone', 12) + kind + '</span>' +
           (raw.media_type === 'video' ? '<span style="font-size:10.5px;color:#5B5D63;">com vídeo</span>' : '') + '</div>' +
         (src.ad_headline ? '<div style="font-size:13px;font-weight:600;color:#111214;line-height:1.35;">' + escapeHtml(src.ad_headline) + '</div>' : '') +
         (body ? '<div style="font-size:12px;color:#5b5d63;line-height:1.45;">' + escapeHtml(body) + '</div>' : '') +
@@ -1871,7 +1867,7 @@ hydrateIcons(document);
     }
     if (type === 'audio') {
       var transcriptHtml = m.transcription
-        ? '<div style="font-size:11.5px;color:' + textColor + ';opacity:.75;margin-top:6px;max-width:260px;font-style:italic;">🎧 ' + escapeHtml(m.transcription) + '</div>'
+        ? '<div style="font-size:11.5px;color:' + textColor + ';opacity:.75;margin-top:6px;max-width:260px;font-style:italic;display:flex;gap:5px;align-items:flex-start;"><span style="flex-shrink:0;margin-top:2px;display:inline-flex;">' + ICON('message-square-text', 12) + '</span><span>' + escapeHtml(m.transcription) + '</span></div>'
         : '<div class="transcricao-pendente" data-msg-id="' + m.id + '" style="font-size:11px;color:' + textColor + ';opacity:.6;margin-top:4px;">Transcrevendo...</div>';
       return '<audio controls src="' + m.media_url + '" style="max-width:260px;"></audio>' + transcriptHtml;
     }
@@ -2269,7 +2265,7 @@ hydrateIcons(document);
       if (data.type === 'message:transcribed' && data.conversationId === state.currentConversationId) {
         var pending = document.querySelector('.transcricao-pendente[data-msg-id="' + data.messageId + '"]');
         if (pending) {
-          pending.textContent = '🎧 ' + data.transcription;
+          pending.textContent = data.transcription;
           pending.classList.remove('transcricao-pendente');
           pending.style.fontStyle = 'italic';
         }
@@ -2449,7 +2445,7 @@ hydrateIcons(document);
   var AUTOMATION_TEMPLATES = [
     {
       id: 'fora-expediente',
-      icon: '🌙',
+      icon: 'moon',
       title: 'Fora do expediente / fim de semana',
       description: 'Enquanto a empresa está fechada, avisa o lead, espera ~1400 min (quase 1 dia) e manda um segundo estímulo pra reengajar antes de criar o lembrete pro time.',
       trigger_type: 'first_message',
@@ -2490,7 +2486,7 @@ hydrateIcons(document);
     },
     {
       id: 'boas-vindas',
-      icon: '👋',
+      icon: 'hand',
       title: 'Boas-vindas (primeira mensagem)',
       description: 'Responde a primeira mensagem de qualquer lead novo com uma saudação e marca a tag "novo-lead".',
       trigger_type: 'first_message',
@@ -2507,7 +2503,7 @@ hydrateIcons(document);
     },
     {
       id: 'formulario-qualificacao',
-      icon: '📝',
+      icon: 'clipboard-list',
       title: 'Formulário de qualificação',
       description: 'Na primeira mensagem, pergunta nome, e-mail e interesse (com botões), grava tudo na ficha do lead e marca a tag "lead-qualificado". Lead que já respondeu antes não é perguntado de novo.',
       trigger_type: 'first_message',
@@ -2539,7 +2535,7 @@ hydrateIcons(document);
     },
     {
       id: 'captura-orcamento',
-      icon: '💰',
+      icon: 'dollar-sign',
       title: 'Captura de orçamento',
       description: 'Quando a mensagem contém "preço", "valor" ou "orçamento", pergunta o que o lead precisa, marca a tag e cria um lembrete pro time orçar.',
       trigger_type: 'keyword',
@@ -2564,13 +2560,13 @@ hydrateIcons(document);
   function renderAutomationTemplates() {
     var list = document.getElementById('automacao-templates-list');
     list.innerHTML = AUTOMATION_TEMPLATES.map(function (t) {
-      return '<div style="display:flex;align-items:flex-start;gap:12px;border:1px solid #E6E6E0;border-radius:12px;padding:14px 16px;">' +
-        '<div style="width:34px;height:34px;border-radius:9px;background:#F4F4F0;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">' + t.icon + '</div>' +
+      return '<div style="display:flex;align-items:flex-start;gap:12px;border:1px solid var(--border);border-radius:14px;padding:14px 16px;">' +
+        '<span class="ct-tile" style="width:36px;height:36px;border-radius:10px;background:var(--acc-soft);color:var(--acc-ink);">' + ICON(t.icon, 18) + '</span>' +
         '<div style="flex-grow:1;min-width:0;">' +
           '<div style="font-weight:600;font-size:13.5px;color:#111214;margin-bottom:3px;">' + escapeHtml(t.title) + '</div>' +
           '<div style="font-size:12px;color:#5B5D63;line-height:1.4;">' + escapeHtml(t.description) + '</div>' +
         '</div>' +
-        '<button data-use-template="' + t.id + '" style="flex-shrink:0;background:#111214;color:#FFFFFF;border:none;border-radius:8px;padding:8px 14px;font-weight:600;font-size:12px;cursor:pointer;white-space:nowrap;">Usar modelo</button>' +
+        '<button type="button" class="ct-btn ct-btn-primary" data-use-template="' + t.id + '" style="flex-shrink:0;height:34px;">Usar modelo</button>' +
       '</div>';
     }).join('');
 
@@ -3145,8 +3141,9 @@ hydrateIcons(document);
   }
   document.getElementById('flow-zoom-reset').addEventListener('click', flowFitToScreen);
 
-  function flowDeleteNode(clientId) {
-    if (!confirm('Excluir esse nó? Conexões que apontam pra ele vão ficar soltas.')) return;
+  async function flowDeleteNode(clientId) {
+    var okNode = await ctConfirm({ title: 'Excluir este bloco?', message: 'As conexões que apontam para ele ficam soltas. A mudança só vale depois de salvar o fluxo.', confirmLabel: 'Excluir bloco' });
+    if (!okNode) return;
     flowCanvas.nodes = flowCanvas.nodes.filter(function (n) { return n.client_id !== clientId; });
     flowCanvas.nodes.forEach(function (n) {
       if (n.next_step_id === clientId) n.next_step_id = null;
@@ -3683,7 +3680,7 @@ hydrateIcons(document);
     try { await flowSave({ activate: false }); } catch (err) { alert('Não foi possível desativar: ' + err.message); }
   });
   document.getElementById('flow-discard-btn').addEventListener('click', async function () {
-    if (!flowCanvas.dirty || confirm('Descartar as alterações não salvas desse fluxo?')) {
+    if (!flowCanvas.dirty || await ctConfirm({ title: 'Descartar alterações?', message: 'As mudanças não salvas deste fluxo serão perdidas.', confirmLabel: 'Descartar' })) {
       var fresh = await api('/automation-flows/' + flowCanvas.flow.id);
       await flowLoadIntoCanvas(fresh);
     }
@@ -3699,7 +3696,8 @@ hydrateIcons(document);
   });
 
   document.getElementById('flow-canvas-delete').addEventListener('click', async function () {
-    if (!confirm('Excluir o fluxo "' + flowCanvas.flow.name + '"? Essa ação não pode ser desfeita.')) return;
+    var okFlow = await ctConfirm({ title: 'Excluir “' + flowCanvas.flow.name + '”?', message: 'O fluxo e as métricas dele serão apagados. Essa ação não pode ser desfeita.', confirmLabel: 'Excluir automação' });
+    if (!okFlow) return;
     await api('/automation-flows/' + flowCanvas.flow.id, { method: 'DELETE' });
     window.__goto && window.__goto('automacao');
     loadAutomationFlows();
@@ -4459,7 +4457,7 @@ hydrateIcons(document);
     document.getElementById('typing-max').addEventListener('change', function () { save({ max_seconds: parseInt(this.value, 10) }); });
   }
 
-  var CAPI_EVENT_LABELS = { QualifiedLead: '🎯 Lead qualificado', Purchase: '💰 Venda' };
+  var CAPI_EVENT_LABELS = { QualifiedLead: 'Lead qualificado', Purchase: 'Venda' };
   var CAPI_STATUS = {
     sent: { label: 'Enviado', bg: '#E3F7EA', fg: '#157A3A' },
     failed: { label: 'Falhou', bg: '#FFE9E1', fg: '#A3300F' },
@@ -4501,8 +4499,8 @@ hydrateIcons(document);
       '<div id="capi-msg" style="font-size:11.5px;color:#5B5D63;margin-bottom:12px;">O dataset de mensagens é o da sua própria conta do WhatsApp — o botão azul busca (ou cria) automaticamente.</div>' +
       '<div style="background:#FBFBF8;border:1px solid #EEEEE8;border-radius:10px;padding:10px 12px;color:#5b5d63;line-height:1.5;margin-bottom:14px;">' +
         '<b>O que dispara cada evento:</b><br>' +
-        '🎯 <b>Lead qualificado</b> e 💰 <b>Venda</b>: em <b>Funis</b>, escolha em cada etapa qual evento ela envia ao receber um lead.<br>' +
-        '💰 Marcar uma <b>oportunidade como ganha</b> também envia a venda, com o valor da oportunidade.<br>' +
+        '<b>Lead qualificado</b> e <b>Venda</b>: em <b>Funis</b>, escolha em cada etapa qual evento ela envia ao receber um lead.<br>' +
+        'Marcar uma <b>oportunidade como ganha</b> também envia a venda, com o valor da oportunidade.<br>' +
         'Cada evento é enviado <b>uma vez por conversa</b>. Só leads que clicaram num anúncio são reportados — os demais aparecem abaixo como "Não enviado".' +
       '</div>' +
       '<div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Atividade recente</div>' +
@@ -4652,7 +4650,8 @@ hydrateIcons(document);
       btn.addEventListener('click', async function () {
         var funnelId = btn.getAttribute('data-set-default-funnel');
         var funnel = funnels.find(function (f) { return String(f.id) === funnelId; });
-        if (!confirm('Tornar "' + (funnel ? funnel.name : '') + '" o funil padrão? Todo lead novo (sem palavra-chave de campanha) vai entrar nele a partir de agora.')) return;
+        var okDefault = await ctConfirm({ title: 'Tornar “' + (funnel ? funnel.name : '') + '” o funil padrão?', message: 'Todo lead novo (sem palavra-chave de campanha) vai entrar nele a partir de agora.', confirmLabel: 'Tornar padrão', tone: 'neutral' });
+        if (!okDefault) return;
         try {
           await api('/funnels/' + funnelId + '/set-default', { method: 'POST' });
           loadFunnelsSection();
@@ -5526,8 +5525,8 @@ hydrateIcons(document);
 
     var activeAgents = agents.filter(function (a) { return a.is_active; });
     var iaHtml = activeAgents.length
-      ? '<span style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;background:#E8F3EC;color:#157A3A;padding:4px 10px;border-radius:20px;">🟢 ' + activeAgents.length + (activeAgents.length === 1 ? ' agente de IA ativo' : ' agentes de IA ativos') + '</span>'
-      : '<span style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;background:#FEF3E2;color:#7A4E00;padding:4px 10px;border-radius:20px;">⚪ IA em modo de teste</span>';
+      ? '<span class="ct-pill ct-pill-success"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);"></span>' + activeAgents.length + (activeAgents.length === 1 ? ' agente de IA ativo' : ' agentes de IA ativos') + '</span>'
+      : '<span class="ct-pill ct-pill-warning"><span style="width:6px;height:6px;border-radius:50%;background:var(--warning);"></span>IA em modo de teste</span>';
     var iaSubtitle = activeAgents.length
       ? 'Responde mensagens recebidas neste canal.'
       : 'Nenhum agente de IA ativo — a IA não responde ninguém neste canal.';
