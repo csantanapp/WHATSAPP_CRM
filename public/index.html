@@ -1177,7 +1177,9 @@ hydrateIcons(document);
   var screens = document.querySelectorAll('.screen');
   var qnBtns = document.querySelectorAll('.qn-btn');
   var stage = document.getElementById('stage');
-  function goto(id){
+  // opts.force: pula a checagem de "alterações não salvas" (já confirmada).
+  function goto(id, opts){
+    if (!(opts && opts.force) && typeof window.__canLeaveScreen === 'function' && window.__canLeaveScreen(id) === false) return;
     for (var i = 0; i < screens.length; i++){
       screens[i].classList.toggle('active', screens[i].id === 'screen-' + id);
     }
@@ -3982,6 +3984,58 @@ hydrateIcons(document);
   document.getElementById('flow-deactivate-btn').addEventListener('click', async function () {
     try { await flowSave({ activate: false }); } catch (err) { ctAlert('Não foi possível desativar: ' + err.message); }
   });
+  // ── Segurança: sair do editor com alterações não salvas ──
+  function flowEditorOpenWithChanges() {
+    var editor = document.getElementById('screen-automacao-flow');
+    return Boolean(editor && editor.classList.contains('active') && flowCanvas.flow && flowCanvas.dirty);
+  }
+  // Pergunta antes de sair. Resolve true se pode sair (salvou ou descartou).
+  async function confirmLeaveFlow() {
+    var choice = await ctChoice({
+      title: 'Alterações não salvas',
+      message: 'Você alterou a automação “' + flowCanvas.flow.name + '” e ainda não salvou. Se sair agora, o que foi feito será perdido.',
+      tone: 'warning',
+      cancelValue: 'stay',
+      actions: [
+        { value: 'stay', label: 'Continuar editando', variant: 'secondary' },
+        { value: 'discard', label: 'Sair sem salvar', variant: 'danger' },
+        { value: 'save', label: 'Salvar e sair', variant: 'primary' },
+      ],
+    });
+    if (choice === 'save') {
+      try {
+        await flowSave();
+        return true;
+      } catch (err) {
+        ctAlert('Não foi possível salvar: ' + err.message + '. Continue no editor e tente de novo.');
+        return false;
+      }
+    }
+    if (choice === 'discard') {
+      flowCanvas.dirty = false;
+      flowUpdateDirtyUI();
+      return true;
+    }
+    return false;
+  }
+  // Chamado pelo goto() em toda troca de tela (menu, voltar, sino, links).
+  window.__canLeaveScreen = function (targetId) {
+    if (targetId === 'automacao-flow' || !flowEditorOpenWithChanges()) return true;
+    confirmLeaveFlow().then(function (ok) { if (ok) window.__goto(targetId, { force: true }); });
+    return false;
+  };
+  window.__beforeLogout = async function () {
+    if (!flowEditorOpenWithChanges()) return true;
+    return confirmLeaveFlow();
+  };
+  // Fechar/recarregar a aba ou ir pra outra página (Usuários, Sair): aviso
+  // padrão do navegador (o texto é dele, não dá pra personalizar).
+  window.addEventListener('beforeunload', function (e) {
+    if (!flowEditorOpenWithChanges()) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
+
   document.getElementById('flow-discard-btn').addEventListener('click', async function () {
     if (!flowCanvas.dirty || await ctConfirm({ title: 'Descartar alterações?', message: 'As mudanças não salvas deste fluxo serão perdidas.', confirmLabel: 'Descartar' })) {
       var fresh = await api('/automation-flows/' + flowCanvas.flow.id);

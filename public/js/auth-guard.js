@@ -31,6 +31,8 @@
   const logoutBtn = document.getElementById('ds-logout-btn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
+      // Editor de automação com alterações não salvas: pergunta antes de encerrar a sessão.
+      if (typeof window.__beforeLogout === 'function' && !(await window.__beforeLogout())) return;
       await fetch('/api/auth/logout', { method: 'POST' });
       window.location.href = '/login.html';
     });

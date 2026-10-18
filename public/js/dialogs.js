@@ -59,6 +59,9 @@
     '.cd-btn-primary:hover:not(:disabled){background:#2B2D33;}',
     '.cd-btn-secondary{background:#FFFFFF;border-color:#E3E3DC;color:#111214;}',
     '.cd-btn-secondary:hover{background:#F4F4F0;}',
+    '.cd-btn-danger{background:#FFFFFF;border-color:#F3B6AE;color:#B4381A;}',
+    '.cd-btn-danger:hover{background:#FDE8E3;}',
+    '.cd-tile.warning{background:#FFF4DC;color:#7A4E00;}',
   ].join('\n');
 
   var ICONS = {
@@ -267,6 +270,47 @@
           dlg.addEventListener('cancel', function (e) { e.preventDefault(); finish(); });
           dlg.addEventListener('click', function (e) { if (e.target === dlg) finish(); });
           setTimeout(function () { dlg.querySelector('[data-cd-ok]').focus(); }, 30);
+        }
+      );
+    });
+  };
+
+  // Pergunta com várias saídas (ex: "Salvar e sair" / "Sair sem salvar" /
+  // "Continuar editando"). Resolve com o `value` do botão clicado, ou
+  // `cancelValue` se fechar (Esc, clique fora).
+  //   ctChoice({ title, message, tone, actions: [{ value, label, variant: primary|secondary|danger }], cancelValue })
+  window.ctChoice = function (opts) {
+    opts = opts || {};
+    var tone = opts.tone || 'info';
+    var icon = opts.icon || (tone === 'error' || tone === 'warning' ? 'alert' : 'info');
+    var titleId = 'cd-t-' + (++seq);
+    var actions = opts.actions || [];
+    return new Promise(function (resolve) {
+      openDialog(
+        '<form method="dialog" aria-labelledby="' + titleId + '">' +
+          '<div class="cd-head" style="padding-bottom:0;">' +
+            '<span class="cd-tile ' + (tone === 'warning' ? 'warning' : tone) + '" aria-hidden="true">' + svg(icon, 19) + '</span>' +
+            '<div style="flex:1;min-width:0;"><h2 class="cd-title" id="' + titleId + '">' + esc(opts.title || '') + '</h2>' +
+              (opts.message ? '<p class="cd-desc">' + esc(opts.message) + '</p>' : '') + '</div>' +
+          '</div>' +
+          '<div class="cd-foot" style="flex-wrap:wrap;">' + actions.map(function (a, i) {
+            var cls = a.variant === 'primary' ? 'cd-btn-primary' : a.variant === 'danger' ? 'cd-btn-danger' : 'cd-btn-secondary';
+            return '<button type="button" class="cd-btn ' + cls + '" data-cd-choice="' + i + '">' + (a.variant === 'primary' ? svg('check', 16) : '') + esc(a.label) + '</button>';
+          }).join('') + '</div>' +
+        '</form>',
+        function (dlg, cleanup) {
+          dlg.style.width = 'min(' + (opts.width || 560) + 'px, calc(100vw - 32px))';
+          var done = false;
+          function finish(v) { if (done) return; done = true; cleanup(); resolve(v); }
+          dlg.querySelectorAll('[data-cd-choice]').forEach(function (b) {
+            b.addEventListener('click', function () { finish(actions[parseInt(b.getAttribute('data-cd-choice'), 10)].value); });
+          });
+          dlg.addEventListener('cancel', function (e) { e.preventDefault(); finish(opts.cancelValue); });
+          dlg.addEventListener('click', function (e) { if (e.target === dlg) finish(opts.cancelValue); });
+          setTimeout(function () {
+            var primary = dlg.querySelector('.cd-btn-primary') || dlg.querySelector('[data-cd-choice]');
+            if (primary) primary.focus();
+          }, 30);
         }
       );
     });
