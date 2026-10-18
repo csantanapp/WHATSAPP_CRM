@@ -1,4 +1,5 @@
 import { addInterest, listInterests, deleteInterest, listInterestProducts } from '../repositories/contactInterests.js';
+import { listNotifications, markNotificationRead, markAllNotificationsRead, markConversationNotificationsRead } from '../repositories/notifications.js';
 import { Router } from 'express';
 import { query } from '../db/pool.js';
 import {
@@ -161,6 +162,26 @@ apiRouter.post('/contacts/:id/tags', asyncHandler(async (req, res) => {
       console.error('Falha no gatilho tag_added:', err.message);
     });
   }
+}));
+
+apiRouter.get('/notifications', asyncHandler(async (req, res) => {
+  res.json(await listNotifications(req.tenantId, req.user.id));
+}));
+
+apiRouter.post('/notifications/read-all', asyncHandler(async (req, res) => {
+  await markAllNotificationsRead(req.tenantId, req.user.id);
+  res.status(204).end();
+}));
+
+apiRouter.post('/notifications/:id/read', asyncHandler(async (req, res) => {
+  const updated = await markNotificationRead(req.tenantId, req.user.id, req.params.id);
+  if (!updated) return res.status(404).json({ error: 'Notificação não encontrada' });
+  res.status(204).end();
+}));
+
+apiRouter.post('/conversations/:id/notifications/read', asyncHandler(async (req, res) => {
+  await markConversationNotificationsRead(req.tenantId, req.user.id, req.params.id);
+  res.status(204).end();
 }));
 
 apiRouter.get('/contacts/:id/interests', asyncHandler(async (req, res) => {
@@ -429,7 +450,7 @@ apiRouter.post('/conversations/:id/send-template', asyncHandler(async (req, res)
 
 apiRouter.patch('/conversations/:id/assign', asyncHandler(async (req, res) => {
   const userId = req.body.user_id ?? req.user.id; // sem user_id = "assumir pra mim"
-  const updated = await assignConversation(req.params.id, userId);
+  const updated = await assignConversation(req.params.id, userId, { assignedBy: req.user.id });
   if (!updated) return res.status(404).json({ error: 'Conversa não encontrada' });
   broadcast({ type: 'conversation:assigned', conversation: updated });
   res.json(updated);

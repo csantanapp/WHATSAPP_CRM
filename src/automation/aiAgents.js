@@ -10,6 +10,7 @@ import { sendText } from './formQuestion.js';
 import { buildAgentSystemPrompt, parseAgentReply, isHumanRequest, DEFAULT_HANDOFF_MESSAGE } from './agentPrompt.js';
 import { broadcast } from '../realtime.js';
 import { logger } from '../logger.js';
+import { notify } from '../repositories/notifications.js';
 
 // Dispara no máximo 1 Agente de IA por mensagem recebida — o primeiro, em
 // ordem de prioridade, cujo gatilho (palavra-chave/horário) casar com a
@@ -206,6 +207,14 @@ async function handoffToHuman({ tenantId, agent, conversation, contact, reason }
     description: reason,
   });
   await setConversationPriority(conversation.id, true);
+  // Avisa o responsável pela conversa; sem responsável, avisa todo mundo.
+  const owner = (await query('SELECT assigned_user_id FROM conversations WHERE id = $1', [conversation.id])).rows[0]?.assigned_user_id;
+  await notify({
+    to: owner ? [owner] : 'all', type: 'ai_handoff',
+    title: (contact.name || contact.phone_display || 'Um lead') + ' quer falar com uma pessoa',
+    body: reason + ' · agente ' + agent.name,
+    conversationId: conversation.id, contactId: contact.id,
+  });
   await logActivity({ contactId: contact.id, conversationId: conversation.id, type: 'ai_handoff', description: `IA passou a conversa para um humano: ${reason}` });
   await logAgentRun(tenantId, agent.id, conversation.id, 'handoff');
 }

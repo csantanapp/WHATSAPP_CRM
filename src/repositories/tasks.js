@@ -1,4 +1,5 @@
 import { query } from '../db/pool.js';
+import { notify } from './notifications.js';
 import { getDefaultTenantId } from '../tenant.js';
 
 export async function createTask({ contactId, conversationId, opportunityId, assignedUserId, title, description, dueAt, createdBy }) {
@@ -8,7 +9,18 @@ export async function createTask({ contactId, conversationId, opportunityId, ass
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
     [tenantId, contactId || null, conversationId || null, opportunityId || null, assignedUserId || null, title, description || null, dueAt || null, createdBy || null]
   );
-  return result.rows[0];
+  const task = result.rows[0];
+  // Lembrete criado pra outra pessoa (ou por automação) avisa o responsável.
+  if (assignedUserId && String(assignedUserId) !== String(createdBy)) {
+    const due = dueAt ? new Date(dueAt).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : null;
+    await notify({
+      to: [assignedUserId], type: 'task',
+      title: 'Novo lembrete: ' + title,
+      body: due ? 'Para ' + due : (description || null),
+      conversationId: conversationId || null, contactId: contactId || null,
+    });
+  }
+  return task;
 }
 
 // \"Minhas tarefas\": hoje, atrasadas e próximas, pro usuário logado.

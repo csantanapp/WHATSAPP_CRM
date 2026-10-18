@@ -2,6 +2,7 @@ import { query } from '../db/pool.js';
 import { logActivity } from './activityLog.js';
 import { getDefaultTenantId } from '../tenant.js';
 import { reportStageChange } from '../services/metaConversions.js';
+import { notify } from './notifications.js';
 
 // Apesar do nome (mantido por compatibilidade com os imports existentes),
 // retorna a conversa mais recente do contato INDEPENDENTE do status — uma
@@ -24,6 +25,15 @@ export async function createConversation(contactId, { funnelId, funnelStageId } 
     [tenantId, contactId, funnelId || null, funnelStageId || null]
   );
   const conversation = result.rows[0];
+
+  const contactRow = await query('SELECT name, phone_display, channel FROM contacts WHERE id = $1', [contactId]);
+  const ct = contactRow.rows[0] || {};
+  await notify({
+    type: 'new_lead',
+    title: 'Novo lead: ' + (ct.name || ct.phone_display || 'contato sem nome'),
+    body: ct.channel === 'instagram' ? 'Chegou pelo Instagram' : 'Chegou pelo WhatsApp',
+    conversationId: conversation.id, contactId,
+  });
 
   if (funnelId) {
     const funnelResult = await query('SELECT name FROM funnels WHERE id = $1', [funnelId]);
@@ -69,12 +79,28 @@ export async function markFirstResponseIfNeeded(conversationId) {
   );
 }
 
-export async function assignConversation(conversationId, userId) {
+// `assignedBy`: quem atribuiu (null = automação). Avisa o novo responsável,
+// a menos que ele mesmo tenha assumido.
+export async function assignConversation(conversationId, userId, { assignedBy = null } = {}) {
+  const before = await query('SELECT assigned_user_id FROM conversations WHERE id = $1', [conversationId]);
   const result = await query(
     'UPDATE conversations SET assigned_user_id = $2, updated_at = now() WHERE id = $1 RETURNING *',
     [conversationId, userId]
   );
-  return result.rows[0];
+  const conv = result.rows[0];
+  const changed = conv && userId && String(before.rows[0]?.assigned_user_id) !== String(userId);
+  if (changed && String(assignedBy) !== String(userId)) {
+    const ct = (await query('SELECT name, phone_display FROM contacts WHERE id = $1', [conv.contact_id])).rows[0] || {};
+    let by = 'uma automação';
+    if (assignedBy) by = (await query('SELECT name FROM users WHERE id = $1', [assignedBy])).rows[0]?.name || 'um colega';
+    await notify({
+      to: [userId], type: 'assigned',
+      title: 'Conversa atribuída a você: ' + (ct.name || ct.phone_display || 'contato'),
+      body: 'Atribuída por ' + by,
+      conversationId: conv.id, contactId: conv.contact_id,
+    });
+  }
+  return conv;
 }
 
 export async function unassignConversation(conversationId) {
