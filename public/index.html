@@ -166,6 +166,11 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 .kb-card{display:block;background:#FFFFFF;border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-decoration:none;color:inherit;transition:transform .15s ease,box-shadow .15s ease;}
 .kb-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-raised);}
 .ct-tag{display:inline-flex;align-items:center;font-size:11px;font-weight:500;background:var(--surface-muted);color:var(--text-2);border-radius:999px;padding:2px 8px;}
+.ct-select{height:38px;border:1px solid var(--border-input);border-radius:10px;background-color:#FFFFFF;color:var(--ink);font-size:13px;padding:0 10px;cursor:pointer;}
+.ct-btn:disabled{opacity:.5;cursor:default;}
+.ct-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+.ct-icon-btn.danger{color:#B4381A;}
+.ct-icon-btn.danger:hover{background:var(--danger-soft);}
 .ct-tile{display:inline-flex;align-items:center;justify-content:center;border-radius:7px;flex-shrink:0;}
 
 :root{
@@ -578,72 +583,61 @@ button{font-family:var(--font-body);}
 
         <section class="screen" id="screen-contatos">
 
-          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;overflow-y:auto;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-              <div>
-                <div style="font-family:var(--font-display);font-weight:600;font-size:32px;letter-spacing:-0.025em;color:#111214;">Contatos</div>
-                <div id="contatos-summary" style="font-size:13px;color:#5B5D63;margin-top:3px;">Customer 360 — busque, filtre e gerencie contatos.</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <button id="contatos-duplicados-btn" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#3e4046;border:1px solid #E3E3DC;border-radius:10px;padding:10px 14px;font-weight:600;font-size:13px;cursor:pointer;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5b5d63" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M4 16V5a2 2 0 0 1 2-2h11"></path></svg>
-                  Duplicados
-                </button>
-                <button id="contatos-importar-btn" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#3e4046;border:1px solid #E3E3DC;border-radius:10px;padding:10px 14px;font-weight:600;font-size:13px;cursor:pointer;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5b5d63" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"></path><path d="m7 10 5 5 5-5"></path><path d="M4 19h16"></path></svg>
-                  Importar CSV
-                </button>
-                <input type="file" id="contatos-csv-input" accept=".csv" style="display:none;"/>
-                <button id="contatos-novo-btn" style="display:flex;align-items:center;gap:6px;background:#111214;color:#FFFFFF;border:none;border-radius:10px;padding:10px 16px;font-weight:600;font-size:13px;cursor:pointer;">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
-                  Novo contato
-                </button>
-              </div>
-            </div>
+          <div class="ct-page">
+            <div class="ct-page-inner">
+              <header class="ct-page-header">
+                <div>
+                  <h1 class="ct-h1">Contatos</h1>
+                  <p id="contatos-summary" style="font-size:14px;color:var(--text-muted);margin:6px 0 0;">Carregando…</p>
+                </div>
+                <div class="ct-page-actions">
+                  <button type="button" id="contatos-duplicados-btn" class="ct-btn ct-btn-secondary"><span data-icon="copy"></span>Duplicados</button>
+                  <button type="button" id="contatos-importar-btn" class="ct-btn ct-btn-secondary"><span data-icon="upload"></span>Importar CSV</button>
+                  <input type="file" id="contatos-csv-input" accept=".csv" style="display:none;"/>
+                  <button type="button" id="contatos-novo-btn" class="ct-btn ct-btn-primary"><span data-icon="plus"></span>Novo contato</button>
+                </div>
+              </header>
 
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-              <div style="display:flex;align-items:center;gap:8px;background:#FFFFFF;border:1px solid #E3E3DC;border-radius:10px;padding:9px 14px;width:300px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E7076" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
-                <input id="contatos-search" name="contatos-search-q" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" placeholder="Buscar por nome, email ou telefone" style="border:none;outline:none;font-size:13px;color:#111214;flex-grow:1;font-family:var(--font-body);"/>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+                <label class="ib-search" style="flex:1 1 260px;max-width:380px;background:#FFFFFF;border:1px solid var(--border-input);height:38px;">
+                  <span data-icon="search"></span>
+                  <input id="contatos-search" name="contatos-search-q" type="search" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-bwignore="true" placeholder="Buscar por nome, e-mail ou telefone…" aria-label="Buscar contatos"/>
+                </label>
+                <select id="contatos-tag-filter" class="ct-select" aria-label="Filtrar por tag"><option value="">Tag: todas</option></select>
+                <select id="contatos-origem-filter" class="ct-select" aria-label="Filtrar por origem"><option value="">Todas as origens</option></select>
+                <select id="contatos-page-size" class="ct-select" aria-label="Itens por página" style="margin-left:auto;">
+                  <option value="25">25 por página</option>
+                  <option value="10">10 por página</option>
+                  <option value="50">50 por página</option>
+                  <option value="100">100 por página</option>
+                </select>
               </div>
-              <select id="contatos-tag-filter" style="background:#FFFFFF;border:1px solid #E3E3DC;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;color:#111214;font-family:var(--font-body);cursor:pointer;">
-                <option value="">Tag: todas</option>
-              </select>
-              <select id="contatos-origem-filter" style="background:#FFFFFF;border:1px solid #E3E3DC;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;color:#111214;font-family:var(--font-body);cursor:pointer;">
-                <option value="">Todas as origens</option>
-              </select>
-              <select id="contatos-page-size" style="background:#FFFFFF;border:1px solid #E3E3DC;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;color:#111214;font-family:var(--font-body);cursor:pointer;margin-left:auto;">
-                <option value="25">25 por página</option>
-                <option value="10">10 por página</option>
-                <option value="50">50 por página</option>
-                <option value="100">100 por página</option>
-              </select>
-            </div>
 
-            <div style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:12px;overflow:hidden;">
-              <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                <thead>
-                  <tr style="background:#FBFBF8;border-bottom:1px solid #E6E6E0;">
-                    <th data-sort="name" style="text-align:left;padding:11px 16px;font-size:11px;font-weight:600;color:#5B5D63;text-transform:uppercase;cursor:pointer;white-space:nowrap;">Nome <span data-sort-arrow="name"></span></th>
-                    <th data-sort="email" style="text-align:left;padding:11px 16px;font-size:11px;font-weight:600;color:#5B5D63;text-transform:uppercase;cursor:pointer;white-space:nowrap;">Email <span data-sort-arrow="email"></span></th>
-                    <th data-sort="phone_display" style="text-align:left;padding:11px 16px;font-size:11px;font-weight:600;color:#5B5D63;text-transform:uppercase;cursor:pointer;white-space:nowrap;">Telefone <span data-sort-arrow="phone_display"></span></th>
-                    <th style="text-align:left;padding:11px 16px;font-size:11px;font-weight:600;color:#5B5D63;text-transform:uppercase;white-space:nowrap;">Tags</th>
-                    <th data-sort="created_at" style="text-align:left;padding:11px 16px;font-size:11px;font-weight:600;color:#5B5D63;text-transform:uppercase;cursor:pointer;white-space:nowrap;">Última atividade <span data-sort-arrow="created_at"></span></th>
-                    <th style="text-align:left;padding:11px 16px;font-size:11px;font-weight:600;color:#5B5D63;text-transform:uppercase;white-space:nowrap;">Status</th>
-                    <th style="padding:11px 16px;"></th>
-                  </tr>
-                </thead>
-                <tbody id="contatos-table-body">
-                  <tr><td colspan="7" style="padding:20px 16px;font-size:12.5px;color:#6E7076;">Carregando contatos...</td></tr>
-                </tbody>
-              </table>
-            </div>
+              <div class="ct-card ct-table-card">
+                <table class="ct-table">
+                  <thead>
+                    <tr>
+                      <th data-sort="name" style="cursor:pointer;">Nome <span data-sort-arrow="name"></span></th>
+                      <th data-sort="email" style="cursor:pointer;">E-mail <span data-sort-arrow="email"></span></th>
+                      <th data-sort="phone_display" style="cursor:pointer;">Telefone <span data-sort-arrow="phone_display"></span></th>
+                      <th>Tags</th>
+                      <th data-sort="created_at" style="cursor:pointer;">Última atividade <span data-sort-arrow="created_at"></span></th>
+                      <th>Status</th>
+                      <th class="num"><span class="ct-sr">Ações</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="contatos-table-body">
+                    <tr><td colspan="7" style="color:var(--text-subtle);">Carregando contatos…</td></tr>
+                  </tbody>
+                </table>
+              </div>
 
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
-              <div id="contatos-page-info" style="font-size:12px;color:#5B5D63;"></div>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <button id="contatos-prev-btn" style="background:#FFFFFF;border:1px solid #E3E3DC;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:#3e4046;cursor:pointer;">← Anterior</button>
-                <button id="contatos-next-btn" style="background:#FFFFFF;border:1px solid #E3E3DC;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:#3e4046;cursor:pointer;">Próxima →</button>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px;">
+                <div id="contatos-page-info" style="font-size:13px;color:var(--text-muted);font-variant-numeric:tabular-nums;"></div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <button type="button" id="contatos-prev-btn" class="ct-btn ct-btn-secondary" style="height:34px;">← Anterior</button>
+                  <button type="button" id="contatos-next-btn" class="ct-btn ct-btn-secondary" style="height:34px;">Próxima →</button>
+                </div>
               </div>
             </div>
           </div>
@@ -1097,6 +1091,14 @@ button{font-family:var(--font-body);}
   </div>
 </div>
 
+<dialog id="ct-confirm-dialog" class="ct-dialog" aria-labelledby="ct-confirm-title" aria-describedby="ct-confirm-message">
+  <h2 class="ct-h2" id="ct-confirm-title">Tem certeza?</h2>
+  <p id="ct-confirm-message" style="font-size:14px;color:var(--text-muted);line-height:1.5;margin:8px 0 20px;"></p>
+  <div style="display:flex;justify-content:flex-end;gap:8px;">
+    <button type="button" class="ct-btn ct-btn-secondary" id="ct-confirm-cancel" onclick="this.closest('dialog').close()">Cancelar</button>
+    <button type="button" class="ct-btn" id="ct-confirm-ok" style="background:var(--danger);color:#FFFFFF;">Excluir</button>
+  </div>
+</dialog>
 <script src="/js/icons.js"></script>
 <script>
 // Ícones declarados no HTML como <span data-icon="nome" data-icon-size="16">.
@@ -1259,6 +1261,30 @@ hydrateIcons(document);
       el.textContent = avatarInitials || initials(name);
     }
   }
+
+  // Confirmação de ação destrutiva em modal (LAYOUT-SPEC §5).
+  function ctConfirm(opts) {
+    return new Promise(function (resolve) {
+      var dlg = document.getElementById('ct-confirm-dialog');
+      document.getElementById('ct-confirm-title').textContent = opts.title || 'Tem certeza?';
+      document.getElementById('ct-confirm-message').textContent = opts.message || '';
+      var ok = document.getElementById('ct-confirm-ok');
+      ok.innerHTML = ICON('trash-2', 15) + escapeHtml(opts.confirmLabel || 'Excluir');
+      function done(value) {
+        ok.removeEventListener('click', onOk);
+        dlg.removeEventListener('close', onClose);
+        if (dlg.open) dlg.close();
+        resolve(value);
+      }
+      function onOk() { done(true); }
+      function onClose() { done(false); }
+      ok.addEventListener('click', onOk);
+      dlg.addEventListener('close', onClose);
+      dlg.showModal();
+      document.getElementById('ct-confirm-cancel').focus();
+    });
+  }
+  window.ctConfirm = ctConfirm;
 
   async function api(path, options) {
     var res = await fetch('/api' + path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, options));
@@ -3835,58 +3861,64 @@ hydrateIcons(document);
     var startIdx = (state.contatosPage - 1) * pageSize;
     var pageItems = filtered.slice(startIdx, startIdx + pageSize);
 
-    document.getElementById('contatos-page-info').textContent =
-      filtered.length === 0 ? 'Nenhum contato' :
-      ('Mostrando ' + (startIdx + 1) + '–' + Math.min(startIdx + pageSize, filtered.length) + ' de ' + filtered.length + ' · página ' + state.contatosPage + ' de ' + totalPages);
+    document.getElementById('contatos-page-info').textContent = 'Página ' + state.contatosPage + ' de ' + totalPages;
+    document.getElementById('contatos-summary').textContent = filtered.length + (filtered.length === 1 ? ' contato encontrado' : ' contatos encontrados');
     document.getElementById('contatos-prev-btn').disabled = state.contatosPage <= 1;
     document.getElementById('contatos-next-btn').disabled = state.contatosPage >= totalPages;
 
     tbody.innerHTML = '';
     if (!pageItems.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="padding:20px 16px;font-size:12.5px;color:#6E7076;">Nenhum contato encontrado.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7"><div class="ct-empty">Nenhum contato encontrado. Ajuste a busca ou os filtros.</div></td></tr>';
       return;
     }
 
+    var dateFmt = new Intl.DateTimeFormat('pt-BR');
     pageItems.forEach(function (c) {
       var tr = document.createElement('tr');
-      tr.style.cssText = 'border-bottom:1px solid #EEEEE8;cursor:pointer;';
-      tr.addEventListener('mouseenter', function () { tr.style.background = '#FBFBF8'; });
-      tr.addEventListener('mouseleave', function () { tr.style.background = ''; });
-
-      var tagsHtml = (c.tags || []).slice(0, 2).map(function (tag) {
-        return '<span style="display:inline-block;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px;background:#F4F4F0;color:#5b5d63;margin-right:3px;">' + escapeHtml(tag) + '</span>';
-      }).join('') + (c.tags && c.tags.length > 2 ? '<span style="font-size:10.5px;color:#6E7076;">+' + (c.tags.length - 2) + '</span>' : '');
-
+      tr.style.cursor = 'pointer';
+      var isIg = c.channel === 'instagram';
+      var label = c.name || c.phone_display || 'contato';
+      var tagsHtml = (c.tags || []).slice(0, 2).map(function (tag) { return '<span class="ct-tag">' + escapeHtml(tag) + '</span>'; }).join(' ') +
+        (c.tags && c.tags.length > 2 ? ' <span style="font-size:12px;color:var(--text-subtle);">+' + (c.tags.length - 2) + '</span>' : '');
       tr.innerHTML =
-        '<td style="padding:11px 16px;"><div style="display:flex;align-items:center;gap:8px;">' + avatarHtml(c.avatar_url, c.avatar_initials, c.name, 26, 10.5, null) + '<span style="font-weight:600;color:#111214;">' + escapeHtml(c.name || 'Sem nome') + '</span></div></td>' +
-        '<td style="padding:11px 16px;color:#5b5d63;">' + (c.email ? escapeHtml(c.email) : '<span style="color:#A9AAA4;">—</span>') + '</td>' +
-        '<td style="padding:11px 16px;color:#5b5d63;">' + escapeHtml(c.phone_display || '') + '</td>' +
-        '<td style="padding:11px 16px;">' + (tagsHtml || '<span style="color:#A9AAA4;">—</span>') + '</td>' +
-        '<td style="padding:11px 16px;color:#5B5D63;white-space:nowrap;">' + new Date(c.created_at).toLocaleDateString('pt-BR') + '</td>' +
-        '<td style="padding:11px 16px;"><span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:#E8F3EC;color:#1A7F4D;">Ativo</span></td>' +
-        '<td style="padding:11px 16px;text-align:right;white-space:nowrap;">' +
-          '<button data-edit-contact="' + c.id + '" title="Editar" style="background:none;border:none;cursor:pointer;color:#5B5D63;padding:4px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg></button>' +
-          '<button data-delete-contact="' + c.id + '" data-contact-name="' + escapeHtml(c.name || c.phone_display || '') + '" title="Excluir" style="background:none;border:none;cursor:pointer;color:#C3302A;padding:4px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg></button>' +
+        '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml(c.avatar_url, c.avatar_initials, c.name, 32, 12) + '<span style="font-weight:500;">' + escapeHtml(c.name || 'Sem nome') + '</span></div></td>' +
+        '<td style="color:var(--text-muted);">' + (c.email ? escapeHtml(c.email) : '<span style="color:var(--text-subtle);">—</span>') + '</td>' +
+        '<td style="white-space:nowrap;font-variant-numeric:tabular-nums;"><span style="display:inline-flex;align-items:center;gap:6px;"><span style="color:' + (isIg ? 'var(--instagram)' : 'var(--whatsapp)') + ';display:inline-flex;">' + ICON(isIg ? 'instagram' : 'message-circle', 14) + '</span>' + escapeHtml(c.phone_display || '') + '</span></td>' +
+        '<td>' + (tagsHtml || '<span style="color:var(--text-subtle);">—</span>') + '</td>' +
+        '<td style="color:var(--text-muted);white-space:nowrap;font-variant-numeric:tabular-nums;">' + dateFmt.format(new Date(c.updated_at || c.created_at)) + '</td>' +
+        '<td><span class="ct-pill ct-pill-success"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);"></span>Ativo</span></td>' +
+        '<td class="num" style="white-space:nowrap;">' +
+          '<button type="button" class="ct-icon-btn" data-open-contact="' + c.id + '" aria-label="Abrir conversa com ' + escapeHtml(label) + '" title="Abrir conversa">' + ICON('message-square-text', 16) + '</button>' +
+          '<button type="button" class="ct-icon-btn danger" data-delete-contact="' + c.id + '" data-contact-name="' + escapeHtml(label) + '" aria-label="Excluir ' + escapeHtml(label) + '" title="Excluir">' + ICON('trash-2', 16) + '</button>' +
         '</td>';
 
       tr.addEventListener('click', function (e) {
-        if (e.target.closest('[data-edit-contact]') || e.target.closest('[data-delete-contact]')) return;
+        if (e.target.closest('button')) return;
         openLeadDetail(c.id);
       });
       tbody.appendChild(tr);
     });
 
-    tbody.querySelectorAll('[data-edit-contact]').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
+    tbody.querySelectorAll('[data-open-contact]').forEach(function (btn) {
+      btn.addEventListener('click', async function (e) {
         e.stopPropagation();
-        openLeadDetail(btn.getAttribute('data-edit-contact'));
+        try {
+          var detail = await api('/contacts/' + btn.getAttribute('data-open-contact'));
+          var conv = (detail.conversations || [])[0];
+          if (!conv) { alert('Esse contato ainda não tem conversa — ela começa quando ele mandar a primeira mensagem.'); return; }
+          openConversation(conv.id);
+          window.__goto && window.__goto('inbox');
+        } catch (err) {
+          alert('Não foi possível abrir a conversa: ' + err.message);
+        }
       });
     });
     tbody.querySelectorAll('[data-delete-contact]').forEach(function (btn) {
       btn.addEventListener('click', async function (e) {
         e.stopPropagation();
         var name = btn.getAttribute('data-contact-name') || 'este contato';
-        if (!confirm('Excluir "' + name + '"? Isso apaga também as conversas e o histórico dele. Essa ação não pode ser desfeita.')) return;
+        var ok = await ctConfirm({ title: 'Excluir “' + name + '”?', message: 'Isso apaga também as conversas e o histórico dele. Essa ação não pode ser desfeita.', confirmLabel: 'Excluir contato' });
+        if (!ok) return;
         try {
           await api('/contacts/' + btn.getAttribute('data-delete-contact'), { method: 'DELETE' });
           loadContacts(document.getElementById('contatos-search').value.trim());
