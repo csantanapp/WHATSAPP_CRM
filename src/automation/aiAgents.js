@@ -3,7 +3,7 @@ import { getDefaultTenantId } from '../tenant.js';
 import { insertMessage } from '../repositories/messages.js';
 import { createTask } from '../repositories/tasks.js';
 import { setConversationPriority } from '../repositories/conversations.js';
-import { listActiveAgentsForDispatch, logAgentRun } from '../repositories/aiAgents.js';
+import { listActiveAgentsForDispatch, logAgentRun, getAgent } from '../repositories/aiAgents.js';
 import { logActivity } from '../repositories/activityLog.js';
 import { replyAsAgent } from '../services/ai/AIService.js';
 import { sendText } from './formQuestion.js';
@@ -29,14 +29,17 @@ export async function runAiAgentsForInboundMessage({ conversation, contact, mess
   if (await isAiPaused(conversation.id)) return;
 
   const tenantId = await getDefaultTenantId();
-  const agents = await listActiveAgentsForDispatch(tenantId, conversation.funnel_id);
-  if (!agents.length) return;
-
   const body = message.body || '';
-  const agent = agents.find((a) =>
-    (!a.keyword_regex || matchesKeyword(a.keyword_regex, body)) &&
-    (!a.business_hours_enabled || withinBusinessHours(a))
-  );
+  // Agente conectado por uma automação ("Conectar Agente IA") responde tudo
+  // nesta conversa, sem olhar palavra-chave/horário/funil dele.
+  let agent = await getConnectedAgent(tenantId, conversation.id);
+  if (!agent) {
+    const agents = await listActiveAgentsForDispatch(tenantId, conversation.funnel_id);
+    agent = agents.find((a) =>
+      (!a.keyword_regex || matchesKeyword(a.keyword_regex, body)) &&
+      (!a.business_hours_enabled || withinBusinessHours(a))
+    );
+  }
   if (!agent) return;
 
   // Pedido de humano detectado antes da IA (palavras do agente + padrão de reserva).
@@ -67,6 +70,37 @@ function cancelPendingReply(conversationId) {
   const timer = pendingReplies.get(key);
   if (timer) clearTimeout(timer);
   pendingReplies.delete(key);
+}
+
+async function getConnectedAgent(tenantId, conversationId) {
+  const result = await query('SELECT ai_agent_id FROM conversations WHERE id = $1', [conversationId]);
+  const agentId = result.rows[0]?.ai_agent_id;
+  if (!agentId) return null;
+  const agent = await getAgent(tenantId, agentId);
+  return agent?.is_active ? agent : null; // agente pausado: volta à escolha normal
+}
+
+// Bloco "Conectar Agente IA" de uma automação: fixa o agente na conversa,
+// reativa a IA nela (o criador do fluxo pediu a IA explicitamente) e, com
+// `replyNow`, já responde a conversa até aqui. Retorna false se o agente não
+// existe ou está pausado.
+export async function connectAgentToConversation({ conversation, contact, agentId, replyNow: answerNow = true }) {
+  const tenantId = await getDefaultTenantId();
+  const agent = agentId ? await getAgent(tenantId, agentId) : null;
+  if (!agent || !agent.is_active) {
+    logger.info('automation_connect_agent_unavailable', { conversationId: conversation.id, agentId });
+    return false;
+  }
+  cancelPendingReply(conversation.id);
+  const result = await query(
+    `UPDATE conversations SET ai_agent_id = $2, ai_paused_at = NULL, ai_paused_reason = NULL
+     WHERE id = $1 RETURNING *`,
+    [conversation.id, agent.id]
+  );
+  if (result.rows[0]) broadcast({ type: 'conversation:updated', conversation: result.rows[0] });
+  await logActivity({ contactId: contact.id, conversationId: conversation.id, type: 'ai_connected', description: `Automação conectou o agente de IA "${agent.name}"` });
+  if (answerNow) await replyNow({ tenantId, agent, conversation, contact });
+  return true;
 }
 
 async function isAiPaused(conversationId) {

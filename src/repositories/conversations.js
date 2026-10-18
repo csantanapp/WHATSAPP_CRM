@@ -190,6 +190,7 @@ export async function getConversationDetail(conversationId) {
             ct.channel AS contact_channel, ct.ig_user_id,
             f.id AS funnel_id_full, f.name AS funnel_name, fs.name AS stage_name,
             u.name AS assigned_user_name,
+            (SELECT a.name FROM ai_agents a WHERE a.id = c.ai_agent_id AND a.is_active) AS ai_agent_name,
             (c.last_inbound_at IS NOT NULL AND c.last_inbound_at > now() - interval '${WINDOW_HOURS} hours') AS window_open
      FROM conversations c
      JOIN contacts ct ON ct.id = c.contact_id

@@ -10,6 +10,7 @@ import { logger } from '../logger.js';
 import { classifyForAutomation } from '../services/ai/AIService.js';
 import { sendQuestion, handleQuestionReply, sendText, knownAnswer, nextStepForAnswer } from './formQuestion.js';
 import { renderTemplate } from './variables.js';
+import { connectAgentToConversation } from './aiAgents.js';
 
 async function isFirstMessageOfConversation(conversationId) {
   const result = await query(
@@ -216,6 +217,21 @@ async function executeSteps({ flow, conversation, contact, run, cursor, hops = 0
         await sendQuestion({ flow, conversation, contact, step: current });
         await updateRun(run.id, { currentStepId: current.id, status: 'waiting_reply' });
         return;
+      }
+      case 'start_ai_agent': {
+        // "Conectar Agente IA": a partir daqui um agente de IA atende a
+        // conversa. Nó terminal — o fluxo termina e a IA assume.
+        if (await isOptedOut(contact.id)) {
+          logOutcome = 'skipped';
+          break;
+        }
+        const connected = await connectAgentToConversation({
+          conversation, contact,
+          agentId: current.config?.agent_id,
+          replyNow: current.config?.reply_now !== false,
+        });
+        logOutcome = connected ? 'connected' : 'skipped';
+        break;
       }
       case 'start_flow': {
         // "Conectar Automação": encerra esta run e começa o outro fluxo

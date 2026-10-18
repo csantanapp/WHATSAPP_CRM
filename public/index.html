@@ -442,6 +442,8 @@ button{font-family:var(--font-body);}
                     <span style="font-size:12.5px;font-weight:600;color:#111214;line-height:1.35;">Atendimento só humano<span style="display:block;font-size:11px;font-weight:400;color:#5B5D63;">IA e automações não respondem este contato. As mensagens continuam chegando aqui.</span></span>
                   </label>
 
+                  <div id="painel-agente-conectado" style="display:none;align-items:center;gap:7px;background:#F1EBFF;border:1px solid #DCCFFF;border-radius:10px;padding:9px 12px;font-size:12px;color:#4A2C99;line-height:1.35;"></div>
+
                   <div id="painel-ia-pausada" style="display:none;align-items:center;justify-content:space-between;gap:10px;background:#FFF8EB;border:1px solid #FBE3B2;border-radius:10px;padding:9px 12px;">
                     <span id="painel-ia-pausada-texto" style="font-size:12px;color:var(--warning-ink);line-height:1.35;display:inline-flex;align-items:center;gap:5px;">IA pausada nesta conversa</span>
                     <button id="painel-ia-reativar" style="flex-shrink:0;font-size:11.5px;font-weight:600;color:#111214;background:#FFFFFF;border:1px solid #C8F542;border-radius:7px;padding:5px 9px;cursor:pointer;">Reativar IA</button>
@@ -788,7 +790,7 @@ button{font-family:var(--font-body);}
                     <button type="button" class="flow-palette-btn" data-add-node="wait"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" /> <polyline points="12 6 12 12 16 14" /></svg></span><span>Aguardar</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="condition"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 3h5v5" /> <path d="M8 3H3v5" /> <path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3" /> <path d="m15 9 6-6" /></svg></span><span>Condição</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="repeat"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m17 2 4 4-4 4" /> <path d="M3 11v-1a4 4 0 0 1 4-4h14" /> <path d="m7 22-4-4 4-4" /> <path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg></span><span>Repetir</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="classify_ai"><span class="ct-tile" style="width:26px;height:26px;background:#F1EBFF;color:#4A2C99;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /> <path d="M20 3v4" /> <path d="M22 5h-4" /> <path d="M4 17v2" /> <path d="M5 18H3" /></svg></span><span>Classificar (IA)</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button>
                   </div>
                   <div class="pal-group"><div class="ct-group-label" style="margin:0 4px 6px;">Ações</div>
-                    <button type="button" class="flow-palette-btn" data-add-node="action"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg></span><span>Ação</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="create_task"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.268 21a2 2 0 0 0 3.464 0" /> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></svg></span><span>Lembrete interno</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="move_stage"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16 3 4 4-4 4" /> <path d="M20 7H4" /> <path d="m8 21-4-4 4-4" /> <path d="M4 17h16" /></svg></span><span>Mover lead no funil</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="tag"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" /> <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" /></svg></span><span>Editar tag do lead</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="start_flow"><span class="ct-tile" style="width:26px;height:26px;background:#E5F8EA;color:#13662F;"><span data-icon="workflow" data-icon-size="14"></span></span><span>Conectar Automação</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="end"><span class="ct-tile" style="width:26px;height:26px;background:#EEEEE8;color:#3E4046;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /> <line x1="4" x2="4" y1="22" y2="15" /></svg></span><span>Fim</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button>
+                    <button type="button" class="flow-palette-btn" data-add-node="action"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg></span><span>Ação</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="create_task"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.268 21a2 2 0 0 0 3.464 0" /> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></svg></span><span>Lembrete interno</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="move_stage"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16 3 4 4-4 4" /> <path d="M20 7H4" /> <path d="m8 21-4-4 4-4" /> <path d="M4 17h16" /></svg></span><span>Mover lead no funil</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="tag"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" /> <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" /></svg></span><span>Editar tag do lead</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="start_flow"><span class="ct-tile" style="width:26px;height:26px;background:#E5F8EA;color:#13662F;"><span data-icon="workflow" data-icon-size="14"></span></span><span>Conectar Automação</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="start_ai_agent"><span class="ct-tile" style="width:26px;height:26px;background:#F1EBFF;color:#4A2C99;"><span data-icon="bot" data-icon-size="14"></span></span><span>Conectar Agente IA</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="end"><span class="ct-tile" style="width:26px;height:26px;background:#EEEEE8;color:#3E4046;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /> <line x1="4" x2="4" y1="22" y2="15" /></svg></span><span>Fim</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button>
                   </div>
                 </div>
               </div>
@@ -1604,6 +1606,10 @@ hydrateIcons(document);
     var showIaPausada = Boolean(conv.ai_agents_active && conv.ai_paused_at && !conv.contact_bot_paused);
     iaPausada.style.display = showIaPausada ? 'flex' : 'none';
     if (showIaPausada) document.getElementById('painel-ia-pausada-texto').innerHTML = ICON('bot', 14) + ' IA pausada nesta conversa · ' + escapeHtml(conv.ai_paused_reason || 'pausada');
+    var agenteConectado = document.getElementById('painel-agente-conectado');
+    var showAgente = Boolean(conv.ai_agent_name && !conv.ai_paused_at && !conv.contact_bot_paused);
+    agenteConectado.style.display = showAgente ? 'flex' : 'none';
+    if (showAgente) agenteConectado.innerHTML = ICON('bot', 14) + '<span>Atendida pelo agente <b>' + escapeHtml(conv.ai_agent_name) + '</b> (conectado por uma automação)</span>';
     loadSourceBox(conv.id);
     var camposHtml = customFieldsHtml(conv.contact_custom_fields);
     document.getElementById('painel-campos').innerHTML = camposHtml;
@@ -2295,6 +2301,7 @@ hydrateIcons(document);
     create_task: 'Lembrete interno',
     repeat: 'Repetir',
     start_flow: 'Conectar Automação',
+    start_ai_agent: 'Conectar Agente IA',
     end: 'Fim',
   };
 
@@ -2332,7 +2339,7 @@ hydrateIcons(document);
   var STEP_SHORT = {
     send_message: 'Mensagem', ask_question: 'Pergunta', wait: 'Aguardar', condition: 'Condição', classify_ai: 'Classificar (IA)',
     add_tag: 'Tag', remove_tag: 'Tag', move_stage: 'Mover etapa', assign_user: 'Atribuir', assign_round_robin: 'Distribuir',
-    close_conversation: 'Fechar', create_task: 'Lembrete', repeat: 'Repetir', start_flow: 'Conectar Automação', end: 'Fim',
+    close_conversation: 'Fechar', create_task: 'Lembrete', repeat: 'Repetir', start_flow: 'Conectar Automação', start_ai_agent: 'Agente IA', end: 'Fim',
   };
   function flowChainHtml(flow) {
     var trig = TRIGGER_LABELS[flow.trigger_type] || flow.trigger_type;
@@ -2657,6 +2664,7 @@ hydrateIcons(document);
     create_task: { bg: '#FFE9E1', stroke: '#8A2E12', icon: 'bell', label: 'Lembrete interno' },
     repeat: { bg: '#FFF4DC', stroke: '#7A4E00', icon: 'repeat', label: 'Repetir' },
     start_flow: { bg: '#E5F8EA', stroke: '#13662F', icon: 'workflow', label: 'Conectar Automação' },
+    start_ai_agent: { bg: '#F1EBFF', stroke: '#4A2C99', icon: 'bot', label: 'Conectar Agente IA' },
     end: { bg: '#EEEEE8', stroke: '#3E4046', icon: 'flag', label: 'Fim' },
   };
 
@@ -2687,7 +2695,7 @@ hydrateIcons(document);
   function flowNodeHandles(node) {
     if (node.kind === 'trigger') return ['out'];
     if (node.step_type === 'condition' || node.step_type === 'classify_ai') return ['true', 'false'];
-    if (node.step_type === 'end' || node.step_type === 'start_flow') return []; // terminais
+    if (node.step_type === 'end' || node.step_type === 'start_flow' || node.step_type === 'start_ai_agent') return []; // terminais
     var branches = flowNodeBranchOptions(node);
     if (branches.length) return branches.map(function (_, i) { return 'opt_' + i; }).concat(['out']);
     return ['out'];
@@ -2771,6 +2779,7 @@ hydrateIcons(document);
       case 'create_task': return escapeHtml(c.title || 'Follow-up') + (c.due_in_hours ? ' · em ' + c.due_in_hours + 'h' : '');
       case 'repeat': return 'Volta pra um nó anterior';
       case 'start_flow': return flowTargetLabel(c.flow_id);
+      case 'start_ai_agent': return flowAgentLabel(c.agent_id, c.reply_now !== false);
       case 'end': return escapeHtml(c.label || 'Fim do fluxo');
       default: return '';
     }
@@ -2783,6 +2792,14 @@ hydrateIcons(document);
     if (!target) return '<span style="color:#B4381A;">Automação removida — escolha outra</span>';
     return 'Continua em <b>' + escapeHtml(target.name) + '</b>' +
       (target.is_active ? '' : '<br><span style="color:#7A4E00;">Pausada — o lead não será levado até ela</span>');
+  }
+
+  function flowAgentLabel(agentId, replyNow) {
+    if (!agentId) return '(escolher agente)';
+    var agent = (flowCanvas.allAgents || []).find(function (a) { return String(a.id) === String(agentId); });
+    if (!agent) return '<span style="color:#B4381A;">Agente removido — escolha outro</span>';
+    return '<b>' + escapeHtml(agent.name) + '</b> assume a conversa' + (replyNow ? ' e já responde' : '') +
+      (agent.is_active ? '' : '<br><span style="color:#7A4E00;">Agente pausado — o lead não será atendido por ele</span>');
   }
 
   function flowStageLabel(stageId) {
@@ -3205,6 +3222,7 @@ hydrateIcons(document);
     if (kind === 'create_task') { flowAddNode('create_task', { title: 'Follow-up' }); return; }
     if (kind === 'move_stage') { flowAddNode('move_stage', {}); return; }
     if (kind === 'start_flow') { flowAddNode('start_flow', { flow_id: null }); return; }
+    if (kind === 'start_ai_agent') { flowAddNode('start_ai_agent', { agent_id: null, reply_now: true }); return; }
     if (kind === 'end') { flowAddNode('end', { label: 'Convertido' }); return; }
   });
 
@@ -3450,6 +3468,21 @@ hydrateIcons(document);
           '<div style="font-size:12.5px;color:#5b5d63;line-height:1.5;">Quando o lead chegar aqui, este fluxo termina e ele segue para a automação escolhida, a partir do primeiro passo dela (o gatilho dela é ignorado). Ela precisa estar <b>ativa</b>.</div>' +
           '<div style="font-size:12.5px;color:#5b5d63;line-height:1.5;">Dica: para uma automação que só deve rodar quando for chamada por outra, use o gatilho “Disparo manual”.</div>';
       }
+    } else if (node.step_type === 'start_ai_agent') {
+      title.textContent = 'Conectar Agente IA';
+      var agents = flowCanvas.allAgents || [];
+      if (!agents.length) {
+        body.innerHTML = '<div class="ct-callout">Você ainda não tem um Agente de IA. Crie um em <b>Agentes IA</b> e depois volte aqui para conectá-lo.</div>';
+      } else {
+        var agentOpts = [{ value: '', label: 'Escolha o agente…' }].concat(agents.map(function (a) {
+          return { value: a.id, label: a.name + (a.is_active ? '' : ' (pausado)') };
+        }));
+        body.innerHTML =
+          flowFieldHtml('f-agent', 'Agente de IA', flowSelectHtml('f-agent', agentOpts, c.agent_id || '')) +
+          '<label style="display:flex;gap:9px;align-items:flex-start;font-size:13px;color:#111214;cursor:pointer;"><input type="checkbox" id="f-agent-reply-now"' + (c.reply_now !== false ? ' checked' : '') + ' style="margin-top:2px;"/>' +
+            '<span>Responder já<span style="display:block;font-size:12px;color:#5b5d63;margin-top:2px;">O agente lê a conversa até aqui e responde na hora. Desmarcado, ele só responde a próxima mensagem do lead.</span></span></label>' +
+          '<div style="font-size:12.5px;color:#5b5d63;line-height:1.5;">Quando o lead chegar aqui, o fluxo termina e o agente escolhido passa a responder esta conversa — mesmo fora da palavra-chave, do horário ou do funil configurados nele. Se ele passar para um humano, a IA pausa normalmente. O agente precisa estar <b>ativo</b>.</div>';
+      }
     } else if (node.step_type === 'end') {
       title.textContent = 'Fim';
       body.innerHTML = flowFieldHtml('f-label', 'Rótulo (o que aconteceu aqui)', flowInputHtml('f-label', c.label || 'Convertido'));
@@ -3544,6 +3577,8 @@ hydrateIcons(document);
       node.config = node.step_type === 'assign_user' ? { user_id: val('f-user') ? parseInt(val('f-user'), 10) : null } : {};
     } else if (node.step_type === 'create_task') {
       node.config = { title: val('f-title'), description: val('f-description') || undefined, due_in_hours: parseInt(val('f-due'), 10) || 24 };
+    } else if (node.step_type === 'start_ai_agent') {
+      if (document.getElementById('f-agent')) node.config = { agent_id: val('f-agent') ? parseInt(val('f-agent'), 10) : null, reply_now: document.getElementById('f-agent-reply-now').checked };
     } else if (node.step_type === 'start_flow') {
       if (document.getElementById('f-target-flow')) node.config = { flow_id: val('f-target-flow') ? parseInt(val('f-target-flow'), 10) : null };
     } else if (node.step_type === 'end') {
@@ -3735,6 +3770,11 @@ hydrateIcons(document);
       flowCanvas.allFlows = await api('/automation-flows');
     } catch (err) {
       flowCanvas.allFlows = [];
+    }
+    try {
+      flowCanvas.allAgents = await api('/ai-agents');
+    } catch (err) {
+      flowCanvas.allAgents = [];
     }
     flowCanvas.nodes = [{
       client_id: 'trigger', kind: 'trigger', step_type: 'trigger', config: {},
