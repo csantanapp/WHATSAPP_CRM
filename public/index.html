@@ -202,6 +202,14 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 .ct-dl{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;background:#F7F7F3;border-radius:12px;padding:12px 14px;margin:14px 0;}
 .ct-dl dt{font-size:12px;color:var(--text-subtle);}
 .ct-dl dd{margin:2px 0 0;font-size:13px;color:var(--ink);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.fn-stages{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:16px;}
+.fn-stage{background:#FAFAF7;border:1px solid var(--divider);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;}
+.fn-stage-top{display:flex;align-items:center;gap:8px;}
+.fn-move{width:22px;height:22px;border:none;background:transparent;border-radius:6px;color:var(--text-subtle);cursor:pointer;font-size:15px;line-height:1;display:inline-flex;align-items:center;justify-content:center;}
+.fn-move:hover:not(:disabled){background:var(--surface-muted);color:var(--ink);}
+.fn-move:disabled{opacity:.35;cursor:default;}
+.fn-link{background:var(--ink);border-radius:14px;padding:16px;margin-top:16px;color:#FFFFFF;}
+.fn-link input{flex:1;min-width:0;height:38px;border:1px solid #2B2D33;background:#1E1F23;color:#FFFFFF;border-radius:10px;padding:0 12px;font-family:var(--font-mono);font-size:12.5px;}
 .ct-tile{display:inline-flex;align-items:center;justify-content:center;border-radius:7px;flex-shrink:0;}
 
 :root{
@@ -1045,33 +1053,33 @@ button{font-family:var(--font-body);}
         </section>
 
         <section class="screen" id="screen-funis">
-
-          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;overflow-y:auto;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
-              <div>
-                <div style="font-family:var(--font-display);font-weight:600;font-size:32px;letter-spacing:-0.025em;color:#111214;">Funis</div>
-                <div style="font-size:13px;color:#5B5D63;margin-top:3px;">Crie e organize os funis/Kanbans de atendimento — um por campanha, evento ou fluxo de vendas.</div>
-              </div>
-              <button id="funis-novo-funil-btn" style="display:flex;align-items:center;gap:6px;background:#111214;color:#FFFFFF;border:none;border-radius:10px;padding:10px 16px;font-weight:600;font-size:13px;cursor:pointer;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
-                Novo funil
-              </button>
-            </div>
-            <div id="funis-list" style="display:flex;flex-direction:column;gap:12px;">
-              <div style="font-size:12.5px;color:#6E7076;">Carregando...</div>
-            </div>
-
-            <div style="margin-top:32px;">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div class="ct-page">
+            <div class="ct-page-inner">
+              <header class="ct-page-header">
                 <div>
-                  <div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;">Catálogo de tags</div>
-                  <div style="font-size:12px;color:#5B5D63;margin-top:2px;">Tags disponíveis pra classificar leads no Kanban e na Gestão de Leads.</div>
+                  <h1 class="ct-h1">Funis</h1>
+                  <p style="font-size:14px;color:var(--text-muted);margin:6px 0 0;">Um funil por campanha, evento ou fluxo de vendas.</p>
                 </div>
-                <button id="tags-novo-btn" style="font-size:12px;font-weight:600;color:#111214;background:none;border:none;cursor:pointer;">+ Nova tag</button>
+                <div class="ct-page-actions">
+                  <button type="button" id="funis-novo-funil-btn" class="ct-btn ct-btn-primary"><span data-icon="plus"></span>Novo funil</button>
+                </div>
+              </header>
+              <div id="funis-list" style="display:flex;flex-direction:column;gap:14px;">
+                <div style="font-size:13px;color:var(--text-subtle);">Carregando…</div>
               </div>
-              <div id="tags-list" style="display:flex;flex-wrap:wrap;gap:8px;">
-                <div style="font-size:12.5px;color:#6E7076;">Carregando...</div>
-              </div>
+
+              <section style="margin-top:32px;">
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+                  <div>
+                    <h2 class="ct-h2">Catálogo de tags</h2>
+                    <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">Tags disponíveis para classificar leads no Kanban e nos Contatos.</p>
+                  </div>
+                  <button type="button" id="tags-novo-btn" class="ct-btn ct-btn-secondary"><span data-icon="plus"></span>Nova tag</button>
+                </div>
+                <div id="tags-list" style="display:flex;flex-wrap:wrap;gap:8px;">
+                  <div style="font-size:13px;color:var(--text-subtle);">Carregando…</div>
+                </div>
+              </section>
             </div>
           </div>
         </section>
@@ -4573,68 +4581,68 @@ hydrateIcons(document);
       return;
     }
     listEl.innerHTML = '';
+    var FN_DOTS = ['var(--success)', 'var(--info)', 'var(--warning)', 'var(--ai)', 'var(--danger)', 'var(--text-subtle)'];
+    if (!funnels.length) listEl.innerHTML = '<div class="ct-empty">Nenhum funil ainda. Crie o primeiro com “Novo funil”.</div>';
     funnels.forEach(function (f) {
-      var card = document.createElement('div');
-      card.style.cssText = 'background:#FFFFFF;border:1px solid #E6E6E0;border-radius:12px;padding:14px 16px;';
+      var card = document.createElement('article');
+      card.className = 'ct-card';
       var stagesHtml = f.stages.map(function (s, i) {
         var isFirst = i === 0;
         var isLast = i === f.stages.length - 1;
-        return '<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:8px;background:#F4F4F0;margin-bottom:4px;">' +
-          '<div style="display:flex;flex-direction:column;gap:1px;">' +
-            '<button data-move-stage="' + s.id + '" data-direction="up" ' + (isFirst ? 'disabled' : '') + ' style="background:none;border:none;padding:0;line-height:1;font-size:10px;cursor:' + (isFirst ? 'default' : 'pointer') + ';color:' + (isFirst ? '#D6D6CF' : '#5b5d63') + ';">▲</button>' +
-            '<button data-move-stage="' + s.id + '" data-direction="down" ' + (isLast ? 'disabled' : '') + ' style="background:none;border:none;padding:0;line-height:1;font-size:10px;cursor:' + (isLast ? 'default' : 'pointer') + ';color:' + (isLast ? '#D6D6CF' : '#5b5d63') + ';">▼</button>' +
+        return '<div class="fn-stage">' +
+          '<div class="fn-stage-top">' +
+            '<button type="button" class="fn-move" data-move-stage="' + s.id + '" data-direction="up" ' + (isFirst ? 'disabled' : '') + ' aria-label="Mover “' + escapeHtml(s.name) + '” para antes">‹</button>' +
+            '<span class="ct-mono" style="font-size:12px;color:var(--text-subtle);">' + String(i + 1).padStart(2, '0') + '</span>' +
+            '<span style="width:8px;height:8px;border-radius:50%;background:' + FN_DOTS[i % FN_DOTS.length] + ';flex-shrink:0;"></span>' +
+            '<button type="button" data-rename-stage="' + s.id + '" data-stage-name="' + escapeHtml(s.name) + '" title="Renomear etapa" style="flex:1;min-width:0;text-align:left;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0;">' + escapeHtml(s.name) + '</button>' +
+            '<button type="button" class="fn-move" data-move-stage="' + s.id + '" data-direction="down" ' + (isLast ? 'disabled' : '') + ' aria-label="Mover “' + escapeHtml(s.name) + '” para depois">›</button>' +
+            '<button type="button" class="ct-icon-btn danger" data-delete-stage="' + s.id + '" data-stage-name="' + escapeHtml(s.name) + '" aria-label="Remover etapa “' + escapeHtml(s.name) + '”" style="width:26px;height:26px;">' + ICON('x', 14) + '</button>' +
           '</div>' +
-          '<span data-rename-stage="' + s.id + '" data-stage-name="' + escapeHtml(s.name) + '" style="flex-grow:1;cursor:pointer;font-size:12.5px;font-weight:600;color:#3e4046;">' + escapeHtml(s.name) + '</span>' +
-          '<select data-stage-meta="' + s.id + '" title="Evento enviado à Meta quando um lead de anúncio entra nesta etapa (Configurações → Conversões de anúncios)" style="font-size:11px;border:1px solid ' + (s.meta_event ? '#C8F542' : '#E3E3DC') + ';background:' + (s.meta_event ? '#F0FBD2' : '#FFFFFF') + ';color:' + (s.meta_event ? '#2B2D33' : '#5B5D63') + ';border-radius:6px;padding:3px 6px;cursor:pointer;font-family:var(--font-body);">' +
+          '<select data-stage-meta="' + s.id + '" class="ct-select" aria-label="Evento da Meta para “' + escapeHtml(s.name) + '”" title="Evento enviado à Meta quando um lead de anúncio entra nesta etapa" style="height:32px;font-size:12px;' + (s.meta_event ? 'background-color:var(--acc-soft);border-color:var(--acc);' : '') + '">' +
             '<option value=""' + (!s.meta_event ? ' selected' : '') + '>Meta: —</option>' +
-            '<option value="QualifiedLead"' + (s.meta_event === 'QualifiedLead' ? ' selected' : '') + '>🎯 Lead qualificado</option>' +
-            '<option value="Purchase"' + (s.meta_event === 'Purchase' ? ' selected' : '') + '>💰 Venda</option>' +
+            '<option value="QualifiedLead"' + (s.meta_event === 'QualifiedLead' ? ' selected' : '') + '>Meta: Lead qualificado</option>' +
+            '<option value="Purchase"' + (s.meta_event === 'Purchase' ? ' selected' : '') + '>Meta: Venda</option>' +
           '</select>' +
-          '<button data-delete-stage="' + s.id + '" title="Remover etapa" style="background:none;border:none;cursor:pointer;color:#6E7076;font-size:14px;line-height:1;padding:0 4px;">×</button>' +
         '</div>';
       }).join('');
 
       var campaignHtml = '';
       if (f.entry_keyword) {
-        var waLink = whatsappDigits
-          ? 'https://wa.me/' + whatsappDigits + '?text=' + encodeURIComponent(f.entry_keyword)
-          : null;
+        var waLink = whatsappDigits ? 'https://wa.me/' + whatsappDigits + '?text=' + encodeURIComponent(f.entry_keyword) : null;
         campaignHtml =
-          '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #EEEEE8;">' +
-            '<div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;">Link de captação desta campanha</div>' +
+          '<div class="fn-link">' +
+            '<div style="font-size:12px;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Link de captação</div>' +
             (waLink
-              ? '<div style="display:flex;align-items:center;gap:8px;"><code style="font-size:11.5px;background:#F4F4F0;padding:4px 8px;border-radius:6px;color:#3e4046;word-break:break-all;flex-grow:1;">' + escapeHtml(waLink) + '</code>' +
-                '<button data-copy-link="' + escapeHtml(waLink) + '" style="font-size:11px;font-weight:600;color:#111214;background:none;border:1px solid #E3E3DC;border-radius:6px;padding:4px 8px;cursor:pointer;flex-shrink:0;">Copiar</button></div>'
-              : '<div style="font-size:11.5px;color:#7A4E00;">Configure o WhatsApp (Conexão acima) pra gerar o link completo. Palavra-chave: <code>' + escapeHtml(f.entry_keyword) + '</code></div>') +
-            '<div style="font-size:11px;color:#5B5D63;margin-top:6px;">Leads que chegarem com essa mensagem caem automaticamente neste funil.</div>' +
-            '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;">' +
-              '<div style="font-size:11.5px;color:#5b5d63;flex-grow:1;">' + (f.welcome_message ? escapeHtml(f.welcome_message) : '<span style="color:#6E7076;">Sem boas-vindas específica configurada.</span>') + '</div>' +
-              '<button data-edit-welcome="' + f.id + '" style="font-size:11px;font-weight:600;color:#111214;background:none;border:none;cursor:pointer;flex-shrink:0;">Editar</button>' +
+              ? '<div style="display:flex;gap:8px;"><input readonly value="' + escapeHtml(waLink) + '" aria-label="Link de captação do funil ' + escapeHtml(f.name) + '"/>' +
+                '<button type="button" class="ct-btn ct-btn-accent" data-copy-link="' + escapeHtml(waLink) + '" aria-live="polite">' + ICON('copy', 15) + 'Copiar</button></div>'
+              : '<div style="font-size:13px;color:#FFD27A;">Configure o WhatsApp em Conexões para gerar o link completo. Palavra-chave: <span class="ct-mono">' + escapeHtml(f.entry_keyword) + '</span></div>') +
+            '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:#C9CAC4;">' +
+              '<span style="flex:1;min-width:0;">Mensagem: “' + escapeHtml(f.entry_keyword) + '”' + (f.welcome_message ? ' · Boas-vindas: “' + escapeHtml(f.welcome_message) + '”' : ' · Sem boas-vindas específica') + '</span>' +
+              '<button type="button" data-edit-welcome="' + f.id + '" class="ct-btn" style="height:30px;padding:0 10px;font-size:12.5px;background:transparent;border-color:#3E4046;color:#FFFFFF;">Editar</button>' +
             '</div>' +
+            '<div style="font-size:12px;color:#C9CAC4;margin-top:6px;">Leads que chegarem com essa mensagem caem automaticamente neste funil.</div>' +
           '</div>';
       }
 
       var tagsHtml = (f.default_tags || []).map(function (tag) {
-        return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:2px 4px 2px 8px;border-radius:20px;background:#F1F1EC;color:#3E4046;margin-right:4px;margin-top:4px;">' +
-          escapeHtml(tag) +
-          '<button data-remove-funnel-tag="' + f.id + '" data-tag-value="' + escapeHtml(tag) + '" style="background:none;border:none;cursor:pointer;color:#3E4046;opacity:.6;font-size:11px;line-height:1;padding:0 2px;">×</button>' +
-        '</span>';
-      }).join('') + '<button data-add-funnel-tag="' + f.id + '" style="font-size:10.5px;font-weight:600;color:#111214;background:none;border:1px dashed #D6D6CF;border-radius:20px;padding:2px 8px;cursor:pointer;margin-top:4px;">+ tag automática</button>';
+        return '<span class="ct-pill ct-pill-acc" style="padding-right:4px;">' + escapeHtml(tag) +
+          '<button type="button" data-remove-funnel-tag="' + f.id + '" data-tag-value="' + escapeHtml(tag) + '" aria-label="Remover tag automática ' + escapeHtml(tag) + '" style="border:none;background:none;cursor:pointer;color:var(--acc-ink);display:inline-flex;padding:0 2px;">' + ICON('x', 12) + '</button></span>';
+      }).join('') + '<button type="button" data-add-funnel-tag="' + f.id + '" class="ct-chip" style="border-style:dashed;">' + ICON('plus', 12) + 'Tag automática</button>';
 
       card.innerHTML =
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
-          '<span style="font-family:var(--font-body);font-weight:600;font-size:14px;color:#111214;">' + escapeHtml(f.name) + (f.is_default ? ' <span style="font-size:10px;font-weight:600;color:#111214;">(padrão)</span>' : '') + '</span>' +
-          '<div style="display:flex;align-items:center;gap:14px;">' +
-            '<button data-open-kanban="' + f.id + '" style="font-size:11.5px;font-weight:600;color:#111214;background:none;border:none;cursor:pointer;">Ver Kanban →</button>' +
-            '<button data-add-stage="' + f.id + '" style="font-size:11.5px;font-weight:600;color:#111214;background:none;border:none;cursor:pointer;">+ Etapa</button>' +
-            (f.is_default ? '' : '<button data-set-default-funnel="' + f.id + '" style="font-size:11.5px;font-weight:600;color:#5b5d63;background:none;border:none;cursor:pointer;">Tornar padrão</button>') +
-            (f.is_default ? '' : '<button data-delete-funnel="' + f.id + '" style="font-size:11.5px;font-weight:600;color:#B4381A;background:none;border:none;cursor:pointer;">Excluir</button>') +
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">' +
+          '<div style="display:flex;align-items:center;gap:10px;min-width:0;"><h2 class="ct-h2" style="font-size:20px;">' + escapeHtml(f.name) + '</h2>' +
+            (f.is_default ? '<span class="ct-pill" style="background:var(--acc);color:var(--ink);">Padrão</span>' : '') + '</div>' +
+          '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">' +
+            '<button type="button" class="ct-btn ct-btn-ghost" data-open-kanban="' + f.id + '">' + ICON('square-kanban', 15) + 'Ver Kanban</button>' +
+            (f.is_default ? '' : '<button type="button" class="ct-btn ct-btn-secondary" data-set-default-funnel="' + f.id + '">Tornar padrão</button>') +
+            '<button type="button" class="ct-btn ct-btn-secondary" data-add-stage="' + f.id + '">' + ICON('plus', 15) + 'Etapa</button>' +
+            (f.is_default ? '' : '<button type="button" class="ct-icon-btn danger" data-delete-funnel="' + f.id + '" aria-label="Excluir funil “' + escapeHtml(f.name) + '”" title="Excluir funil">' + ICON('trash-2', 16) + '</button>') +
           '</div>' +
         '</div>' +
-        '<div>' + (stagesHtml || '<span style="font-size:12px;color:#6E7076;">Sem etapas ainda.</span>') + '</div>' +
-        '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #EEEEE8;">' +
-          '<div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;">Tags automáticas (aplicadas a todo lead que entra aqui)</div>' +
-          '<div style="display:flex;flex-wrap:wrap;align-items:center;">' + tagsHtml + '</div>' +
+        (stagesHtml ? '<div class="fn-stages">' + stagesHtml + '</div>' : '<div class="ct-empty" style="margin-top:14px;">Sem etapas ainda. Use “+ Etapa”.</div>') +
+        '<div style="margin-top:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+          '<span style="font-size:12px;color:var(--text-muted);margin-right:4px;">Tags automáticas:</span>' + tagsHtml +
         '</div>' +
         campaignHtml;
       listEl.appendChild(card);
@@ -4658,7 +4666,8 @@ hydrateIcons(document);
       btn.addEventListener('click', async function () {
         var funnelId = btn.getAttribute('data-delete-funnel');
         var funnel = funnels.find(function (f) { return String(f.id) === funnelId; });
-        if (!confirm('Excluir o funil "' + (funnel ? funnel.name : '') + '"? As conversas nele ficarão sem funil atribuído. Essa ação não pode ser desfeita.')) return;
+        var okFunnel = await ctConfirm({ title: 'Excluir o funil “' + (funnel ? funnel.name : '') + '”?', message: 'As conversas nele ficarão sem funil atribuído. Essa ação não pode ser desfeita.', confirmLabel: 'Excluir funil' });
+        if (!okFunnel) return;
         await api('/funnels/' + funnelId, { method: 'DELETE' });
         loadFunnelsSection();
         loadKanban();
@@ -4691,8 +4700,8 @@ hydrateIcons(document);
     listEl.querySelectorAll('[data-copy-link]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         navigator.clipboard.writeText(btn.getAttribute('data-copy-link')).then(function () {
-          btn.textContent = 'Copiado!';
-          setTimeout(function () { btn.textContent = 'Copiar'; }, 1500);
+          btn.innerHTML = ICON('check', 15) + 'Copiado';
+          setTimeout(function () { btn.innerHTML = ICON('copy', 15) + 'Copiar'; }, 1800);
         });
       });
     });
@@ -4741,7 +4750,8 @@ hydrateIcons(document);
     listEl.querySelectorAll('[data-delete-stage]').forEach(function (btn) {
       btn.addEventListener('click', async function (e) {
         e.stopPropagation();
-        if (!confirm('Remover essa etapa? As conversas nela ficarão sem etapa definida.')) return;
+        var okStage = await ctConfirm({ title: 'Remover a etapa “' + (btn.getAttribute('data-stage-name') || '') + '”?', message: 'As conversas nela ficarão sem etapa definida.', confirmLabel: 'Remover etapa' });
+        if (!okStage) return;
         await api('/stages/' + btn.getAttribute('data-delete-stage'), { method: 'DELETE' });
         loadFunnelsSection();
         loadKanban();
@@ -4785,19 +4795,22 @@ hydrateIcons(document);
     }
     listEl.innerHTML = '';
     if (!tags.length) {
-      listEl.innerHTML = '<div style="font-size:12.5px;color:#6E7076;">Nenhuma tag cadastrada ainda.</div>';
+      listEl.innerHTML = '<div class="ct-empty" style="width:100%;">Nenhuma tag ainda. Crie com “Nova tag”.</div>';
       return;
     }
     tags.forEach(function (tag) {
       var chip = document.createElement('span');
-      chip.style.cssText = 'display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 6px 5px 12px;border-radius:20px;background:#F4F4F0;color:#3e4046;';
-      chip.innerHTML = escapeHtml(tag.name) +
-        '<button data-delete-tag="' + tag.id + '" style="background:none;border:none;cursor:pointer;color:#6E7076;font-size:13px;line-height:1;padding:0 4px;">×</button>';
+      chip.className = 'ct-chip';
+      chip.style.cursor = 'default';
+      chip.style.paddingRight = '5px';
+      chip.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:' + avatarBg(tag.name).replace('#E8F5C8', '#9BC53D').replace('#FFE2D6', '#FF8F6B').replace('#DCEBFF', '#3B8DF0').replace('#ECE4FF', '#8B5CF6').replace('#FFF0C2', '#FFB020').replace('#E0F3EC', '#22C55E') + ';"></span>' + escapeHtml(tag.name) +
+        '<button type="button" data-delete-tag="' + tag.id + '" data-tag-name="' + escapeHtml(tag.name) + '" aria-label="Remover tag ' + escapeHtml(tag.name) + ' do catálogo" style="background:none;border:none;cursor:pointer;color:var(--text-subtle);display:inline-flex;padding:0 2px;">' + ICON('x', 12) + '</button>';
       listEl.appendChild(chip);
     });
     listEl.querySelectorAll('[data-delete-tag]').forEach(function (btn) {
       btn.addEventListener('click', async function () {
-        if (!confirm('Remover essa tag do catálogo? (Não remove de leads que já usam ela)')) return;
+        var okTag = await ctConfirm({ title: 'Remover a tag “' + (btn.getAttribute('data-tag-name') || '') + '” do catálogo?', message: 'Ela não é removida dos leads que já a usam.', confirmLabel: 'Remover tag' });
+        if (!okTag) return;
         await api('/tags/' + btn.getAttribute('data-delete-tag'), { method: 'DELETE' });
         loadTags();
       });
