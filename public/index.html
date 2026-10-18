@@ -171,6 +171,15 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 .ct-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
 .ct-icon-btn.danger{color:#B4381A;}
 .ct-icon-btn.danger:hover{background:var(--danger-soft);}
+.howto-step{display:flex;gap:12px;background:#1E1F23;border-radius:14px;padding:14px;}
+.howto-num{width:26px;height:26px;border-radius:8px;color:var(--ink);font-size:13px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-mono);}
+.howto-t{font-size:14px;font-weight:600;color:#FFFFFF;}
+.howto-d{font-size:12.5px;color:#C9CAC4;line-height:1.45;margin-top:2px;}
+.flow-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.flow-chain{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:8px;}
+.flow-chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--border-input);background:#FFFFFF;font-size:12px;color:var(--text-2);white-space:nowrap;}
+.flow-chip-trigger{background:var(--acc-soft);border-color:var(--acc-soft);color:var(--acc-ink);}
+.flow-chain-sep{color:var(--text-subtle);font-size:13px;}
 .ct-tile{display:inline-flex;align-items:center;justify-content:center;border-radius:7px;flex-shrink:0;}
 
 :root{
@@ -260,13 +269,10 @@ body{
 .nav-icon.on .nav-label{color:#111214;}
 .spacer{flex-grow:1;}
 button{font-family:var(--font-body);}
-.switch{width:40px;height:22px;border-radius:20px;background:#D6D6CF;position:relative;cursor:pointer;flex-shrink:0;border:none;padding:0;}
-.switch .knob{width:18px;height:18px;border-radius:50%;background:#FFFFFF;position:absolute;top:2px;left:2px;box-shadow:0 1px 2px rgba(0,0,0,0.25);transition:left .12s;}
-.switch.on{background:#111214;}
-/* Acabamento corporativo: foco azul e cantos consistentes em campos/botões */
-.screen input:focus,.screen select:focus,.screen textarea:focus{outline:none;border-color:#111214 !important;box-shadow:0 0 0 3px rgba(17,18,20,0.12);}
-.screen ::selection{background:#F0FBD2;}
-.switch.on .knob{left:20px;}
+.switch{width:44px;height:26px;border-radius:999px;background:#D6D6CF;position:relative;cursor:pointer;flex-shrink:0;border:none;padding:0;transition:background-color .15s ease;}
+.switch .knob{width:20px;height:20px;border-radius:50%;background:#FFFFFF;position:absolute;top:3px;left:3px;transition:transform .15s ease,background-color .15s ease;}
+.switch.on{background:var(--ink);}
+.switch.on .knob{transform:translateX(18px);background:var(--acc);}
 </style>
 
 <div class="page">
@@ -660,67 +666,44 @@ button{font-family:var(--font-body);}
         </section>
 
         <section class="screen" id="screen-automacao">
-
-          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;overflow-y:auto;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
-              <div>
-                <div style="font-family:var(--font-display);font-weight:600;font-size:32px;letter-spacing:-0.025em;color:#111214;">Fluxos de Automação</div>
-                <div id="automacao-summary" style="font-size:13px;color:#5B5D63;margin-top:3px;">Carregando...</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <button id="automacao-templates-btn" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#3e4046;border:1px solid #E3E3DC;border-radius:10px;padding:10px 14px;font-weight:600;font-size:13px;cursor:pointer;">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5b5d63" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
-                  Usar um modelo
-                </button>
-                <button id="automacao-nova-btn" style="display:flex;align-items:center;gap:6px;background:#111214;color:#FFFFFF;border:none;border-radius:10px;padding:10px 16px;font-weight:600;font-size:13px;cursor:pointer;">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
-                  Nova automação
-                </button>
-              </div>
-            </div>
-
-            <select id="automacao-funnel-filter" style="background:#FFFFFF;border:1px solid #E3E3DC;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;color:#111214;font-family:var(--font-body);cursor:pointer;margin-bottom:18px;">
-              <option value="">Todos os funis</option>
-            </select>
-
-            <div style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:16px;padding:22px;margin-bottom:24px;">
-              <div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;margin-bottom:16px;">Exemplo · como funciona uma automação</div>
-              <div style="display:flex;align-items:center;">
-                <div style="width:322px;flex-shrink:0;border:1px solid #E6E6E0;border-radius:12px;padding:16px;">
-                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">
-                    <div style="width:28px;height:28px;border-radius:8px;background:#F0FBD2;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111214" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path></svg></div>
-                    <span style="font-size:11px;font-weight:600;color:#5B5D63;text-transform:uppercase;letter-spacing:.03em;">Gatilho</span>
-                  </div>
-                  <div style="font-size:13px;color:#111214;margin-bottom:10px;">Mensagem recebida contém</div>
-                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                    <span style="font-size:11.5px;font-weight:600;background:#F4F4F0;border:1px solid #E3E3DC;color:#3e4046;padding:4px 10px;border-radius:20px;">orçamento</span>
-                    <span style="font-size:11.5px;font-weight:600;background:#F4F4F0;border:1px solid #E3E3DC;color:#3e4046;padding:4px 10px;border-radius:20px;">preço</span>
-                  </div>
+          <div class="ct-page">
+            <div class="ct-page-inner">
+              <header class="ct-page-header">
+                <div>
+                  <h1 class="ct-h1">Automações</h1>
+                  <p id="automacao-summary" style="font-size:14px;color:var(--text-muted);margin:6px 0 0;">Carregando…</p>
                 </div>
-                <svg width="56" height="24" viewBox="0 0 56 24" fill="none" style="flex-shrink:0;"><line x1="2" y1="12" x2="46" y2="12" stroke="#D6D6CF" stroke-width="2"></line><path d="M40 6 48 12 40 18" stroke="#D6D6CF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                <div style="width:322px;flex-shrink:0;border:1px solid #E6E6E0;border-radius:12px;padding:16px;">
-                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">
-                    <div style="width:28px;height:28px;border-radius:8px;background:#FDECC8;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54Z"></path></svg></div>
-                    <span style="font-size:11px;font-weight:600;color:#5B5D63;text-transform:uppercase;letter-spacing:.03em;">Condição</span>
-                  </div>
-                  <div style="font-size:13px;color:#111214;margin-bottom:10px;">Etapa atual é</div>
-                  <div style="display:flex;gap:6px;flex-wrap:wrap;"><span style="font-size:11.5px;font-weight:600;background:#F0FBD2;color:#111214;padding:4px 10px;border-radius:20px;">Novo lead</span></div>
+                <div class="ct-page-actions">
+                  <button type="button" id="automacao-templates-btn" class="ct-btn ct-btn-secondary"><span data-icon="layout-template"></span>Usar um modelo</button>
+                  <button type="button" id="automacao-nova-btn" class="ct-btn ct-btn-primary"><span data-icon="plus"></span>Nova automação</button>
                 </div>
-                <svg width="56" height="24" viewBox="0 0 56 24" fill="none" style="flex-shrink:0;"><line x1="2" y1="12" x2="46" y2="12" stroke="#D6D6CF" stroke-width="2"></line><path d="M40 6 48 12 40 18" stroke="#D6D6CF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                <div style="width:322px;flex-shrink:0;border:1px solid #E6E6E0;border-radius:12px;padding:16px;">
-                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">
-                    <div style="width:28px;height:28px;border-radius:8px;background:#F1F1EC;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3E4046" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"></path></svg></div>
-                    <span style="font-size:11px;font-weight:600;color:#5B5D63;text-transform:uppercase;letter-spacing:.03em;">Ações</span>
-                  </div>
-                  <div style="font-size:13px;color:#111214;margin-bottom:10px;">Mover para <b>Qualificado</b> e notificar</div>
-                  <div style="display:flex;gap:6px;flex-wrap:wrap;"><span style="font-size:11.5px;font-weight:600;background:#F4F4F0;border:1px solid #E3E3DC;color:#3e4046;padding:4px 10px;border-radius:20px;">vendedor no Slack</span></div>
-                </div>
-              </div>
-            </div>
+              </header>
 
-            <div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;">Todas as automações</div>
-            <div id="automacao-list" style="display:flex;flex-direction:column;gap:10px;">
-              <div style="font-size:12.5px;color:#6E7076;">Carregando fluxos...</div>
+              <section id="automacao-howto" class="ct-card" style="background:var(--ink);border-color:var(--ink);color:#FFFFFF;margin-bottom:24px;position:relative;">
+                <button type="button" id="automacao-howto-close" class="ct-icon-btn" aria-label="Dispensar explicação" style="position:absolute;top:12px;right:12px;color:#C9CAC4;"><span data-icon="x" data-icon-size="16"></span></button>
+                <h2 class="ct-h2" style="color:#FFFFFF;margin-bottom:4px;">Como funciona</h2>
+                <p style="font-size:13px;color:#C9CAC4;margin:0 0 16px;">Toda automação é um gatilho, condições opcionais e as ações que acontecem em sequência.</p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;">
+                  <div class="howto-step"><span class="howto-num" style="background:var(--acc);">1</span><div><div class="howto-t">Gatilho</div><div class="howto-d">Primeira mensagem, palavra-chave (“preço”, “orçamento”), tag ou etapa.</div></div></div>
+                  <div class="howto-step"><span class="howto-num" style="background:#FFD27A;">2</span><div><div class="howto-t">Condição</div><div class="howto-d">Opcional: só segue se o lead tiver uma tag, estiver numa etapa ou no horário comercial.</div></div></div>
+                  <div class="howto-step"><span class="howto-num" style="background:#8CC8FF;">3</span><div><div class="howto-t">Ações</div><div class="howto-d">Responder, perguntar (formulário), mover no funil, aplicar tag, avisar o time.</div></div></div>
+                </div>
+              </section>
+
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+                <div id="automacao-status-tabs" class="ct-segmented" role="tablist" aria-label="Filtrar por estado" style="grid-auto-columns:auto;">
+                  <button type="button" role="tab" aria-selected="true" data-status="all" style="padding:0 14px;">Todas</button>
+                  <button type="button" role="tab" aria-selected="false" data-status="active" style="padding:0 14px;">Ativas</button>
+                  <button type="button" role="tab" aria-selected="false" data-status="paused" style="padding:0 14px;">Pausadas</button>
+                </div>
+                <select id="automacao-funnel-filter" class="ct-select" aria-label="Filtrar por funil">
+                  <option value="">Todos os funis</option>
+                </select>
+              </div>
+
+              <div id="automacao-list" style="display:flex;flex-direction:column;gap:10px;">
+                <div style="font-size:13px;color:var(--text-subtle);">Carregando fluxos…</div>
+              </div>
             </div>
           </div>
         </section>
@@ -2298,6 +2281,50 @@ hydrateIcons(document);
     select.value = currentValue;
   }
 
+  var automacaoStatusFilter = 'all';
+  document.querySelectorAll('#automacao-status-tabs [data-status]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      automacaoStatusFilter = b.getAttribute('data-status');
+      document.querySelectorAll('#automacao-status-tabs [data-status]').forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      loadAutomationFlows();
+    });
+  });
+  (function () {
+    var howto = document.getElementById('automacao-howto');
+    try { if (localStorage.getItem('ctHowtoAutomacao') === 'off') howto.hidden = true; } catch (e) {}
+    document.getElementById('automacao-howto-close').addEventListener('click', function () {
+      howto.hidden = true;
+      try { localStorage.setItem('ctHowtoAutomacao', 'off'); } catch (e) {}
+    });
+  })();
+
+  // Cadeia de passos em chips, agrupando repetidos em sequência ("Pergunta ×3").
+  var STEP_SHORT = {
+    send_message: 'Mensagem', ask_question: 'Pergunta', wait: 'Aguardar', condition: 'Condição', classify_ai: 'Classificar (IA)',
+    add_tag: 'Tag', remove_tag: 'Tag', move_stage: 'Mover etapa', assign_user: 'Atribuir', assign_round_robin: 'Distribuir',
+    close_conversation: 'Fechar', create_task: 'Lembrete', repeat: 'Repetir', end: 'Fim',
+  };
+  function flowChainHtml(flow) {
+    var trig = TRIGGER_LABELS[flow.trigger_type] || flow.trigger_type;
+    if (flow.trigger_type === 'keyword' && flow.trigger_config && flow.trigger_config.keyword) trig = 'Palavra-chave “' + flow.trigger_config.keyword + '”';
+    if (flow.trigger_type === 'first_message') trig = 'Primeira mensagem';
+    var html = '<span class="flow-chip flow-chip-trigger"><span class="ct-tile" style="width:16px;height:16px;border-radius:50%;background:var(--acc);color:var(--ink);">' + ICON('zap', 10) + '</span>' + escapeHtml(trig) + '</span>';
+    var steps = (flow.steps || []).slice().sort(function (a, b) { return a.position - b.position; });
+    if (!steps.length) return html + '<span class="flow-chain-sep">›</span><span style="font-size:12px;color:var(--warning-ink);">◌ Sem passos configurados</span>';
+    var groups = [];
+    steps.forEach(function (st) {
+      var label = STEP_SHORT[st.step_type] || st.step_type;
+      var last = groups[groups.length - 1];
+      if (last && last.label === label) last.count++;
+      else groups.push({ label: label, type: st.step_type, count: 1 });
+    });
+    groups.forEach(function (g) {
+      var meta = FLOW_NODE_META[g.type] || FLOW_NODE_META.send_message;
+      html += '<span class="flow-chain-sep" aria-hidden="true">›</span><span class="flow-chip"><span style="color:' + meta.stroke + ';display:inline-flex;">' + ICON(meta.icon, 12) + '</span>' + escapeHtml(g.label) + (g.count > 1 ? ' ×' + g.count : '') + '</span>';
+    });
+    return html;
+  }
+
   async function loadAutomationFlows() {
     var summary = document.getElementById('automacao-summary');
     var list = document.getElementById('automacao-list');
@@ -2311,22 +2338,26 @@ hydrateIcons(document);
       return;
     }
 
-    summary.textContent = flows.length + (flows.length === 1 ? ' regra cadastrada' : ' regras cadastradas');
+    var activeCount = flows.filter(function (f) { return f.is_active; }).length;
+    summary.textContent = flows.length + (flows.length === 1 ? ' regra' : ' regras') + ' · ' + activeCount + (activeCount === 1 ? ' ativa' : ' ativas');
+    if (automacaoStatusFilter === 'active') flows = flows.filter(function (f) { return f.is_active; });
+    if (automacaoStatusFilter === 'paused') flows = flows.filter(function (f) { return !f.is_active; });
     list.innerHTML = '';
 
     if (!flows.length) {
-      list.innerHTML = '<div style="font-size:12.5px;color:#6E7076;">Nenhum fluxo cadastrado ainda. Clique em "Nova automação" pra criar o primeiro.</div>';
+      list.innerHTML = '<div class="ct-empty">' + (automacaoStatusFilter === 'all' ? 'Nenhuma automação ainda. Use “Nova automação” ou comece por um modelo.' : 'Nenhuma automação neste filtro.') + '</div>';
       return;
     }
 
     flows.forEach(function (flow) {
       var row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:16px;padding:16px 18px;background:#FFFFFF;border:1px solid #E6E6E0;border-radius:12px;';
+      row.className = 'ct-card flow-row';
 
       var toggle = document.createElement('button');
       toggle.className = 'switch' + (flow.is_active ? ' on' : '');
-      toggle.setAttribute('aria-pressed', flow.is_active ? 'true' : 'false');
-      toggle.setAttribute('aria-label', 'Ativar ou pausar regra');
+      toggle.setAttribute('role', 'switch');
+      toggle.setAttribute('aria-checked', flow.is_active ? 'true' : 'false');
+      toggle.setAttribute('aria-label', 'Ativar ou pausar “' + flow.name + '”');
       toggle.innerHTML = '<span class="knob"></span>';
       toggle.addEventListener('click', async function (e) {
         e.stopPropagation();
@@ -2336,31 +2367,28 @@ hydrateIcons(document);
           body: JSON.stringify({ is_active: newState }),
         });
         toggle.classList.toggle('on', newState);
-        toggle.setAttribute('aria-pressed', newState ? 'true' : 'false');
+        toggle.setAttribute('aria-checked', newState ? 'true' : 'false');
+        loadAutomationFlows();
       });
 
-      var stepsSummary = flow.steps.map(function (s) { return STEP_LABELS[s.step_type] || s.step_type; }).join(' → ') || 'Sem passos configurados';
       var flowFunnel = state.funnels.find(function (f) { return f.id === flow.funnel_id; });
-      var triggerLabel = TRIGGER_LABELS[flow.trigger_type] || flow.trigger_type;
-      if (flow.trigger_type === 'keyword' && flow.trigger_config && flow.trigger_config.keyword) {
-        triggerLabel += ' ("' + flow.trigger_config.keyword + '")';
-      }
-
       var info = document.createElement('div');
-      info.style.cssText = 'flex-grow:1;min-width:0;';
+      info.style.cssText = 'flex:1;min-width:260px;';
       info.innerHTML =
-        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
-          '<span style="font-family:var(--font-body);font-weight:600;font-size:14px;color:#111214;">' + escapeHtml(flow.name) + '</span>' +
-          '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#E3E3DC;color:#5b5d63;">' + escapeHtml(flowFunnel ? flowFunnel.name : 'Todos os funis') + '</span>' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+          '<span style="font-weight:600;font-size:15px;color:var(--ink);">' + escapeHtml(flow.name) + '</span>' +
+          '<span class="ct-tag">' + escapeHtml(flowFunnel ? flowFunnel.name : 'Todos os funis') + '</span>' +
+          (flow.is_active
+            ? '<span style="font-size:12px;color:var(--success-ink);display:inline-flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);"></span>Ativa</span>'
+            : '<span style="font-size:12px;color:var(--text-subtle);">Pausada</span>') +
         '</div>' +
-        '<div style="font-size:12px;color:#5B5D63;">Gatilho: ' + escapeHtml(triggerLabel) + '</div>' +
-        '<div style="font-size:12px;color:#5B5D63;margin-top:2px;">Passos: ' + escapeHtml(stepsSummary) + '</div>';
+        '<div class="flow-chain">' + flowChainHtml(flow) + '</div>';
 
       var actions = document.createElement('div');
-      actions.style.cssText = 'display:flex;align-items:center;gap:10px;flex-shrink:0;';
+      actions.style.cssText = 'display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto;';
       actions.innerHTML =
-        '<button data-edit-flow="' + flow.id + '" style="font-size:11.5px;font-weight:600;color:#111214;background:none;border:none;cursor:pointer;">Editar</button>' +
-        '<button data-delete-flow="' + flow.id + '" style="font-size:11.5px;font-weight:600;color:#B4381A;background:none;border:none;cursor:pointer;">Excluir</button>';
+        '<button type="button" class="ct-btn ct-btn-secondary" data-edit-flow="' + flow.id + '">' + ICON('workflow', 15) + 'Editar fluxo</button>' +
+        '<button type="button" class="ct-icon-btn danger" data-delete-flow="' + flow.id + '" data-flow-name="' + escapeHtml(flow.name) + '" aria-label="Excluir automação “' + escapeHtml(flow.name) + '”" title="Excluir">' + ICON('trash-2', 16) + '</button>';
 
       row.appendChild(toggle);
       row.appendChild(info);
@@ -2373,7 +2401,8 @@ hydrateIcons(document);
     });
     list.querySelectorAll('[data-delete-flow]').forEach(function (btn) {
       btn.addEventListener('click', async function () {
-        if (!confirm('Excluir esse fluxo de automação? Essa ação não pode ser desfeita.')) return;
+        var ok = await ctConfirm({ title: 'Excluir “' + (btn.getAttribute('data-flow-name') || 'automação') + '”?', message: 'O fluxo e as métricas dele serão apagados. Leads no meio do fluxo deixam de receber os próximos passos. Essa ação não pode ser desfeita.', confirmLabel: 'Excluir automação' });
+        if (!ok) return;
         await api('/automation-flows/' + btn.getAttribute('data-delete-flow'), { method: 'DELETE' });
         loadAutomationFlows();
       });
