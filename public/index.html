@@ -152,6 +152,13 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 .ib-send{width:38px;height:38px;border-radius:11px;border:none;background:var(--acc);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
 .ib-send:disabled{opacity:.5;}
 .ib-panel .ct-group-label{display:block;margin-bottom:8px;}
+.ct-input{height:38px;border:1px solid var(--border-input);border-radius:10px;padding:0 12px;font-size:14px;color:var(--ink);background:#FFFFFF;}
+.ct-input:focus{outline:none;border-color:var(--ink);}
+.ct-dialog{border:none;border-radius:18px;padding:24px;width:min(420px,calc(100vw - 32px));box-shadow:var(--shadow-menu);color:var(--ink);}
+.ct-dialog::backdrop{background:rgba(17,18,20,.4);}
+.ct-filter-card{text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:10px;min-height:0;font:inherit;transition:border-color .15s ease,transform .15s ease,box-shadow .15s ease;}
+.ct-filter-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-raised);}
+.ct-filter-card[aria-selected="true"]{border:1.5px solid var(--ink);}
 .ct-tile{display:inline-flex;align-items:center;justify-content:center;border-radius:7px;flex-shrink:0;}
 
 :root{
@@ -479,23 +486,43 @@ button{font-family:var(--font-body);}
         </section>
 
         <section class="screen" id="screen-radar">
-
-          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;overflow-y:auto;">
-            <div style="font-family:var(--font-display);font-weight:600;font-size:32px;letter-spacing:-0.025em;color:#111214;margin-bottom:4px;">Radar de risco</div>
-            <div style="font-size:13px;color:#5B5D63;margin-bottom:22px;max-width:720px;">Demandas abertas que esfriaram e precisam de você. Se já existe um retorno agendado, aparece como "em voo"; sem próximo passo, é risco de perder o cliente.</div>
-
-            <div id="radar-summary-box" style="background:#FFFFFF;border:1px solid #E6E6E0;border-radius:12px;padding:18px 20px;margin-bottom:16px;">
-              <div id="radar-summary-title" style="font-family:var(--font-body);font-weight:600;font-size:14.5px;color:#111214;margin-bottom:2px;">Carregando...</div>
-              <div style="font-size:12px;color:#5B5D63;margin-bottom:12px;">Ninguém marcou o que acontece a seguir. Cada uma é alguém esperando sem que nada esteja combinado.</div>
-              <div id="radar-summary-list" style="display:flex;flex-direction:column;"></div>
-            </div>
-
-            <div id="radar-tabs" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;"></div>
-
-            <div id="radar-list" style="display:flex;flex-direction:column;gap:0;background:#FFFFFF;border:1px solid #E6E6E0;border-radius:12px;overflow:hidden;">
-              <div style="padding:20px;font-size:12.5px;color:#6E7076;">Carregando...</div>
+          <div class="ct-page">
+            <div class="ct-page-inner">
+              <header class="ct-page-header">
+                <div>
+                  <h1 class="ct-h1">Radar de risco</h1>
+                  <p style="font-size:14px;color:var(--text-muted);margin:6px 0 0;max-width:680px;">Demandas abertas que esfriaram. Com retorno agendado, a conversa fica “em voo”; sem próximo passo, é risco de perder o cliente.</p>
+                </div>
+              </header>
+              <div id="radar-tabs" class="ct-kpi-grid" role="tablist" aria-label="Filtrar demandas" style="margin-bottom:14px;"></div>
+              <div class="ct-card" style="padding:6px;">
+                <div id="radar-list" style="display:flex;flex-direction:column;">
+                  <div style="padding:16px;font-size:13px;color:var(--text-subtle);">Carregando…</div>
+                </div>
+              </div>
             </div>
           </div>
+          <dialog id="radar-schedule-dialog" class="ct-dialog" aria-labelledby="radar-schedule-title">
+            <form method="dialog" id="radar-schedule-form">
+              <h2 class="ct-h2" id="radar-schedule-title">Agendar retorno</h2>
+              <p id="radar-schedule-who" style="font-size:13px;color:var(--text-muted);margin:4px 0 14px;"></p>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text-2);font-weight:500;">Quando
+                <input type="datetime-local" id="radar-schedule-when" name="quando" required class="ct-input"/>
+              </label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+                <button type="button" class="ct-chip" data-quick="1">Amanhã 9h</button>
+                <button type="button" class="ct-chip" data-quick="2">Em 2 dias</button>
+                <button type="button" class="ct-chip" data-quick="7">Próxima semana</button>
+              </div>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text-2);font-weight:500;margin-top:14px;">Lembrete
+                <input type="text" id="radar-schedule-title-input" name="titulo" class="ct-input" value="Retornar contato" autocomplete="off"/>
+              </label>
+              <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;">
+                <button type="button" class="ct-btn ct-btn-secondary" id="radar-schedule-cancel">Cancelar</button>
+                <button type="submit" class="ct-btn ct-btn-primary" value="ok"><span data-icon="calendar"></span>Agendar</button>
+              </div>
+            </form>
+          </dialog>
         </section>
 
         <section class="screen" id="screen-dashboard">
@@ -4842,58 +4869,46 @@ hydrateIcons(document);
     return Math.round(hours) + 'h';
   }
 
+  var RADAR_PILL = { critico: 'ct-pill-danger', em_risco: 'ct-pill-warning', em_voo: 'ct-pill-info' };
+  var RADAR_DOT = { critico: 'var(--danger)', em_risco: 'var(--warning)', em_voo: 'var(--info)' };
+
   function radarBadge(category) {
-    var c = RADAR_CATEGORY_COLORS[category];
-    return '<span style="display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:' + c.bg + ';color:' + c.fg + ';flex-shrink:0;">' + RADAR_CATEGORY_LABELS[category] + '</span>';
+    return '<span class="ct-pill ' + RADAR_PILL[category] + '">' + RADAR_CATEGORY_LABELS[category] + '</span>';
   }
 
   async function loadRadar() {
-    var summaryTitleEl = document.getElementById('radar-summary-title');
-    var summaryListEl = document.getElementById('radar-summary-list');
     var tabsEl = document.getElementById('radar-tabs');
     var listEl = document.getElementById('radar-list');
     var data;
     try {
       data = await api('/radar/risk');
     } catch (err) {
-      listEl.innerHTML = '<div style="padding:20px;font-size:12.5px;color:#B4381A;">Não foi possível carregar o radar.</div>';
+      listEl.innerHTML = '<div class="ct-empty" style="margin:6px;color:var(--danger-ink);">Não foi possível carregar o radar. Recarregue a página.</div>';
       return;
     }
     radarState.data = data;
 
-    var semProximoPasso = data.items.filter(function (i) { return i.category !== 'em_voo'; });
-    semProximoPasso.sort(function (a, b) { return b.hours_stalled - a.hours_stalled; });
-
-    summaryTitleEl.textContent = semProximoPasso.length + (semProximoPasso.length === 1 ? ' demanda aberta sem próximo passo' : ' demandas abertas sem próximo passo');
-    summaryListEl.innerHTML = '';
-    semProximoPasso.slice(0, 8).forEach(function (i) {
-      var row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:12.5px;border-bottom:1px solid #EEEEE8;';
-      row.innerHTML =
-        '<span style="color:#3e4046;">' + escapeHtml(i.contact_name || 'Contato sem nome') + '</span>' +
-        '<span style="color:#6E7076;font-size:11.5px;">aberta há ' + radarFormatStalled(i.hours_stalled) + '</span>';
-      summaryListEl.appendChild(row);
-    });
-    if (!semProximoPasso.length) {
-      summaryListEl.innerHTML = '<div style="font-size:12.5px;color:#6E7076;padding:6px 0;">Nenhuma demanda sem próximo passo. 🎉</div>';
-    }
-
     var tabDefs = [
-      { key: 'critico', count: data.counts.critico },
-      { key: 'em_risco', count: data.counts.em_risco },
-      { key: 'em_voo', count: data.counts.em_voo },
+      { key: null, label: 'Todas abertas', count: data.items.length },
+      { key: 'critico', label: 'Crítico', count: data.counts.critico },
+      { key: 'em_risco', label: 'Em risco', count: data.counts.em_risco },
+      { key: 'em_voo', label: 'Em voo', count: data.counts.em_voo },
     ];
     tabsEl.innerHTML = '';
     tabDefs.forEach(function (t) {
-      var c = RADAR_CATEGORY_COLORS[t.key];
       var active = radarState.activeFilter === t.key;
       var btn = document.createElement('button');
-      btn.style.cssText = 'appearance:none;border:none;border-radius:20px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);' +
-        (active ? 'background:' + c.fg + ';color:#FFFFFF;' : 'background:' + c.bg + ';color:' + c.fg + ';');
-      btn.textContent = t.count + ' ' + RADAR_CATEGORY_LABELS[t.key].toLowerCase();
+      btn.type = 'button';
+      btn.className = 'ct-card ct-filter-card';
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      btn.innerHTML =
+        '<span style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted);">' +
+          (t.key ? '<span style="width:8px;height:8px;border-radius:50%;background:' + RADAR_DOT[t.key] + ';"></span>' : '') + t.label + '</span>' +
+        '<span style="font-family:var(--font-display);font-size:36px;font-weight:500;letter-spacing:-0.02em;line-height:1;color:var(--ink);">' + t.count + '</span>';
       btn.addEventListener('click', function () {
-        radarState.activeFilter = active ? null : t.key;
-        renderRadarList();
+        radarState.activeFilter = t.key;
+        loadRadar();
       });
       tabsEl.appendChild(btn);
     });
@@ -4906,65 +4921,121 @@ hydrateIcons(document);
     var data = radarState.data;
     if (!data) return;
 
-    var items = data.items.slice();
+    var items = data.items.slice().sort(function (a, b) { return b.hours_stalled - a.hours_stalled; });
     if (radarState.activeFilter) {
       items = items.filter(function (i) { return i.category === radarState.activeFilter; });
     }
 
     listEl.innerHTML = '';
     if (!items.length) {
-      listEl.innerHTML = '<div style="padding:20px;font-size:12.5px;color:#6E7076;">Nenhuma demanda nessa categoria.</div>';
+      var emptyMsg = {
+        critico: ['Nenhuma demanda crítica', 'Ótimo sinal — continue agendando retornos para as conversas abertas.'],
+        em_risco: ['Nada em risco agora', 'Conversas paradas há menos de 24h aparecem aqui.'],
+        em_voo: ['Nenhum retorno agendado', 'Use “Agendar retorno” nas demandas abertas para colocá-las em voo.'],
+      }[radarState.activeFilter] || ['Nenhuma demanda aberta', 'Quando uma conversa esfriar sem próximo passo, ela aparece aqui.'];
+      listEl.innerHTML = '<div class="ct-empty" style="margin:6px;"><div style="font-weight:600;color:var(--ink);margin-bottom:4px;">' + emptyMsg[0] + '</div>' + emptyMsg[1] + '</div>';
       return;
     }
 
+    var me = window.__currentUser;
     items.forEach(function (i) {
       var row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid #EEEEE8;';
-
+      row.className = 'ct-list-item';
+      row.style.cssText = 'flex-wrap:wrap;cursor:default;padding:14px 12px;';
+      var isMine = me && String(i.assigned_user_id) === String(me.id);
       var donoText = i.assigned_user_name ? ('Com ' + escapeHtml(i.assigned_user_name)) : 'Sem dono';
-      var warningHtml = i.category !== 'em_voo'
-        ? '<div style="font-size:11.5px;color:#B4690E;margin-top:3px;">⚠ Sem próximo passo agendado</div>'
-        : '<div style="font-size:11.5px;color:#2563A8;margin-top:3px;">✓ Próximo passo agendado</div>';
-
+      var nextStep = i.category !== 'em_voo'
+        ? '<div style="font-size:12px;color:var(--warning-ink);margin-top:4px;display:flex;align-items:center;gap:5px;">' + ICON('calendar-x', 13) + 'Sem próximo passo</div>'
+        : '<div style="font-size:12px;color:var(--info-ink);margin-top:4px;display:flex;align-items:center;gap:5px;">' + ICON('calendar', 13) + 'Retorno agendado</div>';
       row.innerHTML =
-        radarBadge(i.category) +
-        '<div style="flex-grow:1;min-width:0;">' +
-          '<div style="font-weight:600;font-size:13.5px;color:#111214;">' + escapeHtml(i.contact_name || 'Contato sem nome') + '</div>' +
-          '<div style="font-size:12px;color:#5B5D63;margin-top:2px;">' + escapeHtml(i.phone_display || '') + ' · parado há ' + radarFormatStalled(i.hours_stalled) + ' · ' + donoText + '</div>' +
-          warningHtml +
-        '</div>';
+        avatarWithChannel(i.avatar_url, i.avatar_initials, i.contact_name, i.contact_channel, 42, 13) +
+        '<div style="flex:1;min-width:200px;">' +
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-weight:600;font-size:15px;color:var(--ink);">' + escapeHtml(i.contact_name || 'Contato sem nome') + '</span>' + radarBadge(i.category) + '</div>' +
+          '<div style="font-size:13px;color:var(--text-muted);margin-top:3px;font-variant-numeric:tabular-nums;">' + escapeHtml(i.phone_display || '') + ' · parado há ' + radarFormatStalled(i.hours_stalled) + ' · ' + donoText + '</div>' +
+          nextStep +
+        '</div>' +
+        '<div class="radar-actions" style="display:flex;align-items:center;gap:8px;flex-shrink:0;"></div>';
+      var actions = row.querySelector('.radar-actions');
 
-      if (!i.assigned_user_id) {
-        var assumirBtn = document.createElement('button');
-        assumirBtn.textContent = 'Assumir';
-        assumirBtn.style.cssText = 'background:#FFFFFF;border:1px solid #E3E3DC;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#3e4046;cursor:pointer;flex-shrink:0;';
-        assumirBtn.addEventListener('click', async function (e) {
-          e.stopPropagation();
+      if (i.category !== 'em_voo') {
+        var agendar = document.createElement('button');
+        agendar.type = 'button';
+        agendar.className = 'ct-btn ct-btn-secondary';
+        agendar.innerHTML = ICON('calendar', 15) + 'Agendar retorno';
+        agendar.addEventListener('click', function () { openRadarSchedule(i); });
+        actions.appendChild(agendar);
+      }
+      if (isMine) {
+        actions.insertAdjacentHTML('beforeend', '<span class="ct-pill ct-pill-acc">' + ICON('check', 13) + 'Com você</span>');
+      } else {
+        var assumir = document.createElement('button');
+        assumir.type = 'button';
+        assumir.className = 'ct-btn ct-btn-primary';
+        assumir.innerHTML = ICON('hand', 15) + 'Assumir';
+        assumir.addEventListener('click', async function () {
           await api('/conversations/' + i.id + '/assign', { method: 'PATCH', body: JSON.stringify({}) });
           loadRadar();
         });
-        row.appendChild(assumirBtn);
+        actions.appendChild(assumir);
       }
-
-      var arrowBtn = document.createElement('button');
-      arrowBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B5D63" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>';
-      arrowBtn.style.cssText = 'background:none;border:none;cursor:pointer;padding:6px;flex-shrink:0;';
-      arrowBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
+      var abrir = document.createElement('button');
+      abrir.type = 'button';
+      abrir.className = 'ct-icon-btn';
+      abrir.setAttribute('aria-label', 'Abrir conversa com ' + (i.contact_name || 'contato'));
+      abrir.title = 'Abrir conversa';
+      abrir.innerHTML = ICON('arrow-up-right', 17);
+      abrir.addEventListener('click', function () {
         openConversation(i.id);
         window.__goto && window.__goto('inbox');
       });
-      row.appendChild(arrowBtn);
-
-      row.style.cursor = 'pointer';
-      row.addEventListener('click', function () {
-        openConversation(i.id);
-        window.__goto && window.__goto('inbox');
-      });
+      actions.appendChild(abrir);
 
       listEl.appendChild(row);
     });
   }
+
+  // "Agendar retorno": cria uma tarefa com data futura — é o que tira a
+  // conversa do risco (vira "em voo").
+  var radarScheduling = null;
+  function toLocalInput(d) {
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  function openRadarSchedule(item) {
+    radarScheduling = item;
+    var when = new Date(); when.setDate(when.getDate() + 1); when.setHours(9, 0, 0, 0);
+    document.getElementById('radar-schedule-when').value = toLocalInput(when);
+    document.getElementById('radar-schedule-who').textContent = 'Retorno para ' + (item.contact_name || 'o contato') + '. Vira um lembrete nas suas tarefas.';
+    document.getElementById('radar-schedule-dialog').showModal();
+  }
+  document.querySelectorAll('#radar-schedule-dialog [data-quick]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var d = new Date(); d.setDate(d.getDate() + parseInt(b.getAttribute('data-quick'), 10)); d.setHours(9, 0, 0, 0);
+      document.getElementById('radar-schedule-when').value = toLocalInput(d);
+    });
+  });
+  document.getElementById('radar-schedule-cancel').addEventListener('click', function () {
+    document.getElementById('radar-schedule-dialog').close();
+  });
+  document.getElementById('radar-schedule-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var item = radarScheduling;
+    if (!item) return;
+    var when = new Date(document.getElementById('radar-schedule-when').value);
+    if (isNaN(when.getTime()) || when <= new Date()) { alert('Escolha uma data no futuro.'); return; }
+    try {
+      await api('/tasks', { method: 'POST', body: JSON.stringify({
+        contact_id: item.contact_id, conversation_id: item.id,
+        title: document.getElementById('radar-schedule-title-input').value.trim() || 'Retornar contato',
+        due_at: when.toISOString(),
+      }) });
+      document.getElementById('radar-schedule-dialog').close();
+      loadRadar();
+      if (typeof updateSidebarBadges === 'function') updateSidebarBadges();
+    } catch (err) {
+      alert('Não foi possível agendar: ' + err.message);
+    }
+  });
 
 
   // ── Agentes de IA ──────────────────────────────────────────────────────

@@ -62,7 +62,7 @@ export async function getRiskRadarConversations(tenantId, viewer) {
   const result = await query(
     `SELECT c.id, c.assigned_user_id, u.name AS assigned_user_name,
             c.last_message_at, c.created_at,
-            ct.name AS contact_name, ct.phone_display,
+            ct.name AS contact_name, ct.phone_display, c.contact_id, ct.avatar_url, ct.avatar_initials, ct.channel AS contact_channel,
             EXISTS (
               SELECT 1 FROM tasks t
               WHERE t.conversation_id = c.id AND t.status = 'pending' AND t.due_at > now()
