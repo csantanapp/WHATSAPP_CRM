@@ -10,6 +10,8 @@
         return;
       }
       const { user } = await res.json();
+      window.__currentUser = user;
+      document.dispatchEvent(new CustomEvent('ct:user', { detail: user }));
       const nameEl = document.getElementById('ds-user-name');
       const avatarEl = document.getElementById('ds-user-avatar');
       if (nameEl) nameEl.textContent = user.name;

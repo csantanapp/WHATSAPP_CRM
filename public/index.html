@@ -89,6 +89,30 @@ button,input,select,textarea{font-family:var(--font-body);}
 .ct-group-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-subtle);}
 .ct-mono{font-family:var(--font-mono);}
 .ct-empty{border:1.5px dashed #D3D3CC;border-radius:14px;padding:22px;text-align:center;font-size:13px;color:var(--text-subtle);}
+.ct-page{flex:1;min-width:0;height:100%;overflow:auto;padding:32px 36px 48px;}
+.ct-page-inner{max-width:1320px;margin:0 auto;}
+.ct-page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px;}
+.ct-page-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.ct-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+.ct-kpi{min-height:148px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;transition:transform .15s ease,box-shadow .15s ease;}
+.ct-kpi-top{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--text-muted);}
+.ct-kpi-value{font-family:var(--font-display);font-size:52px;font-weight:500;letter-spacing:-0.03em;line-height:1;color:var(--ink);}
+.ct-kpi-dark{background:var(--ink);border-color:var(--ink);}
+.ct-kpi-dark .ct-kpi-top{color:#C9CAC4;}
+.ct-kpi-dark .ct-kpi-value{color:#FFFFFF;}
+.ct-split-card{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));padding:0;overflow:hidden;}
+.ct-split-card > div{padding:18px 20px;border-left:1px solid var(--divider);}
+.ct-split-card > div:first-child{border-left:none;}
+.ct-kpi-md{font-family:var(--font-display);font-size:32px;font-weight:500;letter-spacing:-0.02em;color:var(--ink);line-height:1.15;margin-top:6px;}
+.ct-two-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:14px;align-items:start;}
+.ct-table-card{padding:0;overflow:auto;}
+.ct-table{width:100%;border-collapse:collapse;font-size:14px;}
+.ct-table th{text-align:left;font-size:12px;font-weight:500;color:var(--text-subtle);padding:12px 16px;white-space:nowrap;}
+.ct-table td{padding:12px 16px;border-top:1px solid var(--divider);color:var(--ink);}
+.ct-table tbody tr:hover{background:#FAFAF7;}
+.ct-table .num{text-align:right;font-variant-numeric:tabular-nums;}
+.ct-list-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;text-decoration:none;color:inherit;cursor:pointer;transition:background-color .15s ease;}
+.ct-list-item:hover{background:#F6F6F2;}
 .ct-tile{display:inline-flex;align-items:center;justify-content:center;border-radius:7px;flex-shrink:0;}
 
 :root{
@@ -443,45 +467,55 @@ button{font-family:var(--font-body);}
         </section>
 
         <section class="screen" id="screen-dashboard">
+          <div class="ct-page">
+            <div class="ct-page-inner">
+              <header class="ct-page-header">
+                <div>
+                  <div id="dash-date" style="font-size:13px;color:var(--text-subtle);margin-bottom:4px;"></div>
+                  <h1 class="ct-h1" id="dash-greeting">Bom dia</h1>
+                  <p style="font-size:14px;color:var(--text-muted);margin:6px 0 0;">Resumo em tempo real do atendimento.</p>
+                </div>
+                <div class="ct-page-actions">
+                  <button type="button" id="dash-radar-alert" class="ct-btn" hidden style="background:#FFF1EC;border-color:#FFD2C4;color:var(--danger-ink);"></button>
+                </div>
+              </header>
 
-          <div style="flex-grow:1;display:flex;flex-direction:column;padding:28px 32px;overflow-y:auto;">
-            <div style="font-family:var(--font-display);font-weight:600;font-size:32px;letter-spacing:-0.025em;color:#111214;margin-bottom:4px;">Visão geral</div>
-            <div style="font-size:13px;color:#5B5D63;margin-bottom:24px;">Resumo em tempo real do atendimento da FullHouse</div>
+              <div id="dashboard-cards" class="ct-kpi-grid">
+                <div class="ct-empty" style="grid-column:1/-1;">Carregando métricas…</div>
+              </div>
 
-            <div id="dashboard-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
-              <div style="grid-column:span 4;font-size:12.5px;color:#6E7076;">Carregando métricas...</div>
-            </div>
+              <section style="margin-top:28px;">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px;">
+                  <h2 class="ct-h2">Comercial</h2>
+                  <a href="/tasks/" style="font-size:13px;font-weight:500;color:var(--ink);display:inline-flex;align-items:center;gap:4px;">Minhas tarefas <span aria-hidden="true">↗</span></a>
+                </div>
+                <div id="comercial-cards" class="ct-card ct-split-card">
+                  <div style="padding:6px;color:var(--text-subtle);font-size:13px;">Carregando…</div>
+                </div>
+              </section>
 
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-              <div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;">Comercial</div>
-              <a href="/tasks/" style="font-size:12.5px;color:#111214;font-weight:600;">Minhas tarefas →</a>
-            </div>
-            <div id="comercial-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">
-              <div style="grid-column:span 4;font-size:12.5px;color:#6E7076;">Carregando...</div>
-            </div>
-            <div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Receita por origem</div>
-            <table style="width:100%;border-collapse:collapse;font-size:13px;background:#FFFFFF;border:1px solid #E6E6E0;border-radius:10px;overflow:hidden;">
-              <thead>
-                <tr style="background:#F4F4F0;">
-                  <th style="text-align:left;padding:10px 14px;font-size:11px;color:#5B5D63;text-transform:uppercase;">Origem</th>
-                  <th style="text-align:left;padding:10px 14px;font-size:11px;color:#5B5D63;text-transform:uppercase;">Campanha</th>
-                  <th style="text-align:right;padding:10px 14px;font-size:11px;color:#5B5D63;text-transform:uppercase;">Conversas</th>
-                  <th style="text-align:right;padding:10px 14px;font-size:11px;color:#5B5D63;text-transform:uppercase;">Oportunidades</th>
-                  <th style="text-align:right;padding:10px 14px;font-size:11px;color:#5B5D63;text-transform:uppercase;">Ganhas</th>
-                  <th style="text-align:right;padding:10px 14px;font-size:11px;color:#5B5D63;text-transform:uppercase;">Receita</th>
-                </tr>
-              </thead>
-              <tbody id="receita-origem-tbody">
-                <tr><td colspan="6" style="padding:14px;font-size:12.5px;color:#6E7076;">Carregando...</td></tr>
-              </tbody>
-            </table>
-
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;margin-top:28px;">
-              <div style="font-size:11px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;">Conversas recentes</div>
-              <a href="#kanban" data-goto="kanban" style="font-size:12.5px;color:#111214;font-weight:600;">Ver Kanban completo →</a>
-            </div>
-            <div id="dashboard-recent" style="display:flex;flex-direction:column;gap:8px;margin-bottom:28px;">
-              <div style="font-size:12.5px;color:#6E7076;">Carregando...</div>
+              <div class="ct-two-cols" style="margin-top:28px;">
+                <section>
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px;">
+                    <h2 class="ct-h2">Conversas recentes</h2>
+                    <a href="#kanban" data-goto="kanban" style="font-size:13px;font-weight:500;color:var(--ink);">Ver Kanban <span aria-hidden="true">→</span></a>
+                  </div>
+                  <div class="ct-card" style="padding:6px;">
+                    <div id="dashboard-recent" style="display:flex;flex-direction:column;">
+                      <div style="padding:12px;color:var(--text-subtle);font-size:13px;">Carregando…</div>
+                    </div>
+                  </div>
+                </section>
+                <section>
+                  <h2 class="ct-h2" style="margin-bottom:12px;">Receita por origem</h2>
+                  <div class="ct-card ct-table-card">
+                    <table class="ct-table">
+                      <thead><tr><th>Origem</th><th>Campanha</th><th class="num">Conversas</th><th class="num">Oport.</th><th class="num">Ganhas</th><th class="num">Receita</th></tr></thead>
+                      <tbody id="receita-origem-tbody"><tr><td colspan="6" style="color:var(--text-subtle);">Carregando…</td></tr></tbody>
+                    </table>
+                  </div>
+                </section>
+              </div>
             </div>
           </div>
         </section>
@@ -1112,24 +1146,41 @@ button{font-family:var(--font-body);}
 
   // Selo pequeno de canal (Instagram), sobreposto no canto do avatar — some
   // sozinho pro WhatsApp (canal padrão), só aparece quando vem de outro canal.
+  // Selo do canal no canto do avatar: WhatsApp (verde) ou Instagram (rosa).
   function channelBadge(channel, size) {
-    if (channel !== 'instagram') return '';
-    size = size || 15;
-    return '<span style="position:absolute;bottom:-2px;right:-2px;width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:linear-gradient(45deg,#FEDA75,#D62976,#962FBF);display:flex;align-items:center;justify-content:center;border:1.5px solid #FFFFFF;flex-shrink:0;" title="Instagram">' +
-      '<svg width="' + Math.round(size * 0.6) + '" height="' + Math.round(size * 0.6) + '" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="3.2"></circle><circle cx="17.3" cy="6.7" r="0.6" fill="#FFFFFF" stroke="none"></circle></svg>' +
+    size = size || 16;
+    var isIg = channel === 'instagram';
+    return '<span style="position:absolute;bottom:-2px;right:-2px;width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:' + (isIg ? 'var(--instagram)' : 'var(--whatsapp)') + ';color:#FFFFFF;display:flex;align-items:center;justify-content:center;border:2px solid #FFFFFF;box-sizing:content-box;flex-shrink:0;" title="' + (isIg ? 'Instagram' : 'WhatsApp') + '">' +
+      ICON(isIg ? 'instagram' : 'message-circle', Math.round(size * 0.55), 'stroke-width="2.6"') +
     '</span>';
   }
 
-  function avatarHtml(avatarUrl, avatarInitials, name, size, fontSize, fontFamily) {
-    var base = 'width:' + size + 'px;height:' + size + 'px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:' + fontSize + 'px;' + (fontFamily ? "font-family:'" + fontFamily + "',sans-serif;" : '');
+  // Fundos pastel rotativos, estáveis por pessoa (mesmo nome = mesma cor).
+  var AVATAR_BGS = ['#E8F5C8', '#FFE2D6', '#DCEBFF', '#ECE4FF', '#FFF0C2', '#E0F3EC'];
+  function avatarBg(key) {
+    var str = String(key || '?'); var h = 0;
+    for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+    return AVATAR_BGS[h % AVATAR_BGS.length];
+  }
+
+  function avatarHtml(avatarUrl, avatarInitials, name, size, fontSize) {
+    var base = 'width:' + size + 'px;height:' + size + 'px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:' + fontSize + 'px;color:var(--ink);';
     if (avatarUrl) {
       var safeUrl = String(avatarUrl).replace(/'/g, '%27');
-      return '<div style="' + base + "background:#F0FBD2 url('" + safeUrl + "') center/cover no-repeat;" + '"></div>';
+      return '<div style="' + base + 'background:' + avatarBg(name) + " url('" + safeUrl + "') center/cover no-repeat;" + '"></div>';
     }
-    return '<div style="' + base + 'background:#F0FBD2;color:#111214;">' + escapeHtml(avatarInitials || initials(name)) + '</div>';
+    return '<div style="' + base + 'background:' + avatarBg(name || avatarInitials) + ';">' + escapeHtml(avatarInitials || initials(name)) + '</div>';
+  }
+
+  // Avatar com selo do canal (envolve num container relativo).
+  function avatarWithChannel(avatarUrl, avatarInitials, name, channel, size, fontSize) {
+    return '<div style="position:relative;width:' + size + 'px;height:' + size + 'px;flex-shrink:0;">' +
+      avatarHtml(avatarUrl, avatarInitials, name, size, fontSize) + channelBadge(channel, size >= 40 ? 17 : 16) + '</div>';
   }
 
   function applyAvatarEl(el, avatarUrl, avatarInitials, name) {
+    el.style.backgroundColor = avatarBg(name || avatarInitials);
+    el.style.color = 'var(--ink)';
     if (avatarUrl) {
       el.style.backgroundImage = "url('" + String(avatarUrl).replace(/'/g, '%27') + "')";
       el.style.backgroundSize = 'cover';
@@ -2029,6 +2080,12 @@ button{font-family:var(--font-body);}
     }
   });
 
+  function radarCriticalCount(radar) {
+    if (!radar) return 0;
+    if (radar.counts && radar.counts.critico != null) return radar.counts.critico;
+    return (radar.items || []).filter(function (r) { return r.category === 'critico'; }).length;
+  }
+
   // Badges do menu lateral: fila da Inbox e conversas críticas no Radar.
   var sidebarBadgeTimer = null;
   function setSidebarBadge(id, value) {
@@ -2044,7 +2101,7 @@ button{font-family:var(--font-body);}
     } catch (e) {}
     try {
       var radar = await api('/radar/risk');
-      setSidebarBadge('radar', (radar || []).filter(function (r) { return r.category === 'critico'; }).length);
+      setSidebarBadge('radar', radarCriticalCount(radar));
     } catch (e) {}
   }
   function scheduleSidebarBadges() {
@@ -3470,47 +3527,73 @@ button{font-family:var(--font-body);}
     window.__goto && window.__goto('automacao-flow');
   }
 
+  // ── Dashboard (LAYOUT-SPEC §4.1) ──
+  var BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  var PCT = new Intl.NumberFormat('pt-BR', { style: 'percent', maximumFractionDigits: 1 });
+  var INT = new Intl.NumberFormat('pt-BR');
+
+  function dashGreeting() {
+    var now = new Date();
+    var h = now.getHours();
+    var hello = h < 12 ? 'Bom dia' : (h < 18 ? 'Boa tarde' : 'Boa noite');
+    var user = window.__currentUser;
+    var first = user && user.name ? user.name.split(' ')[0] : '';
+    document.getElementById('dash-greeting').textContent = hello + (first ? ', ' + first : '');
+    var date = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }).format(now);
+    document.getElementById('dash-date').textContent = date.charAt(0).toUpperCase() + date.slice(1);
+  }
+  document.addEventListener('ct:user', dashGreeting);
+
+  function kpiCard(opts) {
+    return '<div class="ct-card ct-kpi' + (opts.dark ? ' ct-kpi-dark' : '') + '">' +
+      '<div class="ct-kpi-top"><span>' + escapeHtml(opts.label) + '</span>' +
+        '<span class="ct-tile" style="width:32px;height:32px;border-radius:9px;background:' + (opts.dark ? 'var(--acc)' : 'var(--surface-muted)') + ';color:var(--ink);">' + ICON(opts.icon, 16) + '</span></div>' +
+      '<div><div class="ct-kpi-value">' + INT.format(opts.value || 0) + '</div>' +
+        (opts.sub ? '<div style="font-size:13px;margin-top:8px;color:' + (opts.dark ? 'var(--acc)' : 'var(--text-subtle)') + ';">' + escapeHtml(opts.sub) + '</div>' : '') +
+      '</div></div>';
+  }
+
   async function loadDashboard() {
+    dashGreeting();
     var cardsEl = document.getElementById('dashboard-cards');
     var recentEl = document.getElementById('dashboard-recent');
-    var summary, recent;
+    var summary, recent, counts = {}, radar = [];
     try {
       summary = await api('/dashboard/summary');
       recent = await api('/dashboard/recent-conversations');
     } catch (err) {
-      cardsEl.innerHTML = '<div style="grid-column:span 4;color:#B4381A;font-size:12.5px;">Não foi possível carregar o dashboard.</div>';
+      cardsEl.innerHTML = '<div class="ct-empty" style="grid-column:1/-1;color:var(--danger-ink);">Não foi possível carregar o dashboard. Recarregue a página.</div>';
       return;
     }
+    try { counts = await api('/inbox/counts'); } catch (e) {}
+    try { radar = await api('/radar/risk'); } catch (e) {}
 
-    var cards = [
-      { label: 'Contatos totais', value: summary.totalContacts },
-      { label: 'Conversas em aberto', value: summary.openConversations },
-      { label: 'Fechadas essa semana', value: summary.closedThisWeek },
-      { label: 'Automações ativas', value: summary.activeAutomations },
-    ];
-    cardsEl.innerHTML = '';
-    cards.forEach(function (c) {
-      var card = document.createElement('div');
-      card.style.cssText = 'background:#FFFFFF;border:1px solid #E6E6E0;border-radius:14px;padding:18px;';
-      card.innerHTML =
-        '<div style="font-size:12px;color:#5B5D63;margin-bottom:6px;">' + escapeHtml(c.label) + '</div>' +
-        '<div style="font-family:var(--font-body);font-weight:600;font-size:26px;color:#111214;">' + c.value + '</div>';
-      cardsEl.appendChild(card);
-    });
+    cardsEl.innerHTML =
+      kpiCard({ dark: true, label: 'Conversas em aberto', icon: 'message-circle', value: summary.openConversations, sub: INT.format(counts.queue || 0) + ' na fila · ' + INT.format(counts.mine || 0) + ' com você' }) +
+      kpiCard({ label: 'Contatos totais', icon: 'users', value: summary.totalContacts }) +
+      kpiCard({ label: 'Fechadas na semana', icon: 'circle-check', value: summary.closedThisWeek }) +
+      kpiCard({ label: 'Automações ativas', icon: 'zap', value: summary.activeAutomations });
+
+    var critical = radarCriticalCount(radar);
+    var alertBtn = document.getElementById('dash-radar-alert');
+    alertBtn.hidden = !critical;
+    alertBtn.innerHTML = ICON('triangle-alert', 16) + '<span>' + critical + (critical === 1 ? ' conversa crítica' : ' conversas críticas') + ' no Radar</span><span aria-hidden="true">→</span>';
+    alertBtn.onclick = function () { window.__goto && window.__goto('radar'); };
 
     recentEl.innerHTML = '';
     if (!recent.length) {
-      recentEl.innerHTML = '<div style="font-size:12.5px;color:#6E7076;">Nenhuma conversa ainda.</div>';
-      return;
+      recentEl.innerHTML = '<div class="ct-empty" style="margin:6px;">Nenhuma conversa ainda. Quando um lead mandar mensagem, ela aparece aqui.</div>';
     }
     recent.forEach(function (c) {
       var row = document.createElement('a');
       row.href = '#conversa';
-      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 14px;background:#FFFFFF;border:1px solid #E6E6E0;border-radius:10px;cursor:pointer;text-decoration:none;';
+      row.className = 'ct-list-item';
+      var pillCls = c.is_closed_stage ? 'ct-pill-neutral' : 'ct-pill-acc';
       row.innerHTML =
-        avatarHtml(c.avatar_url, c.avatar_initials, c.contact_name, 30, 11.5, 'Inter') +
-        '<div style="flex-grow:1;min-width:0;"><div style="font-weight:600;font-size:13px;color:#111214;">' + escapeHtml(c.contact_name || 'Sem nome') + '</div><div style="font-size:11.5px;color:#5B5D63;">' + escapeHtml(c.phone_display || '') + '</div></div>' +
-        '<span style="font-size:11px;font-weight:600;color:#5b5d63;background:#EEEEE8;padding:3px 10px;border-radius:20px;">' + escapeHtml(c.stage_name || '--') + '</span>';
+        avatarWithChannel(c.avatar_url, c.avatar_initials, c.contact_name, c.contact_channel, 38, 13) +
+        '<div style="flex:1;min-width:0;"><div style="font-weight:500;font-size:14px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(c.contact_name || 'Sem nome') + '</div>' +
+          '<div style="font-size:13px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(c.phone_display || '') + '</div></div>' +
+        '<span class="ct-pill ' + pillCls + '">' + escapeHtml(c.stage_name || 'Sem etapa') + '</span>';
       row.addEventListener('click', function (e) {
         e.preventDefault();
         openConversation(c.id);
@@ -3523,7 +3606,7 @@ button{font-family:var(--font-body);}
   }
 
   function formatMoney(v) {
-    return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    return BRL.format(Number(v) || 0);
   }
 
   async function loadComercial() {
@@ -3534,42 +3617,35 @@ button{font-family:var(--font-body);}
       summary = await api('/opportunities/summary');
       bySource = await api('/opportunities/revenue-by-source');
     } catch (err) {
-      cardsEl.innerHTML = '<div style="grid-column:span 4;color:#B4381A;font-size:12.5px;">Não foi possível carregar o comercial.</div>';
+      cardsEl.innerHTML = '<div style="color:var(--danger-ink);font-size:13px;">Não foi possível carregar o comercial.</div>';
       return;
     }
 
-    var cards = [
-      { label: 'Oportunidades abertas', value: summary.open_count },
-      { label: 'Ganhas', value: summary.won_count },
+    var cols = [
+      { label: 'Oportunidades abertas', value: INT.format(summary.open_count || 0) },
+      { label: 'Ganhas', value: INT.format(summary.won_count || 0) },
       { label: 'Valor ganho', value: formatMoney(summary.won_value) },
-      { label: 'Taxa de conversão', value: Math.round(summary.conversion_rate * 100) + '%' },
+      { label: 'Taxa de conversão', value: PCT.format(Number(summary.conversion_rate) || 0) },
     ];
-    cardsEl.innerHTML = '';
-    cards.forEach(function (c) {
-      var card = document.createElement('div');
-      card.style.cssText = 'background:#FFFFFF;border:1px solid #E6E6E0;border-radius:14px;padding:18px;';
-      card.innerHTML =
-        '<div style="font-size:12px;color:#5B5D63;margin-bottom:6px;">' + escapeHtml(c.label) + '</div>' +
-        '<div style="font-family:var(--font-display);font-weight:600;font-size:22px;color:#111214;">' + c.value + '</div>';
-      cardsEl.appendChild(card);
-    });
+    cardsEl.innerHTML = cols.map(function (c) {
+      return '<div><div style="font-size:13px;color:var(--text-muted);">' + escapeHtml(c.label) + '</div><div class="ct-kpi-md">' + c.value + '</div></div>';
+    }).join('');
 
     tbody.innerHTML = '';
     if (!bySource.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="padding:14px;font-size:12.5px;color:#6E7076;">Nenhuma conversa ainda.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text-subtle);">Nenhuma conversa ainda.</td></tr>';
       return;
     }
     var sourceLabels = { referral_ad: 'Anúncio', campaign_keyword: 'Campanha (link)', direct: 'Direto' };
     bySource.forEach(function (r) {
       var tr = document.createElement('tr');
-      tr.style.cssText = 'border-top:1px solid #E6E6E0;';
       tr.innerHTML =
-        '<td style="padding:10px 14px;">' + escapeHtml(sourceLabels[r.source_type] || r.source_type) + '</td>' +
-        '<td style="padding:10px 14px;color:#5B5D63;">' + escapeHtml(r.campaign_key) + '</td>' +
-        '<td style="padding:10px 14px;text-align:right;">' + r.conversations + '</td>' +
-        '<td style="padding:10px 14px;text-align:right;">' + r.opportunities + '</td>' +
-        '<td style="padding:10px 14px;text-align:right;">' + r.won + '</td>' +
-        '<td style="padding:10px 14px;text-align:right;font-weight:600;">' + formatMoney(r.revenue) + '</td>';
+        '<td>' + escapeHtml(sourceLabels[r.source_type] || r.source_type) + '</td>' +
+        '<td style="color:var(--text-muted);">' + (r.campaign_key ? escapeHtml(r.campaign_key) : '—') + '</td>' +
+        '<td class="num">' + INT.format(r.conversations || 0) + '</td>' +
+        '<td class="num">' + INT.format(r.opportunities || 0) + '</td>' +
+        '<td class="num">' + INT.format(r.won || 0) + '</td>' +
+        '<td class="num" style="font-weight:600;">' + formatMoney(r.revenue) + '</td>';
       tbody.appendChild(tr);
     });
   }
