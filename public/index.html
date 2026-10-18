@@ -219,6 +219,8 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 .fn-link{background:var(--ink);border-radius:16px;padding:18px;margin-top:16px;color:#FFFFFF;}
 .fn-link input{flex:1;min-width:0;height:38px;border:1px solid #2B2D33;background:#1E1F23;color:#FFFFFF;border-radius:10px;padding:0 12px;font-family:var(--font-mono);font-size:12.5px;}
 .li-row{display:flex;align-items:center;gap:10px;background:#FAFAF7;border:1px solid var(--divider);border-radius:11px;padding:8px 8px 8px 10px;text-align:left;}
+.ct-table-compact th,.ct-table-compact td{padding-left:11px;padding-right:11px;}
+.ct-table-compact th:first-child,.ct-table-compact td:first-child{padding-left:16px;}
 .ct-link{font-size:14px;font-weight:500;color:var(--ink);display:inline-flex;align-items:center;gap:4px;text-decoration:underline;text-underline-offset:3px;}
 .radar-row{display:flex;align-items:center;gap:14px;padding:18px 22px;flex-wrap:wrap;}
 .radar-list .radar-row + .radar-row{border-top:1px solid var(--divider);}
@@ -647,7 +649,7 @@ button{font-family:var(--font-body);}
               </div>
 
               <div class="ct-card ct-table-card">
-                <table class="ct-table">
+                <table class="ct-table ct-table-compact">
                   <thead>
                     <tr>
                       <th data-sort="name" style="cursor:pointer;">Nome <span data-sort-arrow="name"></span></th>
@@ -4169,7 +4171,7 @@ hydrateIcons(document);
         (c.tags && c.tags.length > 2 ? ' <span style="font-size:12px;color:var(--text-subtle);">+' + (c.tags.length - 2) + '</span>' : '');
       tr.innerHTML =
         '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml(c.avatar_url, c.avatar_initials, c.name, 32, 12) + '<span style="font-weight:500;white-space:nowrap;">' + escapeHtml(c.name || 'Sem nome') + '</span></div></td>' +
-        '<td style="color:var(--text-muted);">' + (c.email ? escapeHtml(c.email) : '<span style="color:var(--text-subtle);">—</span>') + '</td>' +
+        '<td style="color:var(--text-muted);max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"' + (c.email ? ' title="' + escapeHtml(c.email) + '"' : '') + '>' + (c.email ? escapeHtml(c.email) : '<span style="color:var(--text-subtle);">—</span>') + '</td>' +
         '<td style="white-space:nowrap;font-variant-numeric:tabular-nums;"><span style="display:inline-flex;align-items:center;gap:6px;"><span style="color:' + (isIg ? 'var(--instagram)' : 'var(--whatsapp)') + ';display:inline-flex;">' + ICON(isIg ? 'instagram' : 'message-circle', 14) + '</span>' + escapeHtml(c.phone_display || '') + '</span></td>' +
         '<td style="white-space:nowrap;">' + (tagsHtml || '<span style="color:var(--text-subtle);">—</span>') + '</td>' +
         '<td style="white-space:nowrap;">' + interestCellHtml(c) + '</td>' +
