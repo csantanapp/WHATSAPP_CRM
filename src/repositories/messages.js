@@ -13,16 +13,17 @@ export async function insertMessage({
   mediaSizeBytes,
   status = 'sent',
   automationFlowId,
+  automationStepId,
   kind = 'message',
 }) {
   const tenantId = await getDefaultTenantId();
   const result = await query(
     `INSERT INTO messages
-      (tenant_id, conversation_id, wa_message_id, direction, sender_type, body, media_url, media_type, media_filename, media_size_bytes, status, automation_flow_id, kind)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+      (tenant_id, conversation_id, wa_message_id, direction, sender_type, body, media_url, media_type, media_filename, media_size_bytes, status, automation_flow_id, kind, automation_step_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
      ON CONFLICT (wa_message_id) DO NOTHING
      RETURNING *`,
-    [tenantId, conversationId, waMessageId || null, direction, senderType, body || null, mediaUrl || null, mediaType || null, mediaFilename || null, mediaSizeBytes || null, status, automationFlowId || null, kind]
+    [tenantId, conversationId, waMessageId || null, direction, senderType, body || null, mediaUrl || null, mediaType || null, mediaFilename || null, mediaSizeBytes || null, status, automationFlowId || null, kind, automationStepId || null]
   );
   return result.rows[0];
 }

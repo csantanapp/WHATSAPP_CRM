@@ -73,6 +73,7 @@ import {
   updateFlow,
   deleteFlow,
   replaceFlowSteps,
+  getFlowMetrics,
   setFlowActive,
 } from '../repositories/automations.js';
 import {
@@ -619,6 +620,11 @@ apiRouter.patch('/automation-flows/:id', asyncHandler(async (req, res) => {
   });
   if (steps) await replaceFlowSteps(req.params.id, steps);
   res.json(await getFlowWithSteps(req.params.id));
+}));
+
+apiRouter.get('/automation-flows/:id/metrics', asyncHandler(async (req, res) => {
+  const days = req.query.days && req.query.days !== 'all' ? Math.max(1, Math.min(365, parseInt(req.query.days, 10) || 30)) : null;
+  res.json(await getFlowMetrics(req.params.id, days));
 }));
 
 apiRouter.delete('/automation-flows/:id', asyncHandler(async (req, res) => {

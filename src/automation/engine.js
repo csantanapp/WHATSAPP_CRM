@@ -95,6 +95,7 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
     }
     const current = cursor.current;
     let nextOverride; // usado pelo 'condition'/'classify_ai' pra escolher o ramo certo
+    let logOutcome = null;
 
     switch (current.step_type) {
       case 'send_message': {
@@ -111,6 +112,7 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
           senderType: 'automation',
           body: text,
           automationFlowId: flow.id,
+          automationStepId: current.id,
         });
         broadcast({ type: 'message:new', conversationId: conversation.id, message: saved });
         break;
@@ -166,6 +168,7 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
       case 'condition': {
         const result = await evaluateCondition(current.config, { contact, conversation });
         nextOverride = result ? current.next_step_id_true : current.next_step_id_false;
+        logOutcome = result ? 'true' : 'false';
         break;
       }
       case 'classify_ai': {
@@ -178,6 +181,7 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
           .join('\n');
         const result = await classifyForAutomation(flow.tenant_id, { question: current.config?.question || '', transcript });
         nextOverride = result ? current.next_step_id_true : current.next_step_id_false;
+        logOutcome = result ? 'true' : 'false';
         break;
       }
       case 'wait': {
@@ -185,6 +189,7 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
         // (sobrevive a restart/redeploy do container).
         const minutes = current.config?.minutes || 60;
         const runAt = new Date(Date.now() + minutes * 60 * 1000);
+        await logStep(flow.id, current.id, run.id, conversation.id, null);
         await scheduleJob('automation_resume', runAt, { runId: run.id, stepId: current.id });
         await updateRun(run.id, { currentStepId: current.id, status: 'waiting_delay' });
         return;
@@ -199,8 +204,10 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
         const known = knownAnswer(contact, current.config);
         if (known !== null) {
           nextOverride = nextStepForAnswer(current, known) || null;
+          logOutcome = 'skipped_known';
           break;
         }
+        await logStep(flow.id, current.id, run.id, conversation.id, null);
         await sendQuestion({ flow, conversation, contact, step: current });
         await updateRun(run.id, { currentStepId: current.id, status: 'waiting_reply' });
         return;
@@ -209,11 +216,24 @@ async function executeSteps({ flow, conversation, contact, run, cursor }) {
         break;
     }
 
+    await logStep(flow.id, current.id, run.id, conversation.id, logOutcome);
     const nextId = nextOverride !== undefined ? nextOverride : current.next_step_id;
     cursor.current = nextId ? await getStep(nextId) : null;
   }
 
   await updateRun(run.id, { currentStepId: null, status: 'completed' });
+}
+
+// Log leve de execução de nó, pra métricas do construtor. Nunca derruba o fluxo.
+async function logStep(flowId, stepId, runId, conversationId, outcome) {
+  try {
+    await query(
+      `INSERT INTO automation_step_logs (automation_flow_id, step_id, run_id, conversation_id, outcome) VALUES ($1,$2,$3,$4,$5)`,
+      [flowId, stepId, runId, conversationId, outcome]
+    );
+  } catch (err) {
+    logger.error('automation_step_log_failed', { stepId, message: err.message });
+  }
 }
 
 async function evaluateCondition(config, { contact, conversation }) {

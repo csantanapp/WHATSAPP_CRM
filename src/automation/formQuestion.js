@@ -88,6 +88,7 @@ export async function sendQuestion({ flow, conversation, contact, step, textOver
     senderType: 'automation',
     body: textWithOptions,
     automationFlowId: flow.id,
+    automationStepId: step.id,
   });
   broadcast({ type: 'message:new', conversationId: conversation.id, message: saved });
 }
@@ -191,9 +192,10 @@ export async function handleQuestionReply({ flow, run, step, conversation, conta
   const config = step.config || {};
   const value = parseAnswer(config, message.body);
 
+  const optionIndex = value !== null ? questionOptions(config).indexOf(value) : -1;
   await query(
-    'INSERT INTO automation_run_answers (automation_run_id, step_id, answer, is_valid) VALUES ($1,$2,$3,$4)',
-    [run.id, step.id, message.body, value !== null]
+    'INSERT INTO automation_run_answers (automation_run_id, step_id, answer, is_valid, option_index) VALUES ($1,$2,$3,$4,$5)',
+    [run.id, step.id, message.body, value !== null, optionIndex >= 0 ? optionIndex : null]
   );
 
   if (value === null) {
