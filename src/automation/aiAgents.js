@@ -15,6 +15,7 @@ import { logger } from '../logger.js';
 // mecanismos rodam em paralelo, então evite configurar gatilhos sobrepostos
 // num mesmo funil pra não ter duas respostas automáticas pra uma mensagem.
 export async function runAiAgentsForInboundMessage({ conversation, contact, message }) {
+  if (contact.bot_paused) return; // contato "só humano"
   const tenantId = await getDefaultTenantId();
   const agents = await listActiveAgentsForDispatch(tenantId, conversation.funnel_id);
   if (!agents.length) return;

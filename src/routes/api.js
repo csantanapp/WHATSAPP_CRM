@@ -794,6 +794,7 @@ apiRouter.get('/inbox/conversations', asyncHandler(async (req, res) => {
     search: req.query.q,
     unreadOnly: req.query.unread === 'true',
     tag: req.query.tag,
+    adsOnly: req.query.ads === 'true',
   });
   res.json(rows);
 }));

@@ -53,8 +53,26 @@ export async function setFieldConfirmed(contactId, field, confirmed) {
 // Só atualiza os campos explicitamente passados (undefined = "não mexer");
 // string vazia é um valor válido e limpa o campo.
 export async function updateContact(id, fields) {
+  if (fields.bot_paused !== undefined) {
+    const paused = Boolean(fields.bot_paused);
+    const changed = await query(
+      'UPDATE contacts SET bot_paused = $2, updated_at = now() WHERE id = $1 AND bot_paused <> $2 RETURNING id',
+      [id, paused]
+    );
+    if (changed.rowCount) {
+      await logActivity({
+        contactId: id,
+        type: paused ? 'bot_paused' : 'bot_resumed',
+        description: paused ? 'Atendimento só humano: IA e automações pausadas para este contato' : 'IA e automações reativadas para este contato',
+      });
+    }
+  }
+
   const columns = ['name', 'email', 'source', 'notes'].filter((key) => fields[key] !== undefined);
-  if (!columns.length) return getContactById(await getDefaultTenantId(), id);
+  if (!columns.length) {
+    const current = await query('SELECT * FROM contacts WHERE id = $1', [id]);
+    return current.rows[0];
+  }
 
   const setClause = columns.map((col, i) => `${col} = $${i + 2}`).join(', ');
   const values = columns.map((col) => fields[col] || null);

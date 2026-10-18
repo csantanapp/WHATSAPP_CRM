@@ -47,10 +47,20 @@ export async function listMessagesByConversation(conversationId) {
   return result.rows;
 }
 
-export async function updateMessageStatusByWaId(waMessageId, status) {
+// A Meta pode entregar os status fora de ordem (ex: "delivered" depois de
+// "read"). O status só avança: sent < delivered < read. "failed" só vale
+// enquanto a mensagem não foi entregue/lida.
+export async function updateMessageStatusByWaId(waMessageId, status, errorMessage = null) {
   const result = await query(
-    'UPDATE messages SET status = $2 WHERE wa_message_id = $1 RETURNING *',
-    [waMessageId, status]
+    `UPDATE messages SET status = $2, error_message = CASE WHEN $2 = 'failed' THEN $3 ELSE error_message END
+     WHERE wa_message_id = $1
+       AND (
+         ($2 = 'failed' AND coalesce(status, 'sent') NOT IN ('delivered', 'read'))
+         OR (CASE $2 WHEN 'sent' THEN 1 WHEN 'delivered' THEN 2 WHEN 'read' THEN 3 ELSE 0 END)
+            > (CASE coalesce(status, 'sent') WHEN 'sent' THEN 1 WHEN 'delivered' THEN 2 WHEN 'read' THEN 3 WHEN 'failed' THEN 1 ELSE 0 END)
+       )
+     RETURNING *`,
+    [waMessageId, status, errorMessage]
   );
   return result.rows[0];
 }

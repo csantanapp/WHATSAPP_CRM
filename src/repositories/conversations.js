@@ -180,7 +180,7 @@ const WINDOW_HOURS = 24;
 export async function getConversationDetail(conversationId) {
   const result = await query(
     `SELECT c.*, ct.name AS contact_name, ct.email AS contact_email, ct.phone_display, ct.avatar_initials, ct.avatar_url,
-            ct.tags AS contact_tags, ct.source AS contact_source, ct.notes AS contact_notes, ct.custom_fields AS contact_custom_fields, ct.wa_id,
+            ct.tags AS contact_tags, ct.source AS contact_source, ct.notes AS contact_notes, ct.custom_fields AS contact_custom_fields, ct.bot_paused AS contact_bot_paused, ct.wa_id,
             ct.channel AS contact_channel, ct.ig_user_id,
             f.id AS funnel_id_full, f.name AS funnel_name, fs.name AS stage_name,
             u.name AS assigned_user_name,
@@ -235,7 +235,7 @@ export async function listConversationsByFunnel(funnelId, viewer) {
 // filtros estilo Front/Intercom — Fila (não atribuídas), Minhas, Todas,
 // Fechadas. Respeita a mesma regra de visibilidade do Kanban (atendente só
 // vê as suas + não atribuídas).
-function buildInboxConditions(tenantId, viewer, { tab = 'all', search, unreadOnly, tag } = {}) {
+function buildInboxConditions(tenantId, viewer, { tab = 'all', search, unreadOnly, tag, adsOnly } = {}) {
   const conditions = ['c.tenant_id = $1'];
   const params = [tenantId];
 
@@ -264,6 +264,10 @@ function buildInboxConditions(tenantId, viewer, { tab = 'all', search, unreadOnl
     conditions.push(`$${params.length} = ANY(ct.tags)`);
   }
 
+  if (adsOnly) {
+    conditions.push(`EXISTS (SELECT 1 FROM conversation_sources s WHERE s.conversation_id = c.id AND s.source_type = 'referral_ad')`);
+  }
+
   return { where: conditions.join(' AND '), params };
 }
 
@@ -274,8 +278,14 @@ export async function listInboxConversations(tenantId, viewer, filters = {}) {
             ct.name AS contact_name, ct.phone_display, ct.avatar_initials, ct.avatar_url, ct.tags, ct.channel AS contact_channel,
             u.name AS assigned_user_name,
             (SELECT m.body FROM messages m WHERE m.conversation_id = c.id AND m.kind = 'message' ORDER BY m.created_at DESC LIMIT 1) AS last_message_body,
-            (SELECT m.media_type FROM messages m WHERE m.conversation_id = c.id AND m.kind = 'message' ORDER BY m.created_at DESC LIMIT 1) AS last_message_media_type
+            (SELECT m.media_type FROM messages m WHERE m.conversation_id = c.id AND m.kind = 'message' ORDER BY m.created_at DESC LIMIT 1) AS last_message_media_type,
+            src.source_type, src.ad_headline, src.raw->>'source_type' AS ad_source_kind,
+            ct.bot_paused
      FROM conversations c
+     LEFT JOIN LATERAL (
+       SELECT s.source_type, s.ad_headline, s.raw FROM conversation_sources s
+       WHERE s.conversation_id = c.id ORDER BY s.id LIMIT 1
+     ) src ON true
      JOIN contacts ct ON ct.id = c.contact_id
      LEFT JOIN users u ON u.id = c.assigned_user_id
      WHERE ${where}

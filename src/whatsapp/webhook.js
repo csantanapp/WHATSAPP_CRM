@@ -259,9 +259,11 @@ async function sendCampaignWelcome(conversation, contact, funnel) {
 
 async function handleStatusUpdates(value) {
   for (const status of value.statuses) {
-    const updated = await updateMessageStatusByWaId(status.id, status.status);
+    const error = status.errors?.[0];
+    const errorMessage = error ? (error.error_data?.details || error.message || error.title || `Erro ${error.code}`) : null;
+    const updated = await updateMessageStatusByWaId(status.id, status.status, errorMessage);
     if (updated) {
-      broadcast({ type: 'message:status', waMessageId: status.id, status: status.status });
+      broadcast({ type: 'message:status', waMessageId: status.id, status: updated.status, errorMessage: updated.error_message });
     }
   }
 }

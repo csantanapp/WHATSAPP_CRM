@@ -188,8 +188,8 @@ button{font-family:'Inter',sans-serif;}
                 <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#475569;cursor:pointer;">
                   <input type="checkbox" id="inbox-unread-toggle" style="cursor:pointer;"/> Não lidos
                 </label>
-                <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#B6C0CD;cursor:not-allowed;" title="Em breve">
-                  <input type="checkbox" id="inbox-groups-toggle" disabled style="cursor:not-allowed;"/> Grupos
+                <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#475569;cursor:pointer;" title="Só conversas que começaram num anúncio Click-to-WhatsApp">
+                  <input type="checkbox" id="inbox-ads-toggle" style="cursor:pointer;"/> Anúncios
                 </label>
                 <select id="inbox-tag-filter" style="margin-left:auto;background:#F5F7FA;border:1px solid #E2E8F0;border-radius:8px;padding:5px 8px;font-size:11.5px;color:#475569;font-family:'Inter',sans-serif;cursor:pointer;">
                   <option value="">Todas as tags</option>
@@ -273,6 +273,16 @@ button{font-family:'Inter',sans-serif;}
                       <div id="painel-email" title="Clique para editar o e-mail" style="font-size:12px;color:#94A3B8;cursor:pointer;margin-top:2px;">+ adicionar e-mail</div>
                       <a id="painel-ver-contato" href="#contatos" style="font-size:11.5px;font-weight:600;color:#2563EB;margin-top:8px;display:flex;align-items:center;gap:4px;cursor:pointer;">Ver contato <span>→</span></a>
                     </div>
+                  </div>
+
+                  <label style="display:flex;align-items:flex-start;gap:9px;background:#F8FAFC;border:1px solid #E5E9F0;border-radius:10px;padding:10px 12px;cursor:pointer;">
+                    <input type="checkbox" id="painel-bot-paused" style="margin-top:2px;cursor:pointer;"/>
+                    <span style="font-size:12.5px;font-weight:600;color:#1E293B;line-height:1.35;">Atendimento só humano<span style="display:block;font-size:11px;font-weight:400;color:#64748B;">IA e automações não respondem este contato. As mensagens continuam chegando aqui.</span></span>
+                  </label>
+
+                  <div id="painel-origem-wrap" style="display:none;">
+                    <div style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Origem</div>
+                    <div id="painel-origem"></div>
                   </div>
 
                   <div id="painel-campos-wrap" style="display:none;">
@@ -1362,6 +1372,45 @@ button{font-family:'Inter',sans-serif;}
     }).join('');
   }
 
+  // Cartão "Origem": de qual anúncio (Click-to-WhatsApp) ou link de campanha
+  // a conversa veio. A Meta só manda isso na primeira mensagem — fica salvo em
+  // conversation_sources.
+  function sourceCardHtml(src) {
+    if (!src) return '';
+    if (src.source_type === 'campaign_keyword') {
+      return '<div style="font-size:12.5px;color:#334155;">🔗 Link de campanha' + (src.campaign_key ? ' · palavra-chave <b>' + escapeHtml(src.campaign_key) + '</b>' : '') + '</div>';
+    }
+    if (src.source_type !== 'referral_ad') {
+      return '<div style="font-size:12.5px;color:#64748B;">Contato direto (sem anúncio ou link de campanha)</div>';
+    }
+    var raw = src.raw || {};
+    var kind = raw.source_type === 'post' ? 'Publicação' : 'Anúncio';
+    var img = raw.image_url || raw.thumbnail_url;
+    var body = raw.body ? (raw.body.length > 160 ? raw.body.slice(0, 158) + '…' : raw.body) : '';
+    var safeUrl = /^https?:\/\//i.test(src.source_url || '') ? src.source_url : '';
+    return '<div style="border:1px solid #E5E9F0;border-radius:10px;overflow:hidden;background:#FFFFFF;">' +
+      (img ? '<img src="' + escapeHtml(img) + '" alt="" onerror="this.remove()" style="display:block;width:100%;max-height:150px;object-fit:cover;background:#F1F5F9;"/>' : '') +
+      '<div style="padding:10px 12px;display:flex;flex-direction:column;gap:5px;">' +
+        '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span style="font-size:10.5px;font-weight:700;color:#7C3AED;background:#F3EEFF;border-radius:6px;padding:2px 7px;">📣 ' + kind + '</span>' +
+          (raw.media_type === 'video' ? '<span style="font-size:10.5px;color:#64748B;">com vídeo</span>' : '') + '</div>' +
+        (src.ad_headline ? '<div style="font-size:13px;font-weight:600;color:#0F172A;line-height:1.35;">' + escapeHtml(src.ad_headline) + '</div>' : '') +
+        (body ? '<div style="font-size:12px;color:#475569;line-height:1.45;">' + escapeHtml(body) + '</div>' : '') +
+        '<div style="font-size:11px;color:#94A3B8;">Primeira mensagem · ' + new Date(src.created_at).toLocaleDateString('pt-BR') + (src.ad_id ? ' · ID ' + escapeHtml(src.ad_id) : '') + '</div>' +
+        (safeUrl ? '<a href="' + escapeHtml(safeUrl) + '" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:#2563EB !important;">Ver ' + kind.toLowerCase() + ' ↗</a>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  async function loadSourceBox(conversationId) {
+    var wrap = document.getElementById('painel-origem-wrap');
+    var src = null;
+    try { src = await api('/conversations/' + conversationId + '/source'); } catch (e) { src = null; }
+    if (conversationId !== state.currentConversationId) return; // trocou de conversa no meio
+    var html = sourceCardHtml(src);
+    document.getElementById('painel-origem').innerHTML = html;
+    wrap.style.display = html ? 'block' : 'none';
+  }
+
   async function refreshConversationPanel() {
     if (!state.currentConversationId) return;
     var conv;
@@ -1385,6 +1434,8 @@ button{font-family:'Inter',sans-serif;}
     var emailEl = document.getElementById('painel-email');
     emailEl.textContent = conv.contact_email || '+ adicionar e-mail';
     emailEl.style.color = conv.contact_email ? '#475569' : '#94A3B8';
+    document.getElementById('painel-bot-paused').checked = Boolean(conv.contact_bot_paused);
+    loadSourceBox(conv.id);
     var camposHtml = customFieldsHtml(conv.contact_custom_fields);
     document.getElementById('painel-campos').innerHTML = camposHtml;
     document.getElementById('painel-campos-wrap').style.display = camposHtml ? 'block' : 'none';
@@ -1507,6 +1558,14 @@ button{font-family:'Inter',sans-serif;}
     refreshConversationPanel();
   });
 
+  document.getElementById('painel-bot-paused').addEventListener('change', async function () {
+    var conv = state.currentConversationDetail;
+    if (!conv) return;
+    await api('/contacts/' + conv.contact_id, { method: 'PATCH', body: JSON.stringify({ bot_paused: this.checked }) });
+    await refreshConversationPanel();
+    if (typeof loadInboxList === 'function') loadInboxList();
+  });
+
   document.getElementById('painel-notas').addEventListener('blur', async function () {
     var conv = state.currentConversationDetail;
     if (!conv) return;
@@ -1584,11 +1643,24 @@ button{font-family:'Inter',sans-serif;}
     var mediaHtml = renderMediaContent(m, textColor);
     var textHtml = m.body ? '<div style="font-size:13.5px;color:' + textColor + ';line-height:1.5;white-space:pre-wrap;word-break:break-word;' + (mediaHtml ? 'margin-top:6px;' : '') + '">' + escapeHtml(m.body) + '</div>' : '';
 
+    if (isOutbound && m.wa_message_id) wrap.setAttribute('data-wa-id', m.wa_message_id);
     wrap.innerHTML =
       tagHtml +
       '<div style="' + bubbleStyle + '">' + mediaHtml + textHtml + '</div>' +
-      '<div style="font-size:10.5px;color:#94A3B8;margin-top:4px;' + (isOutbound ? 'margin-right' : 'margin-left') + ':4px;">' + formatTime(m.created_at) + '</div>';
+      '<div style="font-size:10.5px;color:#94A3B8;margin-top:4px;display:flex;align-items:center;gap:5px;' + (isOutbound ? 'margin-right' : 'margin-left') + ':4px;">' + formatTime(m.created_at) +
+        (isOutbound ? '<span class="msg-status">' + messageStatusHtml(m.status, m.error_message) + '</span>' : '') +
+      '</div>';
     return wrap;
+  }
+
+  // Status de entrega da Meta: enviada ✓, entregue ✓✓, lida ✓✓ azul, falhou ⚠.
+  function messageStatusHtml(status, errorMessage) {
+    if (status === 'failed') {
+      return '<span title="' + escapeHtml(errorMessage || 'A Meta não entregou esta mensagem') + '" style="color:#DC2626;font-weight:600;cursor:help;">⚠ Não entregue</span>';
+    }
+    if (status === 'read') return '<span title="Lida" style="color:#2563EB;font-weight:700;letter-spacing:-3px;">✓✓</span>';
+    if (status === 'delivered') return '<span title="Entregue" style="color:#94A3B8;font-weight:700;letter-spacing:-3px;">✓✓</span>';
+    return '<span title="Enviada" style="color:#94A3B8;font-weight:700;">✓</span>';
   }
 
   function renderMediaContent(m, textColor) {
@@ -1952,6 +2024,10 @@ button{font-family:'Inter',sans-serif;}
       }
       if (data.type === 'message:new' || data.type === 'conversation:stage_changed') {
         if (state.currentFunnelId) renderFunnel(state.currentFunnelId);
+      }
+      if (data.type === 'message:status' && data.waMessageId) {
+        var statusWrap = document.querySelector('#conversa-messages [data-wa-id="' + CSS.escape(data.waMessageId) + '"] .msg-status');
+        if (statusWrap) statusWrap.innerHTML = messageStatusHtml(data.status, data.errorMessage);
       }
       if (data.type === 'contact:updated' && data.conversationId === state.currentConversationId) {
         refreshConversationPanel();
@@ -3682,6 +3758,10 @@ button{font-family:'Inter',sans-serif;}
         '<div id="modal-lead-email" title="Clique para editar" style="font-size:12px;color:' + (lead.email ? '#475569' : '#94A3B8') + ';cursor:pointer;margin-top:2px;">' + escapeHtml(lead.email || '+ adicionar e-mail') + '</div>' +
       '</div>' +
       '<div style="margin-bottom:18px;">' + tagsHtml + '</div>' +
+      '<label style="display:flex;align-items:flex-start;gap:9px;background:#F8FAFC;border:1px solid #E5E9F0;border-radius:10px;padding:10px 12px;cursor:pointer;margin-bottom:18px;">' +
+        '<input type="checkbox" id="modal-lead-bot-paused" style="margin-top:2px;cursor:pointer;" ' + (lead.bot_paused ? 'checked' : '') + '/>' +
+        '<span style="font-size:12.5px;font-weight:600;color:#1E293B;line-height:1.35;">Atendimento só humano<span style="display:block;font-size:11px;font-weight:400;color:#64748B;">IA e automações não respondem este contato.</span></span>' +
+      '</label>' +
       (customFieldsHtml(lead.custom_fields) ? '<div style="margin-bottom:18px;">' +
         '<div style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Dados do formulário</div>' +
         customFieldsHtml(lead.custom_fields) +
@@ -3712,6 +3792,10 @@ button{font-family:'Inter',sans-serif;}
       await api('/contacts/' + contactId, { method: 'PATCH', body: JSON.stringify({ email: email }) });
       openLeadDetail(contactId);
       loadContacts(document.getElementById('contatos-search').value.trim());
+    });
+    document.getElementById('modal-lead-bot-paused').addEventListener('change', async function () {
+      await api('/contacts/' + contactId, { method: 'PATCH', body: JSON.stringify({ bot_paused: this.checked }) });
+      openLeadDetail(contactId);
     });
     document.getElementById('modal-lead-notes').addEventListener('blur', async function () {
       await api('/contacts/' + contactId, { method: 'PATCH', body: JSON.stringify({ notes: this.value }) });
@@ -4160,7 +4244,7 @@ button{font-family:'Inter',sans-serif;}
     loadTags();
   });
 
-  var inboxState = { tab: 'queue', search: '', unread: false, tag: '', tagsLoaded: false };
+  var inboxState = { tab: 'queue', search: '', unread: false, ads: false, tag: '', tagsLoaded: false };
 
   function mediaPlaceholder(type) {
     var map = { image: '[imagem]', video: '[vídeo]', audio: '[áudio]', document: '[documento]', sticker: '[sticker]' };
@@ -4229,6 +4313,7 @@ button{font-family:'Inter',sans-serif;}
         tab: inboxState.tab,
         q: inboxState.search,
         unread: inboxState.unread ? 'true' : 'false',
+        ads: inboxState.ads ? 'true' : 'false',
         tag: inboxState.tag,
       }).toString());
     } catch (e) {
@@ -4247,7 +4332,7 @@ button{font-family:'Inter',sans-serif;}
       var preview = c.last_message_body || (c.last_message_media_type ? mediaPlaceholder(c.last_message_media_type) : 'Sem mensagens');
       var row = document.createElement('a');
       row.href = '#conversa';
-      row.style.cssText = 'display:flex;align-items:flex-start;gap:10px;padding:12px 18px;border-bottom:1px solid #F5F7FA;cursor:pointer;text-decoration:none;' + (unread ? 'background:#FFFBF7;' : '');
+      row.style.cssText = 'display:flex;align-items:flex-start;gap:10px;padding:12px 18px;border-bottom:1px solid #F5F7FA;cursor:pointer;text-decoration:none;' + (unread ? 'background:#F5F9FF;' : '');
       row.innerHTML =
         '<div style="position:relative;width:34px;height:34px;flex-shrink:0;">' + avatarHtml(c.avatar_url, c.avatar_initials, c.contact_name, 34, 12, null) + '' + channelBadge(c.contact_channel) + '</div>' +
         '<div style="flex-grow:1;min-width:0;">' +
@@ -4259,6 +4344,7 @@ button{font-family:'Inter',sans-serif;}
             '<div style="font-size:12px;color:' + (unread ? '#334155' : '#64748B') + ';font-weight:' + (unread ? '600' : '400') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(preview) + '</div>' +
             (unread ? '<span style="flex-shrink:0;background:#2563EB;color:#FFFFFF;font-size:10.5px;font-weight:700;border-radius:999px;padding:1px 7px;">' + c.unread_count + '</span>' : '') +
           '</div>' +
+          inboxRowBadges(c) +
         '</div>';
       row.addEventListener('click', function (e) {
         e.preventDefault();
@@ -4267,6 +4353,19 @@ button{font-family:'Inter',sans-serif;}
       });
       listEl.appendChild(row);
     });
+  }
+
+  // Etiquetas extras na linha do inbox: origem em anúncio e contato "só humano".
+  function inboxRowBadges(c) {
+    var badges = [];
+    if (c.source_type === 'referral_ad') {
+      var kind = c.ad_source_kind === 'post' ? 'Publicação' : 'Anúncio';
+      badges.push('<span title="' + escapeHtml(kind + (c.ad_headline ? ': ' + c.ad_headline : '')) + '" style="display:inline-flex;align-items:center;gap:4px;max-width:100%;font-size:10.5px;font-weight:600;color:#7C3AED;background:#F3EEFF;border-radius:6px;padding:2px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">📣 ' + kind + (c.ad_headline ? ' · ' + escapeHtml(c.ad_headline) : '') + '</span>');
+    }
+    if (c.bot_paused) {
+      badges.push('<span title="IA e automações pausadas para este contato" style="font-size:10.5px;font-weight:600;color:#475569;background:#EEF2F6;border-radius:6px;padding:2px 7px;white-space:nowrap;">👤 Só humano</span>');
+    }
+    return badges.length ? '<div style="display:flex;gap:5px;margin-top:5px;min-width:0;">' + badges.join('') + '</div>' : '';
   }
 
   function loadInbox() {
@@ -4287,6 +4386,10 @@ button{font-family:'Inter',sans-serif;}
     });
     document.getElementById('inbox-unread-toggle').addEventListener('change', function (e) {
       inboxState.unread = e.target.checked;
+      loadInboxList();
+    });
+    document.getElementById('inbox-ads-toggle').addEventListener('change', function (e) {
+      inboxState.ads = e.target.checked;
       loadInboxList();
     });
     document.getElementById('inbox-tag-filter').addEventListener('change', function (e) {

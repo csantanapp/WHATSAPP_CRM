@@ -262,6 +262,9 @@ function isWithinBusinessHours(config) {
 // (disparou um fluxo ou respondeu a uma pergunta pendente) — nesse caso os
 // Agentes de IA ficam em silêncio, pra não responder junto com o fluxo.
 export async function runTriggersForInboundMessage({ conversation, contact, message }) {
+  // Contato "só humano": nenhum fluxo dispara nem continua (a mensagem só
+  // aparece no Inbox). Retorna true pra os Agentes de IA também ficarem quietos.
+  if (contact.bot_paused) return true;
   // Trigger: primeira mensagem da conversa dispara fluxos configurados como "first_message".
   // Se nenhum disparar, cai na checagem de palavra-chave abaixo — senão um
   // lead novo que chega mandando a palavra de uma campanha seria ignorado.
@@ -335,7 +338,7 @@ export async function runTriggersForInboundMessage({ conversation, contact, mess
 
 // Gatilho: tag adicionada a um contato (chamado pela rota de tags em api.js).
 export async function runTriggersForTagAdded({ conversation, contact, tag }) {
-  if (!conversation) return;
+  if (!conversation || contact?.bot_paused) return;
   const flows = await getActiveFlowsByTrigger('tag_added', conversation.funnel_id);
   for (const flow of flows) {
     if (flow.trigger_config?.tag && flow.trigger_config.tag !== tag) continue;
@@ -348,6 +351,7 @@ export async function runTriggersForTagAdded({ conversation, contact, tag }) {
 
 // Gatilho: conversa entrou numa etapa de funil (chamado pela rota de mover etapa).
 export async function runTriggersForStageEntered({ conversation, contact }) {
+  if (contact?.bot_paused) return;
   const flows = await getActiveFlowsByTrigger('stage_entered', conversation.funnel_id);
   for (const flow of flows) {
     if (flow.trigger_config?.funnel_stage_id && flow.trigger_config.funnel_stage_id !== conversation.funnel_stage_id) continue;
@@ -378,6 +382,11 @@ export async function resumeRunAfterWait(runId) {
   if (!conversation) return;
   const contactResult = await query('SELECT * FROM contacts WHERE id = $1', [conversation.contact_id]);
   const contact = contactResult.rows[0];
+  if (contact?.bot_paused) {
+    // Pausado durante a espera: encerra a run em vez de mandar a próxima mensagem.
+    await updateRun(run.id, { currentStepId: null, status: 'stopped' });
+    return;
+  }
 
   const nextStep = await getStep(nextId);
   await updateRun(run.id, { currentStepId: nextStep.id, status: 'running' });
