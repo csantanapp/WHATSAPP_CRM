@@ -180,6 +180,23 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 .flow-chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--border-input);background:#FFFFFF;font-size:12px;color:var(--text-2);white-space:nowrap;}
 .flow-chip-trigger{background:var(--acc-soft);border-color:var(--acc-soft);color:var(--acc-ink);}
 .flow-chain-sep{color:var(--text-subtle);font-size:13px;}
+.fe-toolbar{height:60px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 16px;background:#FFFFFF;border-bottom:1px solid var(--border);}
+.fe-palette{width:236px;flex-shrink:0;border-right:1px solid var(--border);background:var(--surface-2);padding:14px 12px;overflow-y:auto;}
+.pal-group{display:flex;flex-direction:column;gap:2px;margin-bottom:14px;}
+.pal-grip{margin-left:auto;color:var(--text-subtle);display:inline-flex;}
+.fe-zoom{position:absolute;bottom:16px;left:16px;display:flex;align-items:center;gap:2px;background:#FFFFFF;border:1px solid var(--border);border-radius:999px;padding:3px 6px;box-shadow:0 1px 3px rgba(17,18,20,.06);}
+.fe-zoom .ct-icon-btn{width:30px;height:30px;border-radius:999px;}
+#flow-zoom-level{min-width:44px;text-align:center;font-size:12px;font-weight:500;color:var(--text-2);font-variant-numeric:tabular-nums;}
+.ct-menu{position:absolute;right:0;top:calc(100% + 6px);min-width:210px;background:#FFFFFF;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-menu);padding:6px;z-index:30;}
+.ct-menu-item{display:flex;align-items:center;gap:10px;width:100%;height:36px;padding:0 10px;border:none;background:transparent;border-radius:8px;font-size:14px;color:var(--ink);cursor:pointer;text-align:left;}
+.ct-menu-item:hover{background:var(--surface-muted);}
+.ct-menu-item.danger{color:#B4381A;}
+.ct-menu-item.danger:hover{background:var(--danger-soft);}
+.fe-props-overlay{position:fixed;top:60px;right:0;bottom:0;width:360px;z-index:40;}
+.fe-props{height:100%;background:#FFFFFF;border-left:1px solid var(--border);box-shadow:-8px 0 24px rgba(17,18,20,.06);display:flex;flex-direction:column;}
+.fe-props-head{display:flex;align-items:center;gap:10px;padding:14px 14px 14px 18px;border-bottom:1px solid var(--divider);}
+.fe-props-body{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;}
+.fe-props-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 18px;border-top:1px solid var(--divider);}
 .ct-tile{display:inline-flex;align-items:center;justify-content:center;border-radius:7px;flex-shrink:0;}
 
 :root{
@@ -721,92 +738,98 @@ button{font-family:var(--font-body);}
 
           <div style="flex-grow:1;display:flex;flex-direction:column;min-width:0;">
 
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid #E6E6E0;flex-shrink:0;flex-wrap:wrap;gap:10px;">
-              <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-                <a href="#automacao" data-goto="automacao" style="display:flex;align-items:center;gap:6px;color:#5b5d63;font-size:13px;font-weight:500;flex-shrink:0;">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5b5d63" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"></path></svg>
-                </a>
-                <div id="flow-canvas-name" title="Clique para renomear" style="display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0;">
-                  <span style="font-family:var(--font-body);font-weight:600;font-size:15px;color:#111214;">--</span>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6E7076" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>
+            <div class="fe-toolbar">
+              <div style="display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap;">
+                <button type="button" class="ct-icon-btn" data-goto="automacao" aria-label="Voltar para Automações" title="Voltar"><span data-icon="arrow-left" data-icon-size="18"></span></button>
+                <div id="flow-canvas-name" style="display:flex;align-items:center;gap:4px;min-width:0;">
+                  <span style="font-family:var(--font-display);font-weight:600;font-size:18px;letter-spacing:-0.01em;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;">--</span>
+                  <button type="button" class="ct-icon-btn" aria-label="Renomear automação" title="Renomear" style="width:30px;height:30px;"><span data-icon="pencil" data-icon-size="14"></span></button>
                 </div>
-                <span id="flow-draft-badge" style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:#F4F4F0;color:#5B5D63;flex-shrink:0;">Rascunho</span>
-                <button id="flow-trigger-summary-btn" style="display:flex;align-items:center;gap:6px;background:#F0FBD2;border:none;border-radius:20px;padding:6px 12px;font-size:11.5px;font-weight:600;color:#111214;cursor:pointer;white-space:nowrap;">Gatilho: --</button>
+                <span id="flow-draft-badge" class="ct-pill ct-pill-neutral">Rascunho</span>
+                <button type="button" id="flow-trigger-summary-btn" class="ct-pill ct-pill-acc" style="border:none;cursor:pointer;"></button>
               </div>
-              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                <button id="flow-metrics-btn" title="Ver métricas de cada nó (envios, entregas, leituras, respostas)" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#5b5d63;border:1px solid #E3E3DC;border-radius:9px;padding:8px 12px;font-weight:600;font-size:12px;cursor:pointer;">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
-                  Métricas
-                </button>
-                <button id="flow-organize-btn" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#5b5d63;border:1px solid #E3E3DC;border-radius:9px;padding:8px 12px;font-weight:600;font-size:12px;cursor:pointer;">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5b5d63" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"></circle><circle cx="18" cy="18" r="2.5"></circle><path d="M8.2 7.5 15.8 16.5"></path></svg>
-                  Organizar
-                </button>
-                <button id="flow-discard-btn" style="background:#FFFFFF;color:#5b5d63;border:1px solid #E3E3DC;border-radius:9px;padding:8px 12px;font-weight:600;font-size:12px;cursor:pointer;">Descartar</button>
-                <button id="flow-save-btn" style="background:#FFFFFF;color:#3e4046;border:1px solid #E3E3DC;border-radius:9px;padding:8px 14px;font-weight:600;font-size:12px;cursor:pointer;">Salvar</button>
-                <button id="flow-deactivate-btn" style="background:#FFFFFF;color:#B4381A;border:1px solid #E3E3DC;border-radius:9px;padding:8px 14px;font-weight:600;font-size:12px;cursor:pointer;">Desativar</button>
-                <button id="flow-publish-btn" style="background:#157A3A;color:#FFFFFF;border:none;border-radius:9px;padding:8px 16px;font-weight:600;font-size:12px;cursor:pointer;">Publicar</button>
-                <button id="flow-canvas-delete" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;color:#B4381A;border:1px solid #E3E3DC;border-radius:9px;padding:8px 12px;font-weight:600;font-size:12px;cursor:pointer;">Excluir</button>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <button type="button" id="flow-metrics-btn" class="ct-btn ct-btn-secondary" title="Ver métricas de cada nó (envios, entregas, leituras, respostas)"><span data-icon="chart-column"></span>Métricas</button>
+                <button type="button" id="flow-organize-btn" class="ct-btn ct-btn-ghost"><span data-icon="wand-sparkles"></span>Organizar</button>
+                <button type="button" id="flow-discard-btn" class="ct-btn ct-btn-ghost">Descartar</button>
+                <button type="button" id="flow-save-btn" class="ct-btn ct-btn-secondary">Salvar</button>
+                <button type="button" id="flow-publish-btn" class="ct-btn ct-btn-primary"><span data-icon="rocket"></span>Publicar</button>
+                <div style="position:relative;">
+                  <button type="button" id="flow-more-btn" class="ct-icon-btn" aria-label="Mais ações" aria-haspopup="menu" aria-expanded="false" style="border:1px solid var(--border-input);background:#FFFFFF;width:38px;height:38px;"><span data-icon="ellipsis" data-icon-size="17"></span></button>
+                  <div id="flow-more-menu" class="ct-menu" role="menu" hidden>
+                    <button type="button" role="menuitem" id="flow-deactivate-btn" class="ct-menu-item"><span data-icon="eye-off"></span>Desativar</button>
+                    <button type="button" role="menuitem" id="flow-canvas-delete" class="ct-menu-item danger"><span data-icon="trash-2"></span>Excluir automação…</button>
+                  </div>
+                </div>
               </div>
             </div>
 
             <div style="flex-grow:1;display:flex;min-height:0;">
               <div id="flow-metrics-panel" style="display:none;width:260px;flex-shrink:0;border-right:1px solid #E6E6E0;background:#FBFBF8;padding:18px 16px;overflow-y:auto;"></div>
-              <div id="flow-palette-panel" style="width:188px;flex-shrink:0;border-right:1px solid #E6E6E0;background:#FBFBF8;padding:16px 12px;overflow-y:auto;">
-                <div style="font-size:10.5px;font-weight:600;color:#6E7076;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Adicionar nó</div>
-                <div style="display:flex;flex-direction:column;gap:6px;" id="flow-palette">
-                  <button class="flow-palette-btn" data-add-node="trigger"><span class="ct-tile" style="width:26px;height:26px;background:#F0FBD2;color:#3B4A00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="6 3 20 12 6 21 6 3" /></svg></span><span>Gatilho</span></button>
-                  <button class="flow-palette-btn" data-add-node="wait"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" /> <polyline points="12 6 12 12 16 14" /></svg></span><span>Aguardar</span></button>
-                  <button class="flow-palette-btn" data-add-node="condition"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 3h5v5" /> <path d="M8 3H3v5" /> <path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3" /> <path d="m15 9 6-6" /></svg></span><span>Condição</span></button>
-                  <button class="flow-palette-btn" data-add-node="classify_ai"><span class="ct-tile" style="width:26px;height:26px;background:#F1EBFF;color:#4A2C99;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /> <path d="M20 3v4" /> <path d="M22 5h-4" /> <path d="M4 17v2" /> <path d="M5 18H3" /></svg></span><span>Classificar (IA)</span></button>
-                  <button class="flow-palette-btn" data-add-node="send_message"><span class="ct-tile" style="width:26px;height:26px;background:#E4F2FF;color:#0F4C85;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /> <path d="M13 8H7" /> <path d="M17 12H7" /></svg></span><span>Resposta (texto)</span></button>
-                  <button class="flow-palette-btn" data-add-node="ask_question"><span class="ct-tile" style="width:26px;height:26px;background:#E4F2FF;color:#0F4C85;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /> <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /> <path d="M12 11h4" /> <path d="M12 16h4" /> <path d="M8 11h.01" /> <path d="M8 16h.01" /></svg></span><span>Pergunta (formulário)</span></button>
-                  <button class="flow-palette-btn" data-add-node="repeat"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m17 2 4 4-4 4" /> <path d="M3 11v-1a4 4 0 0 1 4-4h14" /> <path d="m7 22-4-4 4-4" /> <path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg></span><span>Repetir</span></button>
-                  <button class="flow-palette-btn" data-add-node="action"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg></span><span>Ação</span></button>
-                  <button class="flow-palette-btn" data-add-node="create_task"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.268 21a2 2 0 0 0 3.464 0" /> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></svg></span><span>Lembrete interno</span></button>
-                  <button class="flow-palette-btn" data-add-node="move_stage"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16 3 4 4-4 4" /> <path d="M20 7H4" /> <path d="m8 21-4-4 4-4" /> <path d="M4 17h16" /></svg></span><span>Mover lead no funil</span></button>
-                  <button class="flow-palette-btn" data-add-node="tag"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" /> <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" /></svg></span><span>Editar tag do lead</span></button>
-                  <button class="flow-palette-btn" data-add-node="end"><span class="ct-tile" style="width:26px;height:26px;background:#EEEEE8;color:#3E4046;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /> <line x1="4" x2="4" y1="22" y2="15" /></svg></span><span>Fim</span></button>
+              <div id="flow-palette-panel" class="fe-palette">
+                <label class="ib-search" style="background:#FFFFFF;border:1px solid var(--border-input);height:36px;margin-bottom:14px;">
+                  <span data-icon="search"></span>
+                  <input id="flow-palette-search" type="search" autocomplete="off" placeholder="Buscar bloco…" aria-label="Buscar bloco"/>
+                </label>
+                <div id="flow-palette">
+                  <div class="pal-group"><div class="ct-group-label" style="margin:0 4px 6px;">Início</div>
+                    <button type="button" class="flow-palette-btn" data-add-node="trigger"><span class="ct-tile" style="width:26px;height:26px;background:#F0FBD2;color:#3B4A00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="6 3 20 12 6 21 6 3" /></svg></span><span>Gatilho</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button>
+                  </div>
+                  <div class="pal-group"><div class="ct-group-label" style="margin:0 4px 6px;">Mensagens</div>
+                    <button type="button" class="flow-palette-btn" data-add-node="send_message"><span class="ct-tile" style="width:26px;height:26px;background:#E4F2FF;color:#0F4C85;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /> <path d="M13 8H7" /> <path d="M17 12H7" /></svg></span><span>Resposta (texto)</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="ask_question"><span class="ct-tile" style="width:26px;height:26px;background:#E4F2FF;color:#0F4C85;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /> <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /> <path d="M12 11h4" /> <path d="M12 16h4" /> <path d="M8 11h.01" /> <path d="M8 16h.01" /></svg></span><span>Pergunta (formulário)</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button>
+                  </div>
+                  <div class="pal-group"><div class="ct-group-label" style="margin:0 4px 6px;">Lógica</div>
+                    <button type="button" class="flow-palette-btn" data-add-node="wait"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" /> <polyline points="12 6 12 12 16 14" /></svg></span><span>Aguardar</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="condition"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 3h5v5" /> <path d="M8 3H3v5" /> <path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3" /> <path d="m15 9 6-6" /></svg></span><span>Condição</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="repeat"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m17 2 4 4-4 4" /> <path d="M3 11v-1a4 4 0 0 1 4-4h14" /> <path d="m7 22-4-4 4-4" /> <path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg></span><span>Repetir</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="classify_ai"><span class="ct-tile" style="width:26px;height:26px;background:#F1EBFF;color:#4A2C99;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /> <path d="M20 3v4" /> <path d="M22 5h-4" /> <path d="M4 17v2" /> <path d="M5 18H3" /></svg></span><span>Classificar (IA)</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button>
+                  </div>
+                  <div class="pal-group"><div class="ct-group-label" style="margin:0 4px 6px;">Ações</div>
+                    <button type="button" class="flow-palette-btn" data-add-node="action"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg></span><span>Ação</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="create_task"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.268 21a2 2 0 0 0 3.464 0" /> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></svg></span><span>Lembrete interno</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="move_stage"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16 3 4 4-4 4" /> <path d="M20 7H4" /> <path d="m8 21-4-4 4-4" /> <path d="M4 17h16" /></svg></span><span>Mover lead no funil</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="tag"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" /> <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" /></svg></span><span>Editar tag do lead</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="end"><span class="ct-tile" style="width:26px;height:26px;background:#EEEEE8;color:#3E4046;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /> <line x1="4" x2="4" y1="22" y2="15" /></svg></span><span>Fim</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button>
+                  </div>
                 </div>
               </div>
 
-              <div id="flow-canvas-viewport" style="position:relative;flex-grow:1;overflow:hidden;background:#F4F4F0;background-image:radial-gradient(#D6D6CF 1.5px, transparent 1.5px);background-size:22px 22px;cursor:grab;">
+              <div id="flow-canvas-viewport" style="position:relative;flex-grow:1;overflow:hidden;background:var(--bg);background-image:radial-gradient(#D3D3CC 1px, transparent 1.2px);background-size:22px 22px;cursor:grab;">
                 <div id="flow-canvas-content" style="position:absolute;top:0;left:0;transform-origin:0 0;">
                   <svg id="flow-canvas-svg" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none;"></svg>
                 </div>
-                <div style="position:absolute;bottom:16px;left:16px;display:flex;flex-direction:column;gap:4px;background:#FFFFFF;border:1px solid #E6E6E0;border-radius:10px;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                  <button id="flow-zoom-in" title="Aumentar zoom" style="width:30px;height:30px;border:none;background:none;cursor:pointer;font-size:15px;color:#3e4046;">+</button>
-                  <button id="flow-zoom-out" title="Diminuir zoom" style="width:30px;height:30px;border:none;background:none;cursor:pointer;font-size:15px;color:#3e4046;">−</button>
-                  <button id="flow-zoom-reset" title="Centralizar" style="width:30px;height:30px;border:none;background:none;cursor:pointer;font-size:12px;color:#3e4046;">⤢</button>
+                <div class="fe-zoom" role="group" aria-label="Zoom do canvas">
+                  <button type="button" id="flow-zoom-out" class="ct-icon-btn" aria-label="Diminuir zoom" title="Diminuir zoom"><span data-icon="minus" data-icon-size="16"></span></button>
+                  <span id="flow-zoom-level" aria-live="polite">100%</span>
+                  <button type="button" id="flow-zoom-in" class="ct-icon-btn" aria-label="Aumentar zoom" title="Aumentar zoom"><span data-icon="plus" data-icon-size="16"></span></button>
+                  <span class="ib-sep"></span>
+                  <button type="button" id="flow-zoom-reset" class="ct-icon-btn" aria-label="Ajustar à tela" title="Ajustar à tela"><span data-icon="scan" data-icon-size="16"></span></button>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <div id="flow-node-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(17,18,20,0.45);z-index:60;align-items:center;justify-content:center;">
-          <div style="background:#FFFFFF;border-radius:16px;width:440px;max-height:85vh;overflow-y:auto;padding:24px;position:relative;">
-            <button id="flow-node-modal-close" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:#6E7076;font-size:18px;line-height:1;">×</button>
-            <div id="flow-node-modal-title" style="font-family:var(--font-body);font-weight:600;font-size:16px;color:#111214;margin-bottom:16px;"></div>
-            <div id="flow-node-modal-body" style="display:flex;flex-direction:column;gap:14px;"></div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;">
-              <button id="flow-node-modal-delete" style="background:none;border:none;color:#B4381A;font-size:12.5px;font-weight:600;cursor:pointer;">Excluir nó</button>
-              <button id="flow-node-modal-save" style="background:#111214;color:#FFFFFF;border:none;border-radius:9px;padding:10px 20px;font-weight:600;font-size:13px;cursor:pointer;">Salvar nó</button>
+        <div id="flow-node-modal-overlay" class="fe-props-overlay" style="display:none;">
+          <aside class="fe-props" aria-labelledby="flow-node-modal-title">
+            <div class="fe-props-head">
+              <span id="flow-node-modal-tile" class="ct-tile" style="width:28px;height:28px;border-radius:8px;"></span>
+              <div id="flow-node-modal-title" style="flex:1;min-width:0;font-weight:600;font-size:15px;color:var(--ink);"></div>
+              <button type="button" id="flow-node-modal-close" class="ct-icon-btn" aria-label="Fechar painel"><span data-icon="x" data-icon-size="16"></span></button>
             </div>
-          </div>
+            <div id="flow-node-modal-body" class="fe-props-body"></div>
+            <div class="fe-props-foot">
+              <button type="button" id="flow-node-modal-delete" class="ct-btn" style="border-color:#FFD2C4;color:var(--danger-ink);background:#FFFFFF;height:36px;"><span data-icon="trash-2"></span>Excluir bloco</button>
+              <button type="button" id="flow-node-modal-save" class="ct-btn ct-btn-primary" style="height:36px;"><span data-icon="check"></span>Salvar bloco</button>
+            </div>
+          </aside>
         </div>
 
         <style>
           .flow-palette-btn{display:flex;align-items:center;gap:10px;text-align:left;background:transparent;border:1px solid transparent;border-radius:10px;height:38px;padding:0 8px;font-size:13px;font-weight:500;color:var(--text-2);cursor:grab;width:100%;transition:background-color .15s ease,box-shadow .15s ease;}
           .flow-palette-btn:hover{background:#FFFFFF;box-shadow:0 0 0 1px var(--border-input);color:var(--ink);}
-          .flow-node{position:absolute;width:220px;background:#FFFFFF;border:1.5px solid #E6E6E0;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.06);cursor:grab;user-select:none;}
-          .flow-node.selected{border-color:#111214;box-shadow:0 0 0 3px rgba(17,18,20,0.15);}
-          .flow-node-header{display:flex;align-items:center;gap:7px;padding:9px 10px;border-bottom:1px solid #EEEEE8;}
-          .flow-node-body{padding:9px 10px;font-size:12px;color:#111214;line-height:1.4;min-height:16px;}
-          .flow-node-label{font-size:10px;font-weight:600;color:#5B5D63;text-transform:uppercase;letter-spacing:.03em;}
-          .flow-node-handle{position:absolute;width:12px;height:12px;border-radius:50%;background:#FFFFFF;border:2px solid #6E7076;right:-7px;cursor:crosshair;}
-          .flow-node-handle:hover{border-color:#111214;background:#111214;}
-          .flow-node-handle-label{position:absolute;right:16px;font-size:9.5px;font-weight:600;color:#5B5D63;white-space:nowrap;}
+          .flow-node{position:absolute;width:220px;background:#FFFFFF;border:1.5px solid #E3E3DC;border-radius:14px;box-shadow:0 1px 2px rgba(17,18,20,.04),0 4px 12px rgba(17,18,20,.04);cursor:grab;user-select:none;transition:box-shadow .15s ease,border-color .15s ease;}
+          .flow-node.selected{border-color:var(--ink);box-shadow:0 0 0 4px var(--acc-soft),0 8px 24px rgba(17,18,20,.1);}
+          .flow-node-header{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;border-bottom:1px solid #F0F0EA;}
+          .flow-node-body{padding:9px 11px 11px;font-size:13px;color:var(--ink);line-height:20px;min-height:16px;}
+          .flow-node-label{font-size:11px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em;}
+          .flow-node-handle{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--acc);border:1.5px solid var(--ink);right:-7px;cursor:crosshair;box-sizing:border-box;}
+          .flow-node-handle:hover{transform:scale(1.25);}
+          .flow-port-in{position:absolute;left:-7px;top:12px;width:12px;height:12px;border-radius:50%;background:#FFFFFF;border:1.5px solid #A9AAA4;box-sizing:border-box;}
+          .flow-node-handle-label{position:absolute;right:16px;font-size:12px;font-weight:500;color:var(--info-ink);white-space:nowrap;line-height:12px;}
           .flow-node.is-end{border-color:#F3B6AE;}
           .flow-node-metrics{position:absolute;left:0;right:0;bottom:calc(100% + 6px);display:flex;gap:2px;background:#FFFFFF;border:1px solid #E6E6E0;border-radius:9px;padding:5px 4px;box-shadow:0 1px 3px rgba(17,18,20,0.06);}
           .flow-node-metrics .fm-cell{flex:1;text-align:center;min-width:0;}
@@ -2664,12 +2687,12 @@ hydrateIcons(document);
 
   // Nó com ramo por opção: corpo com altura fixa e uma linha por saída abaixo dele.
   var FLOW_BRANCH_FIRST_OFFSET = 100;
-  var FLOW_BRANCH_ROW = 24;
+  var FLOW_BRANCH_ROW = 28;
 
   function flowNodeHeight(node) {
     var branches = flowNodeBranchOptions(node);
     if (branches.length) return FLOW_BRANCH_FIRST_OFFSET + branches.length * FLOW_BRANCH_ROW + 20;
-    return flowNodeHandles(node).length > 1 ? 86 : 70;
+    return flowNodeHandles(node).length > 1 ? 98 : 74;
   }
 
   // Nó com ramos: só a pergunta, curta (as opções já aparecem nas saídas).
@@ -2679,14 +2702,14 @@ hydrateIcons(document);
   }
 
   function flowHandleOffset(node, handle) {
-    if (handle === 'true') return 34;
-    if (handle === 'false') return 62;
+    if (handle === 'true') return 46;
+    if (handle === 'false') return 74;
     var branches = flowNodeBranchOptions(node);
     if (branches.length) {
       var index = handle === 'out' ? branches.length : parseInt(handle.slice(4), 10);
       return FLOW_BRANCH_FIRST_OFFSET + index * FLOW_BRANCH_ROW;
     }
-    return flowNodeHeight(node) / 2;
+    return 12;
   }
 
   function flowHandleTarget(node, handle) {
@@ -2898,20 +2921,21 @@ hydrateIcons(document);
               '<div class="flow-node-handle" style="top:' + top + 'px;" data-handle="' + h + '" data-node="' + node.client_id + '"></div>';
           }).join('');
       } else if (handles.length === 1) {
-        handlesHtml = '<div class="flow-node-handle" style="top:50%;transform:translateY(-50%);" data-handle="out" data-node="' + node.client_id + '"></div>';
+        handlesHtml = '<div class="flow-node-handle" style="top:12px;" data-handle="out" data-node="' + node.client_id + '"></div>';
       } else if (handles.length === 2) {
         var trueLabel = (node.config && node.config.true_label) || 'Sim';
         var falseLabel = (node.config && node.config.false_label) || 'Não';
         handlesHtml =
-          '<div class="flow-node-handle-label" style="top:34px;">' + escapeHtml(trueLabel) + flowBranchPct(node, 'true') + '</div>' +
-          '<div class="flow-node-handle" style="top:34px;" data-handle="true" data-node="' + node.client_id + '"></div>' +
-          '<div class="flow-node-handle-label" style="top:62px;">' + escapeHtml(falseLabel) + flowBranchPct(node, 'false') + '</div>' +
-          '<div class="flow-node-handle" style="top:62px;" data-handle="false" data-node="' + node.client_id + '"></div>';
+          '<div class="flow-node-handle-label" style="top:46px;">' + escapeHtml(trueLabel) + flowBranchPct(node, 'true') + '</div>' +
+          '<div class="flow-node-handle" style="top:46px;" data-handle="true" data-node="' + node.client_id + '"></div>' +
+          '<div class="flow-node-handle-label" style="top:74px;">' + escapeHtml(falseLabel) + flowBranchPct(node, 'false') + '</div>' +
+          '<div class="flow-node-handle" style="top:74px;" data-handle="false" data-node="' + node.client_id + '"></div>';
       }
 
       el.innerHTML =
         deleteX +
-        '<div class="flow-node-header" style="background:' + meta.bg + ';border-top-left-radius:11px;border-top-right-radius:11px;">' +
+        (node.kind === 'trigger' ? '' : '<span class="flow-port-in" aria-hidden="true"></span>') +
+        '<div class="flow-node-header">' +
           '<span class="ct-tile" style="width:22px;height:22px;background:' + meta.bg + ';color:' + meta.stroke + ';">' + ICON(meta.icon, 13) + '</span>' +
           '<span class="flow-node-label" style="color:' + meta.stroke + ';">' + meta.label + '</span>' +
         '</div>' +
@@ -2968,23 +2992,23 @@ hydrateIcons(document);
       var fromNode = flowNodeById(edge.from);
       var toNode = flowNodeById(edge.to);
       if (!fromNode || !toNode) return '';
-      var x1 = fromNode.x + 220, y1 = fromNode.y + edge.handleOffset;
-      var x2 = toNode.x, y2 = toNode.y + flowNodeHeight(toNode) / 2;
+      var x1 = fromNode.x + 220, y1 = fromNode.y + edge.handleOffset + 6;
+      var x2 = toNode.x - 2, y2 = toNode.y + 18;
       maxX = Math.max(maxX, x1 + 50, x2 + 50);
       maxY = Math.max(maxY, y1 + 50, y2 + 50);
-      return '<path d="' + flowEdgePath(x1, y1, x2, y2) + '" stroke="#A9AAA4" stroke-width="2" fill="none" marker-end="url(#flow-arrow)"></path>';
+      var hot = flowCanvas.selectedId && (edge.from === flowCanvas.selectedId || edge.to === flowCanvas.selectedId);
+      return '<path d="' + flowEdgePath(x1, y1, x2, y2) + '" stroke="' + (hot ? '#111214' : '#C3C4BD') + '" stroke-width="' + (hot ? 2 : 1.6) + '" fill="none"></path>';
     }).join('');
     svg.setAttribute('width', maxX);
     svg.setAttribute('height', maxY);
     svg.innerHTML =
-      '<defs><marker id="flow-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#A9AAA4"></path></marker></defs>' +
       paths;
 
     if (flowCanvas.connecting) {
       var from = flowNodeById(flowCanvas.connecting.fromId);
       if (from) {
         var offset = flowHandleOffset(from, flowCanvas.connecting.handle);
-        var x1 = from.x + 220, y1 = from.y + offset;
+        var x1 = from.x + 220, y1 = from.y + offset + 6;
         svg.innerHTML += '<path d="' + flowEdgePath(x1, y1, flowCanvas.connecting.x, flowCanvas.connecting.y) + '" stroke="#111214" stroke-width="2" stroke-dasharray="5,4" fill="none"></path>';
       }
     }
@@ -3083,18 +3107,30 @@ hydrateIcons(document);
     flowCanvas.selectedId = null;
   });
 
-  document.getElementById('flow-zoom-in').addEventListener('click', function () {
-    flowCanvas.scale = Math.min(2, flowCanvas.scale * 1.15);
+  function flowSetZoom(scale) {
+    flowCanvas.scale = Math.max(0.4, Math.min(1.5, scale));
+    document.getElementById('flow-zoom-level').textContent = Math.round(flowCanvas.scale * 100) + '%';
     flowRenderAll();
-  });
-  document.getElementById('flow-zoom-out').addEventListener('click', function () {
-    flowCanvas.scale = Math.max(0.3, flowCanvas.scale / 1.15);
-    flowRenderAll();
-  });
-  document.getElementById('flow-zoom-reset').addEventListener('click', function () {
-    flowCanvas.scale = 1; flowCanvas.panX = 40; flowCanvas.panY = 40;
-    flowRenderAll();
-  });
+  }
+  document.getElementById('flow-zoom-in').addEventListener('click', function () { flowSetZoom(flowCanvas.scale * 1.15); });
+  document.getElementById('flow-zoom-out').addEventListener('click', function () { flowSetZoom(flowCanvas.scale / 1.15); });
+  // Ajustar à tela: enquadra todos os nós no espaço visível.
+  function flowFitToScreen() {
+    var nodes = flowCanvas.nodes;
+    var viewport = document.getElementById('flow-canvas-viewport');
+    if (!nodes.length || !viewport) return;
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    nodes.forEach(function (n) {
+      minX = Math.min(minX, n.x); minY = Math.min(minY, n.y - 40);
+      maxX = Math.max(maxX, n.x + 230); maxY = Math.max(maxY, n.y + flowNodeHeight(n) + 10);
+    });
+    var vw = viewport.clientWidth - 80, vh = viewport.clientHeight - 100;
+    var scale = Math.max(0.4, Math.min(1.5, Math.min(vw / (maxX - minX), vh / (maxY - minY))));
+    flowCanvas.panX = 40 - minX * scale + Math.max(0, (vw - (maxX - minX) * scale) / 2);
+    flowCanvas.panY = 50 - minY * scale + Math.max(0, (vh - (maxY - minY) * scale) / 2);
+    flowSetZoom(scale);
+  }
+  document.getElementById('flow-zoom-reset').addEventListener('click', flowFitToScreen);
 
   function flowDeleteNode(clientId) {
     if (!confirm('Excluir esse nó? Conexões que apontam pra ele vão ficar soltas.')) return;
@@ -3182,6 +3218,10 @@ hydrateIcons(document);
 
   async function flowOpenNodeModal(node) {
     flowModalEditing = node;
+    var tileMeta = FLOW_NODE_META[node.kind === 'trigger' ? 'trigger' : node.step_type] || FLOW_NODE_META.send_message;
+    var tileEl = document.getElementById('flow-node-modal-tile');
+    tileEl.style.background = tileMeta.bg; tileEl.style.color = tileMeta.stroke;
+    tileEl.innerHTML = ICON(tileMeta.icon, 15);
     var overlay = document.getElementById('flow-node-modal-overlay');
     var title = document.getElementById('flow-node-modal-title');
     var body = document.getElementById('flow-node-modal-body');
@@ -3489,15 +3529,42 @@ hydrateIcons(document);
   function flowUpdateHeader() {
     document.querySelector('#flow-canvas-name span').textContent = flowCanvas.flow.name;
     var badge = document.getElementById('flow-draft-badge');
-    badge.textContent = flowCanvas.flow.is_active ? 'Publicado' : 'Rascunho';
-    badge.style.background = flowCanvas.flow.is_active ? '#E8F3EC' : '#F4F4F0';
-    badge.style.color = flowCanvas.flow.is_active ? '#1A7F4D' : '#5B5D63';
+    var published = flowCanvas.flow.is_active;
+    badge.className = 'ct-pill ' + (published ? 'ct-pill-success' : 'ct-pill-neutral');
+    badge.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:' + (published ? 'var(--success)' : 'var(--text-subtle)') + ';"></span>' + (published ? 'Publicado' : 'Rascunho');
+    var deact = document.getElementById('flow-deactivate-btn');
+    if (deact) deact.innerHTML = ICON(published ? 'eye-off' : 'eye', 15) + (published ? 'Desativar' : 'Ativar sem publicar alterações');
+    deact.hidden = !published;
 
     var triggerLabel = flowCanvas.flow.trigger_type === 'keyword'
       ? 'Palavra-chave "' + ((flowCanvas.flow.trigger_config || {}).keyword || '') + '"'
       : 'Primeira mensagem do lead';
-    document.getElementById('flow-trigger-summary-btn').textContent = 'Gatilho: ' + triggerLabel;
+    document.getElementById('flow-trigger-summary-btn').innerHTML = ICON('zap', 12) + escapeHtml(triggerLabel.replace(/"([^"]*)"/, '“$1”'));
   }
+
+  (function () {
+    var moreBtn = document.getElementById('flow-more-btn');
+    var menu = document.getElementById('flow-more-menu');
+    function setMenu(open) { menu.hidden = !open; moreBtn.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+    moreBtn.addEventListener('click', function (e) { e.stopPropagation(); setMenu(menu.hidden); });
+    menu.addEventListener('click', function () { setMenu(false); });
+    document.addEventListener('click', function (e) { if (!menu.hidden && !menu.contains(e.target)) setMenu(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
+  })();
+
+  // Busca na paleta de blocos.
+  document.getElementById('flow-palette-search').addEventListener('input', function () {
+    var q = this.value.trim().toLowerCase();
+    document.querySelectorAll('#flow-palette .pal-group').forEach(function (g) {
+      var any = false;
+      g.querySelectorAll('.flow-palette-btn').forEach(function (btn) {
+        var match = !q || btn.textContent.toLowerCase().indexOf(q) !== -1;
+        btn.hidden = !match;
+        if (match) any = true;
+      });
+      g.hidden = !any;
+    });
+  });
 
   function flowUpdateDirtyUI() {
     var saveBtn = document.getElementById('flow-save-btn');
@@ -3648,6 +3715,7 @@ hydrateIcons(document);
     });
     flowCanvas.dirty = false;
     flowCanvas.scale = 1; flowCanvas.panX = 60; flowCanvas.panY = 60;
+    document.getElementById('flow-zoom-level').textContent = '100%';
 
     if (!state.flowUsers) {
       try { state.flowUsers = await api('/users'); } catch (e) { state.flowUsers = []; }
