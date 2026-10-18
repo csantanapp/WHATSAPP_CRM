@@ -91,6 +91,7 @@ button,input,select,textarea{font-family:var(--font-body);}
 .ct-empty{border:1.5px dashed #D3D3CC;border-radius:14px;padding:22px;text-align:center;font-size:13px;color:var(--text-subtle);}
 .ct-page{flex:1;min-width:0;height:100%;overflow:auto;padding:32px 36px 48px;}
 .ct-page-inner{max-width:1320px;margin:0 auto;}
+.ct-page-inner-wide{max-width:none;}
 .ct-page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px;}
 .ct-page-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .ct-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
@@ -221,6 +222,9 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 .li-row{display:flex;align-items:center;gap:10px;background:#FAFAF7;border:1px solid var(--divider);border-radius:11px;padding:8px 8px 8px 10px;text-align:left;}
 .ct-table-compact th,.ct-table-compact td{padding-left:11px;padding-right:11px;}
 .ct-table-compact th:first-child,.ct-table-compact td:first-child{padding-left:16px;}
+.ct-table-contatos{table-layout:fixed;width:100%;}
+.ct-table-contatos td{overflow:hidden;text-overflow:ellipsis;}
+.ct-table-contatos th{overflow:hidden;text-overflow:ellipsis;}
 .ct-link{font-size:14px;font-weight:500;color:var(--ink);display:inline-flex;align-items:center;gap:4px;text-decoration:underline;text-underline-offset:3px;}
 .radar-row{display:flex;align-items:center;gap:14px;padding:18px 22px;flex-wrap:wrap;}
 .radar-list .radar-row + .radar-row{border-top:1px solid var(--divider);}
@@ -618,7 +622,7 @@ button{font-family:var(--font-body);}
         <section class="screen" id="screen-contatos">
 
           <div class="ct-page">
-            <div class="ct-page-inner">
+            <div class="ct-page-inner ct-page-inner-wide">
               <header class="ct-page-header">
                 <div>
                   <h1 class="ct-h1">Contatos</h1>
@@ -649,21 +653,20 @@ button{font-family:var(--font-body);}
               </div>
 
               <div class="ct-card ct-table-card">
-                <table class="ct-table ct-table-compact">
+                <table class="ct-table ct-table-compact ct-table-contatos">
+                  <colgroup><col style="width:32%"><col style="width:204px"><col><col><col style="width:118px"><col style="width:92px"></colgroup>
                   <thead>
                     <tr>
-                      <th data-sort="name" style="cursor:pointer;">Nome <span data-sort-arrow="name"></span></th>
-                      <th data-sort="email" style="cursor:pointer;">E-mail <span data-sort-arrow="email"></span></th>
+                      <th data-sort="name" style="cursor:pointer;">Nome e e-mail <span data-sort-arrow="name"></span></th>
                       <th data-sort="phone_display" style="cursor:pointer;">Telefone <span data-sort-arrow="phone_display"></span></th>
                       <th>Tags</th>
                       <th>Interesse</th>
-                      <th data-sort="created_at" style="cursor:pointer;">Última atividade <span data-sort-arrow="created_at"></span></th>
-                      <th>Status</th>
+                      <th data-sort="created_at" style="cursor:pointer;">Atividade <span data-sort-arrow="created_at"></span></th>
                       <th class="num"><span class="ct-sr">Ações</span></th>
                     </tr>
                   </thead>
                   <tbody id="contatos-table-body">
-                    <tr><td colspan="8" style="color:var(--text-subtle);">Carregando contatos…</td></tr>
+                    <tr><td colspan="6" style="color:var(--text-subtle);">Carregando contatos…</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -4089,7 +4092,7 @@ hydrateIcons(document);
       if (searchTerm) params.set('q', searchTerm);
       contacts = await api('/contacts' + (params.toString() ? '?' + params.toString() : ''));
     } catch (err) {
-      tbody.innerHTML = '<tr><td colspan="8" style="padding:20px 16px;color:#B4381A;font-size:12.5px;">Não foi possível carregar os contatos.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="padding:20px 16px;color:#B4381A;font-size:12.5px;">Não foi possível carregar os contatos.</td></tr>';
       return;
     }
     state.contatosAll = contacts;
@@ -4103,8 +4106,8 @@ hydrateIcons(document);
   function interestCellHtml(c) {
     if (!c.latest_interest) return '<span style="color:var(--text-subtle);">—</span>';
     var others = (c.interests || []).filter(function (p) { return p.toLowerCase() !== c.latest_interest.toLowerCase(); });
-    return '<span style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;">' +
-      '<span class="ct-pill ct-pill-acc" title="Interesse mais recente">' + ICON('target', 12) + escapeHtml(c.latest_interest) + '</span>' +
+    return '<span style="display:flex;align-items:center;gap:6px;min-width:0;">' +
+      '<span class="ct-pill ct-pill-acc" title="Interesse mais recente: ' + escapeHtml(c.latest_interest) + '" style="min-width:0;max-width:100%;"><span style="display:inline-flex;flex-shrink:0;">' + ICON('target', 12) + '</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(c.latest_interest) + '</span></span>' +
       (others.length ? '<span style="font-size:12px;color:var(--text-subtle);" title="' + escapeHtml(others.join(', ')) + '">+' + others.length + '</span>' : '') +
     '</span>';
   }
@@ -4157,7 +4160,7 @@ hydrateIcons(document);
 
     tbody.innerHTML = '';
     if (!pageItems.length) {
-      tbody.innerHTML = '<tr><td colspan="8"><div class="ct-empty">Nenhum contato encontrado. Ajuste a busca ou os filtros.</div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6"><div class="ct-empty">Nenhum contato encontrado. Ajuste a busca ou os filtros.</div></td></tr>';
       return;
     }
 
@@ -4170,13 +4173,15 @@ hydrateIcons(document);
       var tagsHtml = (c.tags || []).slice(0, 2).map(function (tag) { return '<span class="ct-tag">' + escapeHtml(tag) + '</span>'; }).join(' ') +
         (c.tags && c.tags.length > 2 ? ' <span style="font-size:12px;color:var(--text-subtle);">+' + (c.tags.length - 2) + '</span>' : '');
       tr.innerHTML =
-        '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml(c.avatar_url, c.avatar_initials, c.name, 32, 12) + '<span style="font-weight:500;white-space:nowrap;">' + escapeHtml(c.name || 'Sem nome') + '</span></div></td>' +
-        '<td style="color:var(--text-muted);max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"' + (c.email ? ' title="' + escapeHtml(c.email) + '"' : '') + '>' + (c.email ? escapeHtml(c.email) : '<span style="color:var(--text-subtle);">—</span>') + '</td>' +
+        '<td><div style="display:flex;align-items:center;gap:10px;">' + avatarHtml(c.avatar_url, c.avatar_initials, c.name, 36, 13) +
+          '<div style="min-width:0;">' +
+            '<div title="' + escapeHtml(c.name || '') + '" style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(c.name || 'Sem nome') + '</div>' +
+            (c.email ? '<div title="' + escapeHtml(c.email) + '" style="font-size:13px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;">' + escapeHtml(c.email) + '</div>' : '') +
+          '</div></div></td>' +
         '<td style="white-space:nowrap;font-variant-numeric:tabular-nums;"><span style="display:inline-flex;align-items:center;gap:6px;"><span style="color:' + (isIg ? 'var(--instagram)' : 'var(--whatsapp)') + ';display:inline-flex;">' + ICON(isIg ? 'instagram' : 'message-circle', 14) + '</span>' + escapeHtml(c.phone_display || '') + '</span></td>' +
-        '<td style="white-space:nowrap;">' + (tagsHtml || '<span style="color:var(--text-subtle);">—</span>') + '</td>' +
+        '<td>' + (tagsHtml ? '<div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;">' + tagsHtml + '</div>' : '<span style="color:var(--text-subtle);">—</span>') + '</td>' +
         '<td style="white-space:nowrap;">' + interestCellHtml(c) + '</td>' +
         '<td style="color:var(--text-muted);white-space:nowrap;font-variant-numeric:tabular-nums;">' + dateFmt.format(new Date(c.updated_at || c.created_at)) + '</td>' +
-        '<td><span class="ct-pill ct-pill-success"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);"></span>Ativo</span></td>' +
         '<td class="num" style="white-space:nowrap;">' +
           '<button type="button" class="ct-icon-btn" data-open-contact="' + c.id + '" aria-label="Abrir conversa com ' + escapeHtml(label) + '" title="Abrir conversa">' + ICON('message-square-text', 16) + '</button>' +
           '<button type="button" class="ct-icon-btn danger" data-delete-contact="' + c.id + '" data-contact-name="' + escapeHtml(label) + '" aria-label="Excluir ' + escapeHtml(label) + '" title="Excluir">' + ICON('trash-2', 16) + '</button>' +
