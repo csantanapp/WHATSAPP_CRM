@@ -1,5 +1,4 @@
-/* Design system — Tractom CRM WhatsApp. Modo claro, variáveis prontas para
-   modo escuro (ver bloco @media/data-theme ao final). Referência de
+/* Design system — chattrack. Tema único claro. Referência de
    densidade/sobriedade: Linear, Intercom, Front. */
 
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap');
@@ -78,38 +77,9 @@
   --sidebar-active-ink: #111214;
 }
 
-/* Modo escuro preparado — segue a preferência do SO por padrão, com opt-out
-   via [data-theme="light"] no <html>, e opt-in forçado via [data-theme="dark"]. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --color-bg: #0f1115;
-    --color-surface: #171a21;
-    --color-surface-raised: #1d212b;
-    --color-border: #2a2f3a;
-    --color-border-strong: #3a4150;
-    --color-text: #f3f4f6;
-    --color-text-muted: #9ca3af;
-    --color-text-subtle: #6b7280;
-    --color-success-bg: #0d2318;
-    --color-danger-bg: #2a1414;
-    --color-warning-bg: #2a2010;
-    --color-info-bg: #10203a;
-  }
-}
-:root[data-theme='dark'] {
-  --color-bg: #0f1115;
-  --color-surface: #171a21;
-  --color-surface-raised: #1d212b;
-  --color-border: #2a2f3a;
-  --color-border-strong: #3a4150;
-  --color-text: #f3f4f6;
-  --color-text-muted: #9ca3af;
-  --color-text-subtle: #6b7280;
-  --color-success-bg: #0d2318;
-  --color-danger-bg: #2a1414;
-  --color-warning-bg: #2a2010;
-  --color-info-bg: #10203a;
-}
+/* Tema único claro: o sistema não tem modo escuro (os tokens de cor do
+   index.html são só claros), então o navegador não deve inverter nada. */
+:root { color-scheme: light; }
 
 * { box-sizing: border-box; }
 
