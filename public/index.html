@@ -35,10 +35,10 @@ button,input,select,textarea{font-family:var(--font-body);}
 .sb-brand-name{font-family:var(--font-display);font-size:19px;font-weight:600;letter-spacing:-0.02em;color:var(--ink);line-height:1.1;}
 .sb-brand-sub{font-size:12px;color:var(--text-subtle);margin-top:2px;white-space:nowrap;}
 .sb-nav{display:flex;flex-direction:column;gap:2px;}
-.sb-item{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:11px;border:none;background:transparent;color:var(--text-2);font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;width:100%;text-align:left;transition:background-color .15s ease;white-space:nowrap;}
+.sb-item{display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border-radius:12px;border:none;background:transparent;color:var(--ink);font-size:15px;font-weight:500;cursor:pointer;text-decoration:none;width:100%;text-align:left;transition:background-color .15s ease;white-space:nowrap;}
 .sb-item svg{flex-shrink:0;}
 .sb-item:hover{background:#EEEEE8;}
-.sb-item.active{background:var(--acc);color:var(--ink);}
+.sb-item.active{background:var(--acc);color:var(--ink);font-weight:600;}
 .sb-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;}
 .sb-badge{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--ink);color:#fff;font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;}
 .sb-badge-danger{background:var(--danger);}
@@ -62,7 +62,7 @@ button,input,select,textarea{font-family:var(--font-body);}
 .app-sidebar.collapsed .sb-ic-expand{display:inline-flex;}
 
 /* ===== Componentes base (LAYOUT-SPEC §3) ===== */
-.ct-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 14px;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;border:1px solid transparent;transition:background-color .15s ease,border-color .15s ease;white-space:nowrap;}
+.ct-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;border:1px solid transparent;transition:background-color .15s ease,border-color .15s ease;white-space:nowrap;}
 .ct-btn-primary{background:var(--ink);color:#fff;}
 .ct-btn-primary svg{color:var(--acc);}
 .ct-btn-primary:hover{background:var(--ink-hover);}
@@ -77,7 +77,7 @@ button,input,select,textarea{font-family:var(--font-body);}
 .ct-icon-btn:hover{background:var(--surface-muted);}
 .ct-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px 20px;}
 .ct-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:3px 9px;border-radius:999px;white-space:nowrap;}
-.ct-pill-neutral{background:var(--surface-muted);color:var(--text-2);}
+.ct-pill-neutral{background:#EBEBE5;color:var(--ink);}
 .ct-pill-acc{background:var(--acc-soft);color:var(--acc-ink);}
 .ct-pill-success{background:var(--success-soft);color:var(--success-ink);}
 .ct-pill-warning{background:var(--warning-soft);color:var(--warning-ink);}
@@ -107,14 +107,14 @@ button,input,select,textarea{font-family:var(--font-body);}
 .ct-two-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:14px;align-items:start;}
 .ct-table-card{padding:0;overflow:auto;}
 .ct-table{width:100%;border-collapse:collapse;font-size:14px;}
-.ct-table th{text-align:left;font-size:12px;font-weight:500;color:var(--text-subtle);padding:12px 16px;white-space:nowrap;}
-.ct-table td{padding:12px 16px;border-top:1px solid var(--divider);color:var(--ink);}
+.ct-table th{text-align:left;font-size:13px;font-weight:500;color:var(--text-muted);padding:14px 16px;white-space:nowrap;}
+.ct-table td{padding:14px 16px;border-top:1px solid var(--divider);color:var(--ink);font-size:15px;}
 .ct-table tbody tr:hover{background:#FAFAF7;}
 .ct-table .num{text-align:right;font-variant-numeric:tabular-nums;}
 .ct-list-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;text-decoration:none;color:inherit;cursor:pointer;transition:background-color .15s ease;}
 .ct-list-item:hover{background:#F6F6F2;}
 .ct-segmented{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:2px;background:var(--surface-muted);padding:3px;border-radius:11px;}
-.ct-segmented button{height:30px;border:none;border-radius:8px;background:transparent;color:var(--text-2);font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;padding:0 8px;transition:background-color .15s ease;}
+.ct-segmented button{height:32px;border:none;border-radius:8px;background:transparent;color:var(--text-muted);font-size:14px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;padding:0 8px;transition:background-color .15s ease;}
 .ct-segmented button[aria-selected="true"]{background:#FFFFFF;color:var(--ink);box-shadow:0 1px 2px rgba(17,18,20,.08);}
 .ct-segmented .seg-count{font-size:11px;color:var(--text-subtle);font-variant-numeric:tabular-nums;}
 .ct-chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:999px;border:1px solid var(--border-input);background:#FFFFFF;color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background-color .15s ease,border-color .15s ease;}
@@ -161,23 +161,26 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 .ct-filter-card[aria-selected="true"]{border:1.5px solid var(--ink);}
 .kb-board{flex:1;min-height:0;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,1fr);gap:14px;overflow-x:auto;padding-bottom:6px;}
 .kb-col{background:var(--surface-sunken);border-radius:18px;padding:12px;display:flex;flex-direction:column;min-height:0;overflow-y:auto;}
-.kb-col-head{display:flex;align-items:center;gap:8px;padding:2px 4px 12px;}
-.kb-count{font-size:12px;font-weight:500;color:var(--text-2);background:#FFFFFF;border-radius:999px;padding:1px 8px;font-variant-numeric:tabular-nums;}
+.kb-col-head{display:flex;align-items:center;gap:8px;padding:2px 2px 12px 4px;}
+.kb-col-add{width:28px;height:28px;color:var(--ink);}
+.kb-empty{flex:1;min-height:220px;border:1.5px dashed var(--border-input);border-radius:14px;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;font-size:14px;color:var(--text-subtle);}
+.kb-count{font-size:12px;font-weight:600;color:var(--ink);background:#FFFFFF;border-radius:999px;padding:1px 8px;font-variant-numeric:tabular-nums;}
 .kb-card{display:block;background:#FFFFFF;border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-decoration:none;color:inherit;transition:transform .15s ease,box-shadow .15s ease;}
 .kb-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-raised);}
-.ct-tag{display:inline-flex;align-items:center;font-size:11px;font-weight:500;background:var(--surface-muted);color:var(--text-2);border-radius:999px;padding:2px 8px;}
+.ct-tag{display:inline-flex;align-items:center;font-size:12px;font-weight:500;background:#EBEBE5;color:var(--ink);border-radius:999px;padding:2px 8px;}
 .ct-select{height:38px;border:1px solid var(--border-input);border-radius:10px;background-color:#FFFFFF;color:var(--ink);font-size:13px;padding:0 10px;cursor:pointer;}
 .ct-btn:disabled{opacity:.5;cursor:default;}
 .ct-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
 .ct-icon-btn.danger{color:#B4381A;}
 .ct-icon-btn.danger:hover{background:var(--danger-soft);}
-.howto-step{display:flex;gap:12px;background:#1E1F23;border-radius:14px;padding:14px;}
-.howto-num{width:26px;height:26px;border-radius:8px;color:var(--ink);font-size:13px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-mono);}
-.howto-t{font-size:14px;font-weight:600;color:#FFFFFF;}
+.howto-step{display:flex;gap:14px;align-items:flex-start;background:#1E1F23;border:1px solid #2B2D33;border-radius:14px;padding:16px;}
+.howto-num{width:34px;height:34px;border-radius:10px;color:var(--ink);font-size:13px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-mono);}
+.howto-t{font-size:15px;font-weight:600;color:#FFFFFF;line-height:1.4;}
+.howto-k{font-size:12px;font-weight:500;color:#9A9B95;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
 .howto-d{font-size:12.5px;color:#C9CAC4;line-height:1.45;margin-top:2px;}
 .flow-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
 .flow-chain{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:8px;}
-.flow-chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--border-input);background:#FFFFFF;font-size:12px;color:var(--text-2);white-space:nowrap;}
+.flow-chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:999px;border:1px solid var(--border-input);background:#FFFFFF;font-size:13px;color:var(--ink);white-space:nowrap;}
 .flow-chip-trigger{background:var(--acc-soft);border-color:var(--acc-soft);color:var(--acc-ink);}
 .flow-chain-sep{color:var(--text-subtle);font-size:13px;}
 .fe-toolbar{height:60px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 16px;background:#FFFFFF;border-bottom:1px solid var(--border);}
@@ -203,13 +206,19 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 .ct-dl dt{font-size:12px;color:var(--text-subtle);}
 .ct-dl dd{margin:2px 0 0;font-size:13px;color:var(--ink);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums;}
 .fn-stages{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:16px;}
-.fn-stage{background:#FAFAF7;border:1px solid var(--divider);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;}
+.fn-stage{background:#FAFAF7;border:1px solid var(--border);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;}
 .fn-stage-top{display:flex;align-items:center;gap:8px;}
-.fn-move{width:22px;height:22px;border:none;background:transparent;border-radius:6px;color:var(--text-subtle);cursor:pointer;font-size:15px;line-height:1;display:inline-flex;align-items:center;justify-content:center;}
-.fn-move:hover:not(:disabled){background:var(--surface-muted);color:var(--ink);}
-.fn-move:disabled{opacity:.35;cursor:default;}
-.fn-link{background:var(--ink);border-radius:14px;padding:16px;margin-top:16px;color:#FFFFFF;}
+.fn-grip{display:inline-flex;align-items:center;justify-content:center;width:22px;height:24px;border-radius:6px;color:var(--text-subtle);cursor:grab;}
+.fn-grip:hover,.fn-grip:focus-visible{background:var(--surface-muted);color:var(--ink);}
+.fn-stage.dragging{opacity:.4;}
+.fn-stage.drop-target{border-color:var(--ink);border-style:dashed;}
+.fn-body.has-link{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:20px;align-items:start;}
+@media (max-width:1100px){.fn-body.has-link{grid-template-columns:1fr;}}
+.fn-link{background:var(--ink);border-radius:16px;padding:18px;margin-top:16px;color:#FFFFFF;}
 .fn-link input{flex:1;min-width:0;height:38px;border:1px solid #2B2D33;background:#1E1F23;color:#FFFFFF;border-radius:10px;padding:0 12px;font-family:var(--font-mono);font-size:12.5px;}
+.ct-link{font-size:14px;font-weight:500;color:var(--ink);display:inline-flex;align-items:center;gap:4px;text-decoration:underline;text-underline-offset:3px;}
+.radar-row{display:flex;align-items:center;gap:14px;padding:18px 22px;flex-wrap:wrap;}
+.radar-list .radar-row + .radar-row{border-top:1px solid var(--divider);}
 .ct-tile{display:inline-flex;align-items:center;justify-content:center;border-radius:7px;flex-shrink:0;}
 
 :root{
@@ -533,8 +542,8 @@ button{font-family:var(--font-body);}
                 </div>
               </header>
               <div id="radar-tabs" class="ct-kpi-grid" role="tablist" aria-label="Filtrar demandas" style="margin-bottom:14px;"></div>
-              <div class="ct-card" style="padding:6px;">
-                <div id="radar-list" style="display:flex;flex-direction:column;">
+              <div class="ct-card" style="padding:0;overflow:hidden;">
+                <div id="radar-list" class="radar-list">
                   <div style="padding:16px;font-size:13px;color:var(--text-subtle);">Carregando…</div>
                 </div>
               </div>
@@ -584,7 +593,7 @@ button{font-family:var(--font-body);}
               <section style="margin-top:28px;">
                 <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px;">
                   <h2 class="ct-h2">Comercial</h2>
-                  <a href="/tasks/" style="font-size:13px;font-weight:500;color:var(--ink);display:inline-flex;align-items:center;gap:4px;">Minhas tarefas <span aria-hidden="true">↗</span></a>
+                  <a href="/tasks/" class="ct-link">Minhas tarefas <span data-icon="arrow-up-right" data-icon-size="14"></span></a>
                 </div>
                 <div id="comercial-cards" class="ct-card ct-split-card">
                   <div style="padding:6px;color:var(--text-subtle);font-size:13px;">Carregando…</div>
@@ -595,7 +604,7 @@ button{font-family:var(--font-body);}
                 <section>
                   <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px;">
                     <h2 class="ct-h2">Conversas recentes</h2>
-                    <a href="#kanban" data-goto="kanban" style="font-size:13px;font-weight:500;color:var(--ink);">Ver Kanban <span aria-hidden="true">→</span></a>
+                    <a href="#kanban" data-goto="kanban" class="ct-link">Ver Kanban <span data-icon="arrow-up-right" data-icon-size="14"></span></a>
                   </div>
                   <div class="ct-card" style="padding:6px;">
                     <div id="dashboard-recent" style="display:flex;flex-direction:column;">
@@ -637,11 +646,11 @@ button{font-family:var(--font-body);}
               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
                 <label class="ib-search" style="flex:1 1 260px;max-width:380px;background:#FFFFFF;border:1px solid var(--border-input);height:38px;">
                   <span data-icon="search"></span>
-                  <input id="contatos-search" name="contatos-search-q" type="search" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-bwignore="true" placeholder="Buscar por nome, e-mail ou telefone…" aria-label="Buscar contatos"/>
+                  <input id="contatos-search" name="contatos-search-q" type="search" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-bwignore="true" placeholder="Nome, e-mail ou telefone…" aria-label="Buscar contatos"/>
                 </label>
-                <select id="contatos-tag-filter" class="ct-select" aria-label="Filtrar por tag"><option value="">Tag: todas</option></select>
+                <select id="contatos-tag-filter" class="ct-select" aria-label="Filtrar por tag"><option value="">Todas as tags</option></select>
                 <select id="contatos-origem-filter" class="ct-select" aria-label="Filtrar por origem"><option value="">Todas as origens</option></select>
-                <select id="contatos-page-size" class="ct-select" aria-label="Itens por página" style="margin-left:auto;">
+                <select id="contatos-page-size" class="ct-select" aria-label="Itens por página" hidden>
                   <option value="25">25 por página</option>
                   <option value="10">10 por página</option>
                   <option value="50">50 por página</option>
@@ -711,12 +720,12 @@ button{font-family:var(--font-body);}
 
               <section id="automacao-howto" class="ct-card" style="background:var(--ink);border-color:var(--ink);color:#FFFFFF;margin-bottom:24px;position:relative;">
                 <button type="button" id="automacao-howto-close" class="ct-icon-btn" aria-label="Dispensar explicação" style="position:absolute;top:12px;right:12px;color:#C9CAC4;"><span data-icon="x" data-icon-size="16"></span></button>
-                <h2 class="ct-h2" style="color:#FFFFFF;margin-bottom:4px;">Como funciona</h2>
-                <p style="font-size:13px;color:#C9CAC4;margin:0 0 16px;">Toda automação é um gatilho, condições opcionais e as ações que acontecem em sequência.</p>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;">
-                  <div class="howto-step"><span class="howto-num" style="background:var(--acc);">1</span><div><div class="howto-t">Gatilho</div><div class="howto-d">Primeira mensagem, palavra-chave (“preço”, “orçamento”), tag ou etapa.</div></div></div>
-                  <div class="howto-step"><span class="howto-num" style="background:#FFD27A;">2</span><div><div class="howto-t">Condição</div><div class="howto-d">Opcional: só segue se o lead tiver uma tag, estiver numa etapa ou no horário comercial.</div></div></div>
-                  <div class="howto-step"><span class="howto-num" style="background:#8CC8FF;">3</span><div><div class="howto-t">Ações</div><div class="howto-d">Responder, perguntar (formulário), mover no funil, aplicar tag, avisar o time.</div></div></div>
+                <h2 class="ct-h2" style="color:var(--acc);margin-bottom:4px;">Como funciona uma automação</h2>
+                <p style="font-size:14px;color:#C9CAC4;margin:0 0 18px;">Toda automação é um gatilho, condições opcionais e as ações que acontecem em sequência.</p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+                  <div class="howto-step"><span class="howto-num" style="background:var(--acc);"><span data-icon="zap" data-icon-size="16"></span></span><div><div class="howto-k">1 · Gatilho</div><div class="howto-t">Mensagem recebida contém “orçamento” ou “preço”</div></div></div>
+                  <div class="howto-step"><span class="howto-num" style="background:#FFD27A;"><span data-icon="split" data-icon-size="16"></span></span><div><div class="howto-k">2 · Condição</div><div class="howto-t">Etapa atual é Novo lead</div></div></div>
+                  <div class="howto-step"><span class="howto-num" style="background:#8CC8FF;"><span data-icon="check" data-icon-size="16"></span></span><div><div class="howto-k">3 · Ações</div><div class="howto-t">Mover para Qualificado e avisar o vendedor</div></div></div>
                 </div>
               </section>
 
@@ -1472,12 +1481,16 @@ hydrateIcons(document);
           '<span style="width:8px;height:8px;border-radius:50%;background:' + KB_STAGE_DOTS[i % KB_STAGE_DOTS.length] + ';flex-shrink:0;"></span>' +
           '<span style="font-weight:600;font-size:14px;color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(stage.name) + '</span>' +
           '<span class="kb-count">' + stageConvs.length + '</span>' +
+          '<button type="button" class="ct-icon-btn kb-col-add" aria-label="Adicionar contato em “' + escapeHtml(stage.name) + '”" title="Novo contato">' + ICON('plus', 15) + '</button>' +
         '</div>';
+      col.querySelector('.kb-col-add').addEventListener('click', function () {
+        document.getElementById('kanban-novo-contato-btn').click();
+      });
 
       var list = document.createElement('div');
-      list.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+      list.style.cssText = 'display:flex;flex-direction:column;gap:10px;flex:1;';
       if (!stageConvs.length) {
-        list.innerHTML = '<div class="ct-empty" style="padding:18px 12px;">Sem conversas nesta etapa</div>';
+        list.innerHTML = '<div class="kb-empty">Sem conversas nesta etapa</div>';
       }
 
       stageConvs.forEach(function (conv) {
@@ -2338,8 +2351,8 @@ hydrateIcons(document);
   };
   function flowChainHtml(flow) {
     var trig = TRIGGER_LABELS[flow.trigger_type] || flow.trigger_type;
-    if (flow.trigger_type === 'keyword' && flow.trigger_config && flow.trigger_config.keyword) trig = 'Palavra-chave “' + flow.trigger_config.keyword + '”';
-    if (flow.trigger_type === 'first_message') trig = 'Primeira mensagem';
+    if (flow.trigger_type === 'keyword' && flow.trigger_config && flow.trigger_config.keyword) trig = 'Mensagem contém “' + flow.trigger_config.keyword + '”';
+    if (flow.trigger_type === 'first_message') trig = 'Nova conversa iniciada';
     var html = '<span class="flow-chip flow-chip-trigger"><span class="ct-tile" style="width:16px;height:16px;border-radius:50%;background:var(--acc);color:var(--ink);">' + ICON('zap', 10) + '</span>' + escapeHtml(trig) + '</span>';
     var steps = (flow.steps || []).slice().sort(function (a, b) { return a.position - b.position; });
     if (!steps.length) return html + '<span class="flow-chain-sep">›</span><span style="font-size:12px;color:var(--warning-ink);">◌ Sem passos configurados</span>';
@@ -2408,8 +2421,8 @@ hydrateIcons(document);
       info.style.cssText = 'flex:1;min-width:260px;';
       info.innerHTML =
         '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
-          '<span style="font-weight:600;font-size:15px;color:var(--ink);">' + escapeHtml(flow.name) + '</span>' +
-          '<span class="ct-tag">' + escapeHtml(flowFunnel ? flowFunnel.name : 'Todos os funis') + '</span>' +
+          '<span style="font-weight:600;font-size:17px;color:var(--ink);">' + escapeHtml(flow.name) + '</span>' +
+          '<span class="ct-tag" style="text-transform:uppercase;letter-spacing:.05em;font-size:11px;">' + escapeHtml(flowFunnel ? flowFunnel.name : 'Todos os funis') + '</span>' +
           (flow.is_active
             ? '<span style="font-size:12px;color:var(--success-ink);display:inline-flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);"></span>Ativa</span>'
             : '<span style="font-size:12px;color:var(--text-subtle);">Pausada</span>') +
@@ -3771,8 +3784,8 @@ hydrateIcons(document);
     return '<div class="ct-card ct-kpi' + (opts.dark ? ' ct-kpi-dark' : '') + '">' +
       '<div class="ct-kpi-top"><span>' + escapeHtml(opts.label) + '</span>' +
         '<span class="ct-tile" style="width:32px;height:32px;border-radius:9px;background:' + (opts.dark ? 'var(--acc)' : 'var(--surface-muted)') + ';color:var(--ink);">' + ICON(opts.icon, 16) + '</span></div>' +
-      '<div><div class="ct-kpi-value">' + INT.format(opts.value || 0) + '</div>' +
-        (opts.sub ? '<div style="font-size:13px;margin-top:8px;color:' + (opts.dark ? 'var(--acc)' : 'var(--text-subtle)') + ';">' + escapeHtml(opts.sub) + '</div>' : '') +
+      '<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;"><div class="ct-kpi-value">' + INT.format(opts.value || 0) + '</div>' +
+        (opts.sub ? '<div style="font-size:14px;color:' + (opts.dark ? 'var(--acc)' : 'var(--text-subtle)') + ';">' + escapeHtml(opts.sub) + '</div>' : '') +
       '</div></div>';
   }
 
@@ -3886,7 +3899,7 @@ hydrateIcons(document);
     } catch (err) {
       return;
     }
-    select.innerHTML = '<option value="">Tag: todas</option>';
+    select.innerHTML = '<option value="">Todas as tags</option>';
     tags.forEach(function (t) {
       var opt = document.createElement('option');
       opt.value = t.name;
@@ -4585,15 +4598,12 @@ hydrateIcons(document);
       var card = document.createElement('article');
       card.className = 'ct-card';
       var stagesHtml = f.stages.map(function (s, i) {
-        var isFirst = i === 0;
-        var isLast = i === f.stages.length - 1;
-        return '<div class="fn-stage">' +
+        return '<div class="fn-stage" draggable="true" data-stage-id="' + s.id + '" data-stage-index="' + i + '" data-funnel-id="' + f.id + '">' +
           '<div class="fn-stage-top">' +
-            '<button type="button" class="fn-move" data-move-stage="' + s.id + '" data-direction="up" ' + (isFirst ? 'disabled' : '') + ' aria-label="Mover “' + escapeHtml(s.name) + '” para antes">‹</button>' +
+            '<span class="fn-grip" data-grip-stage="' + s.id + '" tabindex="0" role="button" aria-label="Reordenar “' + escapeHtml(s.name) + '” (arraste, ou use as setas)" title="Arraste para reordenar">' + ICON('grip-vertical', 15) + '</span>' +
             '<span class="ct-mono" style="font-size:12px;color:var(--text-subtle);">' + String(i + 1).padStart(2, '0') + '</span>' +
             '<span style="width:8px;height:8px;border-radius:50%;background:' + FN_DOTS[i % FN_DOTS.length] + ';flex-shrink:0;"></span>' +
             '<button type="button" data-rename-stage="' + s.id + '" data-stage-name="' + escapeHtml(s.name) + '" title="Renomear etapa" style="flex:1;min-width:0;text-align:left;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0;">' + escapeHtml(s.name) + '</button>' +
-            '<button type="button" class="fn-move" data-move-stage="' + s.id + '" data-direction="down" ' + (isLast ? 'disabled' : '') + ' aria-label="Mover “' + escapeHtml(s.name) + '” para depois">›</button>' +
             '<button type="button" class="ct-icon-btn danger" data-delete-stage="' + s.id + '" data-stage-name="' + escapeHtml(s.name) + '" aria-label="Remover etapa “' + escapeHtml(s.name) + '”" style="width:26px;height:26px;">' + ICON('x', 14) + '</button>' +
           '</div>' +
           '<select data-stage-meta="' + s.id + '" class="ct-select" aria-label="Evento da Meta para “' + escapeHtml(s.name) + '”" title="Evento enviado à Meta quando um lead de anúncio entra nesta etapa" style="height:32px;font-size:12px;' + (s.meta_event ? 'background-color:var(--acc-soft);border-color:var(--acc);' : '') + '">' +
@@ -4609,7 +4619,7 @@ hydrateIcons(document);
         var waLink = whatsappDigits ? 'https://wa.me/' + whatsappDigits + '?text=' + encodeURIComponent(f.entry_keyword) : null;
         campaignHtml =
           '<div class="fn-link">' +
-            '<div style="font-size:12px;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Link de captação</div>' +
+            '<div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">' + ICON('link', 14) + 'Link de captação</div>' +
             (waLink
               ? '<div style="display:flex;gap:8px;"><input readonly value="' + escapeHtml(waLink) + '" aria-label="Link de captação do funil ' + escapeHtml(f.name) + '"/>' +
                 '<button type="button" class="ct-btn ct-btn-accent" data-copy-link="' + escapeHtml(waLink) + '" aria-live="polite">' + ICON('copy', 15) + 'Copiar</button></div>'
@@ -4638,11 +4648,15 @@ hydrateIcons(document);
             (f.is_default ? '' : '<button type="button" class="ct-icon-btn danger" data-delete-funnel="' + f.id + '" aria-label="Excluir funil “' + escapeHtml(f.name) + '”" title="Excluir funil">' + ICON('trash-2', 16) + '</button>') +
           '</div>' +
         '</div>' +
-        (stagesHtml ? '<div class="fn-stages">' + stagesHtml + '</div>' : '<div class="ct-empty" style="margin-top:14px;">Sem etapas ainda. Use “+ Etapa”.</div>') +
-        '<div style="margin-top:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
-          '<span style="font-size:12px;color:var(--text-muted);margin-right:4px;">Tags automáticas:</span>' + tagsHtml +
-        '</div>' +
-        campaignHtml;
+        '<div class="fn-body' + (campaignHtml ? ' has-link' : '') + '">' +
+          '<div style="min-width:0;">' +
+            (stagesHtml ? '<div class="fn-stages">' + stagesHtml + '</div>' : '<div class="ct-empty" style="margin-top:14px;">Sem etapas ainda. Use “+ Etapa”.</div>') +
+            '<div style="margin-top:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+              '<span style="font-size:13px;color:var(--text-muted);margin-right:4px;">Tags automáticas:</span>' + tagsHtml +
+            '</div>' +
+          '</div>' +
+          campaignHtml +
+        '</div>';
       listEl.appendChild(card);
     });
 
@@ -4757,16 +4771,56 @@ hydrateIcons(document);
       });
     });
 
-    listEl.querySelectorAll('[data-move-stage]').forEach(function (btn) {
-      btn.addEventListener('click', async function (e) {
-        e.stopPropagation();
-        if (btn.disabled) return;
-        await api('/stages/' + btn.getAttribute('data-move-stage') + '/move', {
-          method: 'PATCH',
-          body: JSON.stringify({ direction: btn.getAttribute('data-direction') }),
-        });
-        loadFunnelsSection();
-        loadKanban();
+    // Reordenar etapas: arrastar pela alça (ou setas com a alça em foco).
+    // A API move uma posição por vez, então chamamos N vezes na direção certa.
+    async function moveStageBy(stageId, delta) {
+      if (!delta) return;
+      var direction = delta < 0 ? 'up' : 'down';
+      try {
+        for (var k = 0; k < Math.abs(delta); k++) {
+          await api('/stages/' + stageId + '/move', { method: 'PATCH', body: JSON.stringify({ direction: direction }) });
+        }
+      } catch (err) {
+        alert('Não foi possível reordenar: ' + err.message);
+      }
+      loadFunnelsSection();
+      loadKanban();
+    }
+    var dragStage = null;
+    listEl.querySelectorAll('.fn-stage[draggable]').forEach(function (el) {
+      el.addEventListener('dragstart', function (e) {
+        dragStage = el;
+        el.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        try { e.dataTransfer.setData('text/plain', el.dataset.stageId); } catch (err) {}
+      });
+      el.addEventListener('dragend', function () {
+        el.classList.remove('dragging');
+        listEl.querySelectorAll('.drop-target').forEach(function (t) { t.classList.remove('drop-target'); });
+        dragStage = null;
+      });
+      el.addEventListener('dragover', function (e) {
+        if (!dragStage || dragStage === el || dragStage.dataset.funnelId !== el.dataset.funnelId) return;
+        e.preventDefault();
+        el.classList.add('drop-target');
+      });
+      el.addEventListener('dragleave', function () { el.classList.remove('drop-target'); });
+      el.addEventListener('drop', function (e) {
+        if (!dragStage || dragStage === el || dragStage.dataset.funnelId !== el.dataset.funnelId) return;
+        e.preventDefault();
+        moveStageBy(dragStage.dataset.stageId, parseInt(el.dataset.stageIndex, 10) - parseInt(dragStage.dataset.stageIndex, 10));
+      });
+    });
+    listEl.querySelectorAll('[data-grip-stage]').forEach(function (grip) {
+      grip.addEventListener('keydown', function (e) {
+        var delta = (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : 0;
+        if (!delta) return;
+        e.preventDefault();
+        var stageEl = grip.closest('.fn-stage');
+        var total = stageEl.parentElement.querySelectorAll('.fn-stage').length;
+        var idx = parseInt(stageEl.dataset.stageIndex, 10);
+        if (idx + delta < 0 || idx + delta >= total) return;
+        moveStageBy(grip.getAttribute('data-grip-stage'), delta);
       });
     });
   }
@@ -5047,8 +5101,8 @@ hydrateIcons(document);
       btn.setAttribute('role', 'tab');
       btn.setAttribute('aria-selected', active ? 'true' : 'false');
       btn.innerHTML =
-        '<span style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted);">' +
-          (t.key ? '<span style="width:8px;height:8px;border-radius:50%;background:' + RADAR_DOT[t.key] + ';"></span>' : '') + t.label + '</span>' +
+        '<span style="display:flex;align-items:center;gap:8px;font-size:15px;color:var(--ink);">' +
+          '<span style="width:8px;height:8px;border-radius:50%;background:' + (t.key ? RADAR_DOT[t.key] : 'var(--ink)') + ';"></span>' + t.label + '</span>' +
         '<span style="font-family:var(--font-display);font-size:36px;font-weight:500;letter-spacing:-0.02em;line-height:1;color:var(--ink);">' + t.count + '</span>';
       btn.addEventListener('click', function () {
         radarState.activeFilter = t.key;
@@ -5084,21 +5138,19 @@ hydrateIcons(document);
     var me = window.__currentUser;
     items.forEach(function (i) {
       var row = document.createElement('div');
-      row.className = 'ct-list-item';
-      row.style.cssText = 'flex-wrap:wrap;cursor:default;padding:14px 12px;';
+      row.className = 'radar-row';
       var isMine = me && String(i.assigned_user_id) === String(me.id);
       var donoText = i.assigned_user_name ? ('Com ' + escapeHtml(i.assigned_user_name)) : 'Sem dono';
       var nextStep = i.category !== 'em_voo'
-        ? '<div style="font-size:12px;color:var(--warning-ink);margin-top:4px;display:flex;align-items:center;gap:5px;">' + ICON('calendar-x', 13) + 'Sem próximo passo</div>'
-        : '<div style="font-size:12px;color:var(--info-ink);margin-top:4px;display:flex;align-items:center;gap:5px;">' + ICON('calendar', 13) + 'Retorno agendado</div>';
+        ? '<span style="font-size:14px;color:var(--warning-ink);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">' + ICON('calendar-x', 15) + 'Sem próximo passo</span>'
+        : '<span style="font-size:14px;color:var(--info-ink);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">' + ICON('calendar', 15) + 'Retorno agendado</span>';
       row.innerHTML =
         avatarWithChannel(i.avatar_url, i.avatar_initials, i.contact_name, i.contact_channel, 42, 13) +
         '<div style="flex:1;min-width:200px;">' +
-          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-weight:600;font-size:15px;color:var(--ink);">' + escapeHtml(i.contact_name || 'Contato sem nome') + '</span>' + radarBadge(i.category) + '</div>' +
-          '<div style="font-size:13px;color:var(--text-muted);margin-top:3px;font-variant-numeric:tabular-nums;">' + escapeHtml(i.phone_display || '') + ' · parado há ' + radarFormatStalled(i.hours_stalled) + ' · ' + donoText + '</div>' +
-          nextStep +
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-weight:600;font-size:17px;color:var(--ink);">' + escapeHtml(i.contact_name || 'Contato sem nome') + '</span>' + radarBadge(i.category) + '</div>' +
+          '<div style="font-size:14px;color:var(--text-muted);margin-top:3px;font-variant-numeric:tabular-nums;">' + escapeHtml(i.phone_display || '') + ' · parado há ' + radarFormatStalled(i.hours_stalled) + ' · ' + donoText + '</div>' +
         '</div>' +
-        '<div class="radar-actions" style="display:flex;align-items:center;gap:8px;flex-shrink:0;"></div>';
+        '<div class="radar-actions" style="display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">' + nextStep + '</div>';
       var actions = row.querySelector('.radar-actions');
 
       if (i.category !== 'em_voo') {
