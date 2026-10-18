@@ -186,7 +186,7 @@ const WINDOW_HOURS = 24;
 export async function getConversationDetail(conversationId) {
   const result = await query(
     `SELECT c.*, ct.name AS contact_name, ct.email AS contact_email, ct.phone_display, ct.avatar_initials, ct.avatar_url,
-            ct.tags AS contact_tags, ct.source AS contact_source, ct.notes AS contact_notes, ct.custom_fields AS contact_custom_fields, ct.bot_paused AS contact_bot_paused, ct.wa_id,
+            ct.tags AS contact_tags, ct.source AS contact_source, ct.notes AS contact_notes, ct.custom_fields AS contact_custom_fields, ct.bot_paused AS contact_bot_paused, ct.wa_id, EXISTS (SELECT 1 FROM ai_agents a WHERE a.is_active) AS ai_agents_active,
             ct.channel AS contact_channel, ct.ig_user_id,
             f.id AS funnel_id_full, f.name AS funnel_name, fs.name AS stage_name,
             u.name AS assigned_user_name,

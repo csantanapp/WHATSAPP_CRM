@@ -280,6 +280,11 @@ button{font-family:'Inter',sans-serif;}
                     <span style="font-size:12.5px;font-weight:600;color:#1E293B;line-height:1.35;">Atendimento só humano<span style="display:block;font-size:11px;font-weight:400;color:#64748B;">IA e automações não respondem este contato. As mensagens continuam chegando aqui.</span></span>
                   </label>
 
+                  <div id="painel-ia-pausada" style="display:none;align-items:center;justify-content:space-between;gap:10px;background:#FFF8EB;border:1px solid #FBE3B2;border-radius:10px;padding:9px 12px;">
+                    <span id="painel-ia-pausada-texto" style="font-size:12px;color:#92400E;line-height:1.35;">🤖 IA pausada nesta conversa</span>
+                    <button id="painel-ia-reativar" style="flex-shrink:0;font-size:11.5px;font-weight:700;color:#2563EB;background:#FFFFFF;border:1px solid #C7D7FE;border-radius:7px;padding:5px 9px;cursor:pointer;">Reativar IA</button>
+                  </div>
+
                   <div id="painel-origem-wrap" style="display:none;">
                     <div style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Origem</div>
                     <div id="painel-origem"></div>
@@ -760,8 +765,7 @@ button{font-family:'Inter',sans-serif;}
             </div>
 
             <div style="font-size:11.5px;color:#94A3B8;background:#F8FAFC;border:1px solid #EEF2F6;border-radius:10px;padding:10px 14px;margin:14px 0 20px;">
-              Cada agente roda de forma independente da seção Automações — evite configurar os dois com gatilhos que se sobrepõem no mesmo funil pra não ter duas respostas automáticas pra uma mesma mensagem.
-            </div>
+              O agente fica em silêncio quando um fluxo de automação já respondeu a mensagem, quando o contato é "só humano" ou quando a conversa passou para um atendente (reative pelo painel da conversa). Sem chave de IA configurada em Configurações, ele não responde clientes.</div>
 
             <div id="ai-agents-list" style="display:flex;flex-direction:column;gap:12px;">
               <div style="font-size:12.5px;color:#94A3B8;">Carregando agentes...</div>
@@ -784,10 +788,38 @@ button{font-family:'Inter',sans-serif;}
                 <input id="aa-description" style="width:100%;background:#F5F7FA;border:1px solid #E2E8F0;border-radius:9px;padding:9px 12px;font-size:13px;color:#0F172A;box-sizing:border-box;font-family:'Inter',sans-serif;"/>
               </label>
               <label style="display:flex;flex-direction:column;gap:5px;">
-                <span style="font-size:11.5px;font-weight:600;color:#475569;">Prompt do sistema * <span style="font-weight:400;color:#94A3B8;">(instruções de como o agente deve se comportar)</span></span>
+                <span style="font-size:11.5px;font-weight:600;color:#475569;">Instruções e tom de voz * <span style="font-weight:400;color:#94A3B8;">(quem é o agente, como fala, o que deve fazer — ex: qualificar o lead e levar para matrícula)</span></span>
                 <textarea id="aa-prompt" style="width:100%;background:#F5F7FA;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px;font-size:13px;color:#0F172A;min-height:110px;resize:vertical;font-family:'Inter',sans-serif;box-sizing:border-box;"></textarea>
                 <span id="aa-prompt-tokens" style="font-size:11px;color:#94A3B8;">0 tokens estimados</span>
               </label>
+
+              <div style="border:1px solid #DBE7FF;background:#F8FAFF;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px;">
+                <div>
+                  <div style="font-size:13px;font-weight:700;color:#0F172A;">📚 Base de conhecimento</div>
+                  <div style="font-size:11.5px;color:#64748B;line-height:1.45;margin-top:2px;">O que o agente pode afirmar sobre a empresa: preços, horários, endereço, cursos, formas de pagamento, políticas. Quanto mais completo, menos ele precisa passar para um humano.</div>
+                </div>
+                <div id="aa-faq-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+                <button id="aa-faq-add" type="button" style="align-self:flex-start;background:#FFFFFF;border:1px dashed #93B4F8;color:#2563EB;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;">+ Adicionar pergunta e resposta</button>
+                <label style="display:flex;flex-direction:column;gap:5px;">
+                  <span style="font-size:11.5px;font-weight:600;color:#475569;">Informações gerais <span style="font-weight:400;color:#94A3B8;">(texto livre — cole aqui tabela de preços, horários, regras...)</span></span>
+                  <textarea id="aa-kb-text" style="width:100%;background:#F5F7FA;border:1px solid #E2E8F0;border-radius:9px;padding:9px 12px;font-size:13px;color:#0F172A;box-sizing:border-box;font-family:'Inter',sans-serif;min-height:90px;resize:vertical;"></textarea>
+                </label>
+                <label style="display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:#334155;font-weight:600;">
+                  <input type="checkbox" id="aa-only-kb" checked style="margin-top:2px;"/>
+                  <span>Responder só com o que está na base <span style="display:block;font-weight:400;color:#64748B;font-size:11.5px;">Se a resposta não estiver aqui, o agente não inventa: passa a conversa para um humano.</span></span>
+                </label>
+                <div style="display:grid;grid-template-columns:150px 1fr;gap:12px;">
+                  <label style="display:flex;flex-direction:column;gap:5px;">
+                    <span style="font-size:11.5px;font-weight:600;color:#475569;">Juntar mensagens (seg.)</span>
+                    <input id="aa-wait" type="number" min="0" max="60" value="6" style="width:100%;background:#F5F7FA;border:1px solid #E2E8F0;border-radius:9px;padding:9px 12px;font-size:13px;color:#0F172A;box-sizing:border-box;font-family:'Inter',sans-serif;"/>
+                  </label>
+                  <label style="display:flex;flex-direction:column;gap:5px;">
+                    <span style="font-size:11.5px;font-weight:600;color:#475569;">Mensagem ao passar para humano</span>
+                    <input id="aa-handoff-msg" placeholder="Certo! Vou te passar para uma pessoa da nossa equipe — em instantes alguém te responde por aqui. 🙌" style="width:100%;background:#F5F7FA;border:1px solid #E2E8F0;border-radius:9px;padding:9px 12px;font-size:13px;color:#0F172A;box-sizing:border-box;font-family:'Inter',sans-serif;"/>
+                  </label>
+                </div>
+                <div style="font-size:11px;color:#94A3B8;line-height:1.45;">O agente espera esses segundos depois da última mensagem do cliente antes de responder — assim "oi", "tudo bem?" e "quanto custa?" recebem uma resposta só. Quando ele passa para humano (ou um atendente responde pelo CRM), a IA para de responder naquela conversa até ser reativada no painel.</div>
+              </div>
 
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                 <label style="display:flex;flex-direction:column;gap:5px;">
@@ -1438,6 +1470,10 @@ button{font-family:'Inter',sans-serif;}
     emailEl.textContent = conv.contact_email || '+ adicionar e-mail';
     emailEl.style.color = conv.contact_email ? '#475569' : '#94A3B8';
     document.getElementById('painel-bot-paused').checked = Boolean(conv.contact_bot_paused);
+    var iaPausada = document.getElementById('painel-ia-pausada');
+    var showIaPausada = Boolean(conv.ai_agents_active && conv.ai_paused_at && !conv.contact_bot_paused);
+    iaPausada.style.display = showIaPausada ? 'flex' : 'none';
+    if (showIaPausada) document.getElementById('painel-ia-pausada-texto').textContent = '🤖 IA pausada nesta conversa · ' + (conv.ai_paused_reason || 'pausada');
     loadSourceBox(conv.id);
     var camposHtml = customFieldsHtml(conv.contact_custom_fields);
     document.getElementById('painel-campos').innerHTML = camposHtml;
@@ -1558,6 +1594,12 @@ button{font-family:'Inter',sans-serif;}
     var email = prompt('E-mail do lead:', conv.contact_email || '');
     if (email === null) return;
     await api('/contacts/' + conv.contact_id, { method: 'PATCH', body: JSON.stringify({ email: email }) });
+    refreshConversationPanel();
+  });
+
+  document.getElementById('painel-ia-reativar').addEventListener('click', async function () {
+    if (!state.currentConversationId) return;
+    await api('/conversations/' + state.currentConversationId + '/ai', { method: 'POST', body: JSON.stringify({ paused: false }) });
     refreshConversationPanel();
   });
 
@@ -2031,6 +2073,9 @@ button{font-family:'Inter',sans-serif;}
       if (data.type === 'message:status' && data.waMessageId) {
         var statusWrap = document.querySelector('#conversa-messages [data-wa-id="' + CSS.escape(data.waMessageId) + '"] .msg-status');
         if (statusWrap) statusWrap.innerHTML = messageStatusHtml(data.status, data.errorMessage);
+      }
+      if (data.type === 'conversation:updated' && data.conversation && String(data.conversation.id) === String(state.currentConversationId)) {
+        refreshConversationPanel();
       }
       if (data.type === 'contact:updated' && data.conversationId === state.currentConversationId) {
         refreshConversationPanel();
@@ -4759,6 +4804,36 @@ button{font-family:'Inter',sans-serif;}
       state.funnels.map(function (f) { return '<option value="' + f.id + '">' + escapeHtml(f.name) + '</option>'; }).join('');
   }
 
+  // Pares pergunta/resposta da base de conhecimento do agente.
+  function aiAgentRenderFaq(items) {
+    var list = document.getElementById('aa-faq-list');
+    list.innerHTML = '';
+    items.forEach(function (item) { aiAgentAddFaqRow(item.q, item.a); });
+  }
+  function aiAgentAddFaqRow(q, a) {
+    var list = document.getElementById('aa-faq-list');
+    var row = document.createElement('div');
+    row.className = 'aa-faq-row';
+    row.style.cssText = 'display:flex;gap:8px;align-items:flex-start;background:#FFFFFF;border:1px solid #E5E9F0;border-radius:10px;padding:8px;';
+    row.innerHTML =
+      '<div style="flex-grow:1;display:flex;flex-direction:column;gap:6px;">' +
+        '<input class="aa-faq-q" placeholder="Pergunta (ex: Qual o valor do curso de Medicina?)" value="' + escapeHtml(q || '') + '" style="width:100%;border:1px solid #E2E8F0;border-radius:7px;padding:7px 9px;font-size:12.5px;box-sizing:border-box;font-family:\'Inter\',sans-serif;"/>' +
+        '<textarea class="aa-faq-a" placeholder="Resposta (ex: R$ 890/mês, com bolsa de até 50% no primeiro semestre.)" style="width:100%;border:1px solid #E2E8F0;border-radius:7px;padding:7px 9px;font-size:12.5px;min-height:44px;resize:vertical;box-sizing:border-box;font-family:\'Inter\',sans-serif;">' + escapeHtml(a || '') + '</textarea>' +
+      '</div>' +
+      '<button type="button" title="Remover" style="background:none;border:none;color:#94A3B8;font-size:16px;cursor:pointer;line-height:1;padding:4px;">×</button>';
+    row.querySelector('button').addEventListener('click', function () { row.remove(); });
+    list.appendChild(row);
+    return row;
+  }
+  function aiAgentReadFaq() {
+    return Array.from(document.querySelectorAll('#aa-faq-list .aa-faq-row')).map(function (row) {
+      return { q: row.querySelector('.aa-faq-q').value.trim(), a: row.querySelector('.aa-faq-a').value.trim() };
+    }).filter(function (item) { return item.q && item.a; });
+  }
+  document.getElementById('aa-faq-add').addEventListener('click', function () {
+    aiAgentAddFaqRow('', '').querySelector('.aa-faq-q').focus();
+  });
+
   async function openAiAgentModal(id) {
     aiAgentsState.editingId = id;
     aiAgentsState.handoffKeywords = [];
@@ -4778,6 +4853,11 @@ button{font-family:'Inter',sans-serif;}
     document.getElementById('aa-hours-start').value = '09:00';
     document.getElementById('aa-hours-end').value = '18:00';
     document.getElementById('aa-allow-handoff').checked = true;
+    document.getElementById('aa-kb-text').value = '';
+    document.getElementById('aa-only-kb').checked = true;
+    document.getElementById('aa-wait').value = 6;
+    document.getElementById('aa-handoff-msg').value = '';
+    aiAgentRenderFaq([]);
 
     if (id) {
       var ag;
@@ -4796,6 +4876,11 @@ button{font-family:'Inter',sans-serif;}
       document.getElementById('aa-hours-end').value = ag.business_hours_end || '18:00';
       document.getElementById('aa-allow-handoff').checked = ag.allow_handoff !== false;
       aiAgentsState.handoffKeywords = (ag.handoff_keywords || []).slice();
+      document.getElementById('aa-kb-text').value = ag.knowledge_text || '';
+      document.getElementById('aa-only-kb').checked = ag.only_from_knowledge !== false;
+      document.getElementById('aa-wait').value = ag.wait_seconds != null ? ag.wait_seconds : 6;
+      document.getElementById('aa-handoff-msg').value = ag.handoff_message || '';
+      aiAgentRenderFaq(ag.knowledge_faq || []);
     }
     aiAgentRenderHandoffChips();
     document.getElementById('ai-agent-modal-overlay').style.display = 'flex';
@@ -4829,6 +4914,11 @@ button{font-family:'Inter',sans-serif;}
       business_hours_end: document.getElementById('aa-hours-end').value || '18:00',
       allow_handoff: document.getElementById('aa-allow-handoff').checked,
       handoff_keywords: aiAgentsState.handoffKeywords,
+      knowledge_faq: aiAgentReadFaq(),
+      knowledge_text: document.getElementById('aa-kb-text').value.trim() || null,
+      only_from_knowledge: document.getElementById('aa-only-kb').checked,
+      wait_seconds: parseInt(document.getElementById('aa-wait').value, 10) || 0,
+      handoff_message: document.getElementById('aa-handoff-msg').value.trim() || null,
     };
 
     try {

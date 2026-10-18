@@ -49,6 +49,7 @@ import {
 } from '../repositories/tasks.js';
 import { getSourceForConversation } from '../repositories/conversationSources.js';
 import { runTriggersForTagAdded, runTriggersForStageEntered } from '../automation/engine.js';
+import { pauseAiForConversation, resumeAiForConversation } from '../automation/aiAgents.js';
 import { getDistributionRule, upsertDistributionRule } from '../services/distribution.js';
 import { summarizeConversation, getLatestInsight, getAiSettings, updateAiSettings, AI_PROVIDERS } from '../services/ai/AIService.js';
 import { runRadarNow } from '../jobs/dailyRadarJob.js';
@@ -338,6 +339,8 @@ apiRouter.post('/conversations/:id/messages', asyncHandler(async (req, res) => {
       body: text,
     });
     await touchConversation(conversationId, { incrementUnread: false, isInbound: false });
+    // Atendente assumiu: o Agente de IA para de responder nesta conversa (reativável no painel).
+    await pauseAiForConversation(conversationId, 'Atendente assumiu a conversa');
     await markFirstResponseIfNeeded(conversationId);
     broadcast({ type: 'message:new', conversationId: Number(conversationId), message: saved });
     res.status(201).json(saved);
@@ -387,6 +390,8 @@ apiRouter.post('/conversations/:id/send-template', asyncHandler(async (req, res)
       body: preview || `[template: ${name}]`,
     });
     await touchConversation(conversationId, { incrementUnread: false, isInbound: false });
+    // Atendente assumiu: o Agente de IA para de responder nesta conversa (reativável no painel).
+    await pauseAiForConversation(conversationId, 'Atendente assumiu a conversa');
     await markFirstResponseIfNeeded(conversationId);
     broadcast({ type: 'message:new', conversationId: Number(conversationId), message: saved });
     res.status(201).json(saved);
@@ -630,6 +635,14 @@ apiRouter.delete('/tags/:id', asyncHandler(async (req, res) => {
 
 // --- Origem da conversa ---
 
+// Reativa (ou pausa) o Agente de IA numa conversa.
+apiRouter.post('/conversations/:id/ai', asyncHandler(async (req, res) => {
+  const updated = req.body.paused
+    ? await pauseAiForConversation(req.params.id, 'Pausada manualmente')
+    : await resumeAiForConversation(req.params.id);
+  res.json(updated || null);
+}));
+
 apiRouter.get('/conversations/:id/source', asyncHandler(async (req, res) => {
   const source = await getSourceForConversation(req.params.id);
   res.json(source || null);
@@ -806,6 +819,8 @@ apiRouter.post('/conversations/:id/media', upload.single('file'), asyncHandler(a
       mediaSizeBytes: req.file.size,
     });
     await touchConversation(conversationId, { incrementUnread: false, isInbound: false });
+    // Atendente assumiu: o Agente de IA para de responder nesta conversa (reativável no painel).
+    await pauseAiForConversation(conversationId, 'Atendente assumiu a conversa');
     broadcast({ type: 'message:new', conversationId: Number(conversationId), message: saved });
     res.status(201).json(saved);
   } catch (err) {

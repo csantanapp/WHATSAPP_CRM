@@ -225,7 +225,7 @@ test('submenu por opção: cada opção segue seu ramo, sem ligação vai pelo p
 });
 
 test('agente de IA fica em silêncio enquanto o formulário trata a mensagem', async () => {
-  const created = await agent.post('/api/ai-agents').send({ name: 'Atendente IA', system_prompt: 'Seja simpático.' });
+  const created = await agent.post('/api/ai-agents').send({ name: 'Atendente IA', system_prompt: 'Seja simpático.', wait_seconds: 0 });
   await agent.patch('/api/ai-agents/' + created.body.id + '/active').send({ is_active: true });
 
   await agent.post('/api/automation-flows').send({

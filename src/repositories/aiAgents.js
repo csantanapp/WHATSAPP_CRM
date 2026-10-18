@@ -1,5 +1,21 @@
 import { query } from '../db/pool.js';
 
+// Base de conhecimento em pares pergunta/resposta — descarta pares vazios.
+function normalizeFaq(faq) {
+  if (!Array.isArray(faq)) return [];
+  return faq
+    .map((item) => ({ q: String(item?.q || '').trim(), a: String(item?.a || '').trim() }))
+    .filter((item) => item.q && item.a)
+    .slice(0, 200);
+}
+
+// Segundos de espera pra juntar mensagens seguidas (0 = responde na hora).
+function normalizeWait(value) {
+  const n = parseInt(value, 10);
+  if (Number.isNaN(n)) return 6;
+  return Math.max(0, Math.min(60, n));
+}
+
 export async function listAgents(tenantId) {
   const result = await query(
     `SELECT a.*,
@@ -25,14 +41,16 @@ export async function createAgent(tenantId, fields) {
     `INSERT INTO ai_agents (
        tenant_id, name, description, system_prompt, provider, funnel_id, priority,
        keyword_regex, business_hours_enabled, business_hours_tz, business_hours_start, business_hours_end,
-       allow_handoff, handoff_keywords
-     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
+       allow_handoff, handoff_keywords, knowledge_faq, knowledge_text, only_from_knowledge, wait_seconds, handoff_message
+     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING *`,
     [
       tenantId, fields.name, fields.description || null, fields.system_prompt || '', fields.provider || null,
       fields.funnel_id || null, fields.priority || 0, fields.keyword_regex || null,
       !!fields.business_hours_enabled, fields.business_hours_tz || 'America/Sao_Paulo',
       fields.business_hours_start || '09:00', fields.business_hours_end || '18:00',
       fields.allow_handoff !== false, fields.handoff_keywords || [],
+      JSON.stringify(normalizeFaq(fields.knowledge_faq)), fields.knowledge_text || null,
+      fields.only_from_knowledge !== false, normalizeWait(fields.wait_seconds), fields.handoff_message || null,
     ]
   );
   return result.rows[0];
@@ -42,12 +60,17 @@ export async function updateAgent(tenantId, id, fields) {
   const columns = [
     'name', 'description', 'system_prompt', 'provider', 'funnel_id', 'priority', 'keyword_regex',
     'business_hours_enabled', 'business_hours_tz', 'business_hours_start', 'business_hours_end',
-    'allow_handoff', 'handoff_keywords',
+    'allow_handoff', 'handoff_keywords', 'knowledge_faq', 'knowledge_text', 'only_from_knowledge',
+    'wait_seconds', 'handoff_message',
   ].filter((key) => fields[key] !== undefined);
   if (!columns.length) return getAgent(tenantId, id);
 
   const setClause = columns.map((col, i) => `${col} = $${i + 3}`).join(', ');
-  const values = columns.map((col) => fields[col]);
+  const values = columns.map((col) => {
+    if (col === 'knowledge_faq') return JSON.stringify(normalizeFaq(fields[col]));
+    if (col === 'wait_seconds') return normalizeWait(fields[col]);
+    return fields[col];
+  });
   const result = await query(
     `UPDATE ai_agents SET ${setClause}, updated_at = now() WHERE id = $1 AND tenant_id = $2 RETURNING *`,
     [id, tenantId, ...values]

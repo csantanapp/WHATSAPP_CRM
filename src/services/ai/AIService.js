@@ -167,21 +167,19 @@ export async function classifyForAutomation(tenantId, { question, transcript }) 
   return !!(parsed && parsed.result === true);
 }
 
-// Resposta de um Agente de IA (persona configurável, sem tool-calling) — usada
-// pelo dispatcher de agentes (src/automation/aiAgents.js) no lugar de um
-// step fixo de automação. O próprio prompt instrui o modelo a responder
-// com o token [[HANDOFF]] quando o cliente precisa de um humano.
+// Resposta de um Agente de IA — o prompt (persona + base de conhecimento +
+// regras com os marcadores [[HANDOFF]]/[[SILENCIO]]) é montado em
+// src/automation/agentPrompt.js. Devolve também o provider usado, pra quem
+// chama saber se a resposta veio de uma IA real ou do mock.
 export async function replyAsAgent(tenantId, { systemPrompt, transcript, providerOverride }) {
-  const system = (systemPrompt || '') +
-    '\n\nSe o cliente precisar claramente falar com um humano (reclamação grave, pedido explícito de atendente, ou assunto fora do seu escopo), responda EXATAMENTE com o texto [[HANDOFF]] e mais nada.';
   const result = await complete({
     tenantId,
     feature: 'ai_agent_reply',
-    system,
+    system: systemPrompt || '',
     messages: [{ role: 'user', content: transcript }],
     providerOverride: providerOverride || undefined,
   });
-  return result ? result.text : null;
+  return result ? { text: result.text, provider: result.provider } : null;
 }
 
 export async function getAiSettings(tenantId) {

@@ -104,7 +104,7 @@ test('atendente não pode criar/editar/excluir agentes (RBAC)', async () => {
 });
 
 test('agente ativo responde automaticamente (mock) e loga a execução', async () => {
-  await agent.post('/api/ai-agents').send({ name: 'Bot Geral', system_prompt: 'Responda com simpatia.' })
+  await agent.post('/api/ai-agents').send({ name: 'Bot Geral', system_prompt: 'Responda com simpatia.', wait_seconds: 0 })
     .then((r) => agent.patch('/api/ai-agents/' + r.body.id + '/active').send({ is_active: true }));
 
   await sendInbound('5511500000001', 'Olá, quero saber mais');
@@ -142,7 +142,7 @@ test('mensagem com palavra-chave de handoff cria tarefa e marca prioridade, sem 
 
   const tasks = await query('SELECT title FROM tasks WHERE conversation_id = $1', [convId]);
   assert.equal(tasks.rows.length, 1);
-  assert.match(tasks.rows[0].title, /pediu atendente/);
+  assert.match(tasks.rows[0].title, /precisa de atendente/);
 
   const runs = await query('SELECT outcome FROM ai_agent_runs');
   assert.equal(runs.rows[0].outcome, 'handoff');
