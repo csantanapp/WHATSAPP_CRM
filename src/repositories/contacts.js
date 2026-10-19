@@ -1,4 +1,6 @@
 import { query } from '../db/pool.js';
+import { deleteMediaFiles } from '../services/mediaStorage.js';
+import { logger } from '../logger.js';
 import { createTag } from './tags.js';
 import { logActivity } from './activityLog.js';
 import { getDefaultTenantId } from '../tenant.js';
@@ -126,8 +128,22 @@ export async function getContactById(tenantId, id) {
   return result.rows[0];
 }
 
+// Exclui o contato (conversas e mensagens vão junto, em cascata) e apaga do
+// disco as mídias dessas mensagens.
 export async function deleteContact(tenantId, id) {
+  const media = await query(
+    `SELECT m.media_url FROM messages m JOIN conversations c ON c.id = m.conversation_id
+     WHERE c.contact_id = $1 AND c.tenant_id = $2 AND m.media_url IS NOT NULL`,
+    [id, tenantId]
+  );
   const result = await query('DELETE FROM contacts WHERE id = $1 AND tenant_id = $2 RETURNING id', [id, tenantId]);
+  if (result.rows[0] && media.rows.length) {
+    try {
+      await deleteMediaFiles(media.rows.map((r) => r.media_url));
+    } catch (err) {
+      logger.error('contact_media_delete_failed', { contactId: id, message: err.message });
+    }
+  }
   return result.rows[0];
 }
 

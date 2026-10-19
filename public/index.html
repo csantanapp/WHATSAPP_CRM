@@ -256,6 +256,10 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 .int-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px;}
 .int-steps{margin:8px 0 0;padding-left:20px;font-size:13.5px;color:var(--ink);line-height:1.6;}
 .int-steps code,.int-mono{font-family:var(--font-mono);font-size:12.5px;background:#F0F0EA;border-radius:6px;padding:1px 6px;word-break:break-all;}
+/* Permissões: controles que o perfil não pode usar somem (o servidor também recusa). */
+body[data-can-manage="false"] .only-manager{display:none !important;}
+body[data-is-admin="false"] .only-admin{display:none !important;}
+body[data-can-manage="false"] .switch.flow-toggle{pointer-events:none;opacity:.45;}
 .ct-link{font-size:14px;font-weight:500;color:var(--ink);display:inline-flex;align-items:center;gap:4px;text-decoration:underline;text-underline-offset:3px;}
 .radar-row{display:flex;align-items:center;gap:14px;padding:18px 22px;flex-wrap:wrap;}
 .radar-list .radar-row + .radar-row{border-top:1px solid var(--divider);}
@@ -817,12 +821,12 @@ button{font-family:var(--font-body);}
                 <button type="button" id="flow-organize-btn" class="ct-btn ct-btn-ghost"><span data-icon="wand-sparkles"></span>Organizar</button>
                 <button type="button" id="flow-discard-btn" class="ct-btn ct-btn-ghost">Descartar</button>
                 <button type="button" id="flow-save-btn" class="ct-btn ct-btn-secondary">Salvar</button>
-                <button type="button" id="flow-publish-btn" class="ct-btn ct-btn-primary"><span data-icon="rocket"></span>Publicar</button>
+                <button type="button" id="flow-publish-btn" class="ct-btn ct-btn-primary only-manager"><span data-icon="rocket"></span>Publicar</button>
                 <div style="position:relative;">
                   <button type="button" id="flow-more-btn" class="ct-icon-btn" aria-label="Mais ações" aria-haspopup="menu" aria-expanded="false" style="border:1px solid var(--border-input);background:#FFFFFF;width:38px;height:38px;"><span data-icon="ellipsis" data-icon-size="17"></span></button>
                   <div id="flow-more-menu" class="ct-menu" role="menu" hidden>
-                    <button type="button" role="menuitem" id="flow-deactivate-btn" class="ct-menu-item"><span data-icon="eye-off"></span>Desativar</button>
-                    <button type="button" role="menuitem" id="flow-canvas-delete" class="ct-menu-item danger"><span data-icon="trash-2"></span>Excluir automação…</button>
+                    <button type="button" role="menuitem" id="flow-deactivate-btn" class="ct-menu-item only-manager"><span data-icon="eye-off"></span>Desativar</button>
+                    <button type="button" role="menuitem" id="flow-canvas-delete" class="ct-menu-item danger only-manager"><span data-icon="trash-2"></span>Excluir automação…</button>
                   </div>
                 </div>
               </div>
@@ -2385,6 +2389,25 @@ hydrateIcons(document);
     sidebarBadgeTimer = setTimeout(updateSidebarBadges, 1500);
   }
 
+  // ── Permissões na interface ──
+  function applyRoleToBody(user) {
+    if (!user) return;
+    var isAdmin = user.role === 'admin' || Boolean(user.isPlatformAdmin);
+    document.body.dataset.isAdmin = isAdmin ? 'true' : 'false';
+    document.body.dataset.canManage = isAdmin || user.role === 'supervisor' ? 'true' : 'false';
+  }
+  applyRoleToBody(window.__currentUser);
+  document.addEventListener('ct:user', function (e) { applyRoleToBody((e && e.detail) || window.__currentUser); });
+  // Rede de segurança: erro de API que nenhum código tratou (ex: sem permissão)
+  // vira aviso na tela em vez de falhar em silêncio.
+  window.addEventListener('unhandledrejection', function (e) {
+    var err = e.reason;
+    if (err && err.message && /Falha na API|permissão|Sessão|não encontrad|inválid/i.test(err.message)) {
+      e.preventDefault();
+      ctAlert(err.message);
+    }
+  });
+
   // ── Sino de notificações ──
   var NOTIF_META = {
     new_lead: { icon: 'user-plus', bg: 'var(--acc)', color: 'var(--ink)' },
@@ -2652,7 +2675,7 @@ hydrateIcons(document);
       row.className = 'ct-card flow-row';
 
       var toggle = document.createElement('button');
-      toggle.className = 'switch' + (flow.is_active ? ' on' : '');
+      toggle.className = 'switch flow-toggle' + (flow.is_active ? ' on' : '');
       toggle.setAttribute('role', 'switch');
       toggle.setAttribute('aria-checked', flow.is_active ? 'true' : 'false');
       toggle.setAttribute('aria-label', 'Ativar ou pausar “' + flow.name + '”');
@@ -2686,7 +2709,7 @@ hydrateIcons(document);
       actions.style.cssText = 'display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto;';
       actions.innerHTML =
         '<button type="button" class="ct-btn ct-btn-secondary" data-edit-flow="' + flow.id + '">' + ICON('workflow', 15) + 'Editar fluxo</button>' +
-        '<button type="button" class="ct-icon-btn danger" data-delete-flow="' + flow.id + '" data-flow-name="' + escapeHtml(flow.name) + '" aria-label="Excluir automação “' + escapeHtml(flow.name) + '”" title="Excluir">' + ICON('trash-2', 16) + '</button>';
+        '<button type="button" class="ct-icon-btn danger only-manager" data-delete-flow="' + flow.id + '" data-flow-name="' + escapeHtml(flow.name) + '" aria-label="Excluir automação “' + escapeHtml(flow.name) + '”" title="Excluir">' + ICON('trash-2', 16) + '</button>';
 
       row.appendChild(toggle);
       row.appendChild(info);
@@ -4901,7 +4924,7 @@ hydrateIcons(document);
       lastKnownWhatsappDigits = (status.phoneNumber || '').replace(/\D/g, '') || manualDigits;
 
       var manualFieldHtml =
-        '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #EEEEE8;">' +
+        '<div class="only-admin" style="margin-top:12px;padding-top:12px;border-top:1px solid #EEEEE8;">' +
           '<div style="font-size:11px;color:#5B5D63;margin-bottom:6px;">Número público do WhatsApp (pra gerar os links das campanhas, mesmo antes da API oficial estar 100% conectada):</div>' +
           '<div style="display:flex;gap:8px;">' +
             '<input id="config-manual-number" placeholder="Ex: 5511999998888" value="' + escapeHtml(status.manualPhoneNumber || '') + '" style="flex-grow:1;border:1px solid #E3E3DC;border-radius:8px;padding:8px 12px;font-size:12.5px;color:#111214;font-family:\'Work Sans\',sans-serif;"/>' +
@@ -5204,7 +5227,7 @@ hydrateIcons(document);
             '<span class="ct-mono" style="font-size:12px;color:var(--text-subtle);">' + String(i + 1).padStart(2, '0') + '</span>' +
             '<span style="width:8px;height:8px;border-radius:50%;background:' + FN_DOTS[i % FN_DOTS.length] + ';flex-shrink:0;"></span>' +
             '<button type="button" data-rename-stage="' + s.id + '" data-stage-name="' + escapeHtml(s.name) + '" title="Renomear etapa" style="flex:1;min-width:0;text-align:left;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0;">' + escapeHtml(s.name) + '</button>' +
-            '<button type="button" class="ct-icon-btn danger" data-delete-stage="' + s.id + '" data-stage-name="' + escapeHtml(s.name) + '" aria-label="Remover etapa “' + escapeHtml(s.name) + '”" style="width:26px;height:26px;">' + ICON('x', 14) + '</button>' +
+            '<button type="button" class="ct-icon-btn danger only-manager" data-delete-stage="' + s.id + '" data-stage-name="' + escapeHtml(s.name) + '" aria-label="Remover etapa “' + escapeHtml(s.name) + '”" style="width:26px;height:26px;">' + ICON('x', 14) + '</button>' +
           '</div>' +
           '<select data-stage-meta="' + s.id + '" class="ct-select" aria-label="Evento da Meta para “' + escapeHtml(s.name) + '”" title="Evento enviado à Meta quando um lead de anúncio entra nesta etapa" style="height:32px;font-size:12px;' + (s.meta_event ? 'background-color:var(--acc-soft);border-color:var(--acc);' : '') + '">' +
             '<option value=""' + (!s.meta_event ? ' selected' : '') + '>Meta: —</option>' +
@@ -5245,7 +5268,7 @@ hydrateIcons(document);
             '<button type="button" class="ct-btn ct-btn-ghost" data-open-kanban="' + f.id + '">' + ICON('square-kanban', 15) + 'Ver Kanban</button>' +
             (f.is_default ? '' : '<button type="button" class="ct-btn ct-btn-secondary" data-set-default-funnel="' + f.id + '">Tornar padrão</button>') +
             '<button type="button" class="ct-btn ct-btn-secondary" data-add-stage="' + f.id + '">' + ICON('plus', 15) + 'Etapa</button>' +
-            (f.is_default ? '' : '<button type="button" class="ct-icon-btn danger" data-delete-funnel="' + f.id + '" aria-label="Excluir funil “' + escapeHtml(f.name) + '”" title="Excluir funil">' + ICON('trash-2', 16) + '</button>') +
+            (f.is_default ? '' : '<button type="button" class="ct-icon-btn danger only-manager" data-delete-funnel="' + f.id + '" aria-label="Excluir funil “' + escapeHtml(f.name) + '”" title="Excluir funil">' + ICON('trash-2', 16) + '</button>') +
           '</div>' +
         '</div>' +
         '<div class="fn-body' + (campaignHtml ? ' has-link' : '') + '">' +
@@ -5509,7 +5532,7 @@ hydrateIcons(document);
       chip.style.cursor = 'default';
       chip.style.paddingRight = '5px';
       chip.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:' + avatarBg(tag.name).replace('#E8F5C8', '#9BC53D').replace('#FFE2D6', '#FF8F6B').replace('#DCEBFF', '#3B8DF0').replace('#ECE4FF', '#8B5CF6').replace('#FFF0C2', '#FFB020').replace('#E0F3EC', '#22C55E') + ';"></span>' + escapeHtml(tag.name) +
-        '<button type="button" data-delete-tag="' + tag.id + '" data-tag-name="' + escapeHtml(tag.name) + '" aria-label="Remover tag ' + escapeHtml(tag.name) + ' do catálogo" style="background:none;border:none;cursor:pointer;color:var(--text-subtle);display:inline-flex;padding:0 2px;">' + ICON('x', 12) + '</button>';
+        '<button type="button" class="only-manager" data-delete-tag="' + tag.id + '" data-tag-name="' + escapeHtml(tag.name) + '" aria-label="Remover tag ' + escapeHtml(tag.name) + ' do catálogo" style="background:none;border:none;cursor:pointer;color:var(--text-subtle);display:inline-flex;padding:0 2px;">' + ICON('x', 12) + '</button>';
       listEl.appendChild(chip);
     });
     listEl.querySelectorAll('[data-delete-tag]').forEach(function (btn) {

@@ -247,7 +247,7 @@ apiRouter.patch('/funnels/:id', asyncHandler(async (req, res) => {
   res.json(result.rows[0]);
 }));
 
-apiRouter.delete('/funnels/:id', asyncHandler(async (req, res) => {
+apiRouter.delete('/funnels/:id', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
   await deleteFunnel(req.params.id);
   res.status(204).end();
 }));
@@ -270,7 +270,7 @@ apiRouter.patch('/stages/:id', asyncHandler(async (req, res) => {
   res.json(await renameStage(req.params.id, { name: req.body.name, color: req.body.color, metaEvent }));
 }));
 
-apiRouter.delete('/stages/:id', asyncHandler(async (req, res) => {
+apiRouter.delete('/stages/:id', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
   await deleteStage(req.params.id);
   res.status(204).end();
 }));
@@ -301,7 +301,7 @@ apiRouter.get('/settings/instagram-status', asyncHandler(async (_req, res) => {
 
 // Permite cadastrar o número público do WhatsApp manualmente (só pra gerar os
 // links wa.me das campanhas), sem precisar da API oficial da Meta já validada.
-apiRouter.put('/settings/whatsapp-number', asyncHandler(async (req, res) => {
+apiRouter.put('/settings/whatsapp-number', requireRole('admin'), asyncHandler(async (req, res) => {
   const { phone_number } = req.body;
   await setSetting('whatsapp_public_number', phone_number || null);
   res.json({ manualPhoneNumber: phone_number || null });
@@ -686,12 +686,12 @@ apiRouter.get('/automation-flows/:id/metrics', asyncHandler(async (req, res) => 
   res.json(await getFlowMetrics(req.params.id, days));
 }));
 
-apiRouter.delete('/automation-flows/:id', asyncHandler(async (req, res) => {
+apiRouter.delete('/automation-flows/:id', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
   await deleteFlow(req.params.id);
   res.status(204).end();
 }));
 
-apiRouter.patch('/automation-flows/:id/active', asyncHandler(async (req, res) => {
+apiRouter.patch('/automation-flows/:id/active', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
   res.json(await setFlowActive(req.params.id, req.body.is_active));
 }));
 
@@ -704,7 +704,7 @@ apiRouter.post('/tags', asyncHandler(async (req, res) => {
   res.status(201).json(await createTag(req.body.name, req.body.color));
 }));
 
-apiRouter.delete('/tags/:id', asyncHandler(async (req, res) => {
+apiRouter.delete('/tags/:id', requireRole('admin', 'supervisor'), asyncHandler(async (req, res) => {
   await deleteTag(req.params.id);
   res.status(204).end();
 }));
