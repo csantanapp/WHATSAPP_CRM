@@ -89,6 +89,7 @@ import {
   deleteFunnel,
   setDefaultFunnel,
   updateFunnelEntry,
+  updateFunnelEntryKeyword,
   addDefaultTagToFunnel,
   removeDefaultTagFromFunnel,
   applyFunnelDefaultTagsToContact,
@@ -230,6 +231,15 @@ apiRouter.delete('/funnels/:id/default-tags/:tag', asyncHandler(async (req, res)
 }));
 
 apiRouter.patch('/funnels/:id', asyncHandler(async (req, res) => {
+  // Texto do link primeiro: se for recusado, nada mais é salvo.
+  if (req.body.entry_keyword !== undefined) {
+    try {
+      await updateFunnelEntryKeyword(req.params.id, req.body.entry_keyword);
+    } catch (err) {
+      if (err.status) return res.status(err.status).json({ error: err.message });
+      throw err;
+    }
+  }
   if (req.body.name !== undefined) await renameFunnel(req.params.id, req.body.name);
   if (req.body.welcome_message !== undefined) await updateFunnelEntry(req.params.id, { welcomeMessage: req.body.welcome_message });
   const result = await query('SELECT * FROM funnels WHERE id = $1', [req.params.id]);

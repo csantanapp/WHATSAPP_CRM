@@ -5054,8 +5054,8 @@ hydrateIcons(document);
                 '<button type="button" class="ct-btn ct-btn-accent" data-copy-link="' + escapeHtml(waLink) + '" aria-live="polite">' + ICON('copy', 15) + 'Copiar</button></div>'
               : '<div style="font-size:13px;color:#FFD27A;">Configure o WhatsApp em Conexões para gerar o link completo. Palavra-chave: <span class="ct-mono">' + escapeHtml(f.entry_keyword) + '</span></div>') +
             '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:#C9CAC4;">' +
-              '<span style="flex:1;min-width:0;">Mensagem: “' + escapeHtml(f.entry_keyword) + '”' + (f.welcome_message ? ' · Boas-vindas: “' + escapeHtml(f.welcome_message) + '”' : ' · Sem boas-vindas específica') + '</span>' +
-              '<button type="button" data-edit-welcome="' + f.id + '" class="ct-btn" style="height:30px;padding:0 10px;font-size:12.5px;background:transparent;border-color:#3E4046;color:#FFFFFF;">Editar</button>' +
+              '<span style="flex:1;min-width:0;">Texto do link: “' + escapeHtml(f.entry_keyword) + '”' + (f.welcome_message ? ' · Boas-vindas: “' + escapeHtml(f.welcome_message) + '”' : ' · Sem boas-vindas específica') + '</span>' +
+              '<button type="button" data-edit-welcome="' + f.id + '" class="ct-btn" style="height:30px;padding:0 10px;font-size:12.5px;background:transparent;border-color:#3E4046;color:#FFFFFF;">' + ICON('pencil', 13) + 'Personalizar</button>' +
             '</div>' +
             '<div style="font-size:12px;color:#C9CAC4;margin-top:6px;">Leads que chegarem com essa mensagem caem automaticamente neste funil.</div>' +
           '</div>';
@@ -5161,13 +5161,23 @@ hydrateIcons(document);
       btn.addEventListener('click', async function () {
         var funnelId = btn.getAttribute('data-edit-welcome');
         var current = funnels.find(function (f) { return String(f.id) === funnelId; });
+        var oldLinks = (current && current.entry_keyword_aliases) || [];
         var saved = await ctForm({
-          title: 'Mensagem de boas-vindas',
-          description: 'Enviada a quem chega por este link de captação. Deixe vazio para não enviar nenhuma.',
-          icon: 'message-square-text',
-          fields: [{ name: 'text', label: 'Mensagem', type: 'textarea', rows: 4, value: (current && current.welcome_message) || '', placeholder: 'Ex: Que bom te ver no stand! Em que posso ajudar?' }],
+          title: 'Personalizar link de captação',
+          description: 'O texto do link é a mensagem que já vem escrita quando o lead abre o link. Quem mandar esse texto cai direto neste funil.',
+          icon: 'link',
+          submitLabel: 'Salvar link',
+          fields: [
+            { name: 'keyword', label: 'Texto do link', required: true, optionalHint: false, value: (current && current.entry_keyword) || '', placeholder: current ? current.name : 'Ex: Evento SP',
+              help: 'Ex: o nome do funil (“' + (current ? current.name : 'Evento SP') + '”). Evite palavras comuns como “oi” ou “preço”, que podem aparecer numa conversa normal.' +
+                (oldLinks.length ? ' Links antigos continuam funcionando: ' + oldLinks.map(function (a) { return '“' + a + '”'; }).join(', ') + '.' : ' Se você trocar, o link antigo continua funcionando.') },
+            { name: 'welcome', label: 'Mensagem de boas-vindas', type: 'textarea', rows: 3, value: (current && current.welcome_message) || '', placeholder: 'Ex: Que bom te ver no stand! Em que posso ajudar?', help: 'Enviada a quem chega por este link. Deixe vazio para não enviar nenhuma.' },
+          ],
+          validate: function (v) {
+            if (v.keyword.replace(/[^\p{L}\p{N}]/gu, '').length < 3) return 'O texto do link precisa ter pelo menos 3 letras ou números.';
+          },
           onSubmit: function (v) {
-            return api('/funnels/' + funnelId, { method: 'PATCH', body: JSON.stringify({ welcome_message: v.text }) });
+            return api('/funnels/' + funnelId, { method: 'PATCH', body: JSON.stringify({ entry_keyword: v.keyword, welcome_message: v.welcome }) });
           },
         });
         if (!saved) return;

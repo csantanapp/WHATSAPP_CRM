@@ -14,13 +14,6 @@ export async function listFunnelsWithStages(tenantId) {
   }));
 }
 
-function slugify(text) {
-  return text
-    .normalize('NFD').replace(/[̀-ͯ]/g, '') // remove acentos
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-}
 
 // Etapas padrão de qualquer funil novo — mesmo conjunto do "Funil de Vendas" original.
 // O usuário pode renomear, remover ou adicionar outras depois pela tela de Configurações.
@@ -36,10 +29,8 @@ export async function createFunnel({ name, color = '#12A37D', welcomeMessage, st
   const positionResult = await query('SELECT COALESCE(MAX(position), -1) + 1 AS next FROM funnels WHERE tenant_id = $1', [tenantId]);
   const position = positionResult.rows[0].next;
 
-  // Gera uma palavra-chave única e curta pro link wa.me (ex: "evento-sp-2026" -> "evento-sp-2026-x4k9").
-  const base = slugify(name).slice(0, 30) || 'campanha';
-  const suffix = Math.random().toString(36).slice(2, 6);
-  const entryKeyword = `${base}-${suffix}`;
+  // Texto do link wa.me = o nome do funil ("Evento SP"); se já existir, "Evento SP 2".
+  const entryKeyword = await uniqueEntryKeyword(tenantId, normalizeEntryKeyword(name) || 'campanha');
 
   const tags = defaultTags && defaultTags.length ? defaultTags : [];
   for (const tag of tags) await createTag(tag); // garante que entram no catálogo
@@ -58,6 +49,57 @@ export async function createFunnel({ name, color = '#12A37D', welcomeMessage, st
   }
 
   return { ...funnel, stages: createdStages };
+}
+
+// Texto do link: espaços normalizados, até 60 caracteres.
+export function normalizeEntryKeyword(text) {
+  return String(text || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+}
+
+// Algum funil (fora `exceptFunnelId`) já usa esse texto, como atual ou apelido?
+async function entryKeywordTaken(tenantId, keyword, exceptFunnelId = null) {
+  const result = await query(
+    `SELECT 1 FROM funnels f
+     WHERE f.tenant_id = $1 AND ($3::bigint IS NULL OR f.id <> $3)
+       AND (lower(f.entry_keyword) = lower($2) OR lower($2) = ANY (SELECT lower(a) FROM unnest(f.entry_keyword_aliases) a))
+     LIMIT 1`,
+    [tenantId, keyword, exceptFunnelId]
+  );
+  return result.rowCount > 0;
+}
+
+async function uniqueEntryKeyword(tenantId, base) {
+  let candidate = base;
+  for (let n = 2; await entryKeywordTaken(tenantId, candidate); n++) candidate = `${base} ${n}`;
+  return candidate;
+}
+
+// Troca o texto do link. O texto anterior vira apelido (links antigos seguem
+// funcionando). Lança erro com `status` 400/409 pra rota devolver a mensagem.
+export async function updateFunnelEntryKeyword(funnelId, rawKeyword) {
+  const tenantId = await getDefaultTenantId();
+  const keyword = normalizeEntryKeyword(rawKeyword);
+  if (keyword.replace(/[^\p{L}\p{N}]/gu, '').length < 3) {
+    const err = new Error('O texto do link precisa ter pelo menos 3 letras ou números.');
+    err.status = 400;
+    throw err;
+  }
+  if (await entryKeywordTaken(tenantId, keyword, funnelId)) {
+    const err = new Error(`Outro funil já usa “${keyword}” no link. Escolha um texto diferente.`);
+    err.status = 409;
+    throw err;
+  }
+  const current = (await query('SELECT entry_keyword, entry_keyword_aliases FROM funnels WHERE id = $1', [funnelId])).rows[0];
+  if (!current) return null;
+  let aliases = (current.entry_keyword_aliases || []).filter((a) => a.toLowerCase() !== keyword.toLowerCase());
+  if (current.entry_keyword && current.entry_keyword.toLowerCase() !== keyword.toLowerCase() && !aliases.some((a) => a.toLowerCase() === current.entry_keyword.toLowerCase())) {
+    aliases = [...aliases, current.entry_keyword];
+  }
+  const result = await query(
+    'UPDATE funnels SET entry_keyword = $2, entry_keyword_aliases = $3 WHERE id = $1 RETURNING *',
+    [funnelId, keyword, aliases]
+  );
+  return result.rows[0];
 }
 
 export async function updateFunnelEntry(funnelId, { welcomeMessage }) {
@@ -104,9 +146,12 @@ export async function applyFunnelDefaultTagsToContact(funnelId, contactId) {
 // aparece no texto da mensagem recebida — usado pra rotear o lead automaticamente.
 export async function findFunnelByMessageKeyword(messageText) {
   if (!messageText) return null;
+  // Casa o texto atual do link ou um apelido (texto antigo); o mais longo vence.
   const result = await query(
-    `SELECT * FROM funnels WHERE entry_keyword IS NOT NULL AND $1 ILIKE '%' || entry_keyword || '%'
-     ORDER BY length(entry_keyword) DESC LIMIT 1`,
+    `SELECT f.* FROM funnels f
+     CROSS JOIN LATERAL unnest(array_prepend(f.entry_keyword, f.entry_keyword_aliases)) AS k(keyword)
+     WHERE k.keyword IS NOT NULL AND k.keyword <> '' AND $1 ILIKE '%' || k.keyword || '%'
+     ORDER BY length(k.keyword) DESC LIMIT 1`,
     [messageText]
   );
   if (!result.rows[0]) return null;
