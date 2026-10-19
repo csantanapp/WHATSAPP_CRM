@@ -11,6 +11,9 @@ import { classifyForAutomation } from '../services/ai/AIService.js';
 import { sendQuestion, handleQuestionReply, sendText, knownAnswer, nextStepForAnswer } from './formQuestion.js';
 import { renderTemplate } from './variables.js';
 import { connectAgentToConversation } from './aiAgents.js';
+import { renderPlain } from './variables.js';
+import { getSheet, saveRecord, findRow } from '../integrations/google.js';
+import { sheetExtras } from '../integrations/sheetsSync.js';
 
 async function isFirstMessageOfConversation(conversationId) {
   const result = await query(
@@ -218,6 +221,20 @@ async function executeSteps({ flow, conversation, contact, run, cursor, hops = 0
         await updateRun(run.id, { currentStepId: current.id, status: 'waiting_reply' });
         return;
       }
+      case 'sheets_save': {
+        // "Salvar no Google Sheets": grava os dados do lead numa aba; com
+        // "não duplicar", atualiza a linha do mesmo lead em vez de criar outra.
+        logOutcome = await runSheetsSave(flow, contact, conversation, current.config || {});
+        break;
+      }
+      case 'sheets_lookup': {
+        // "Buscar no Google Sheets": procura uma linha e traz as colunas pra
+        // ficha do lead ({{Coluna}} nas mensagens). Saídas: Encontrou / Não encontrou.
+        const found = await runSheetsLookup(flow, contact, conversation, current.config || {});
+        nextOverride = found === 'found' ? current.next_step_id_true : current.next_step_id_false;
+        logOutcome = found === 'found' ? 'true' : (found === 'error' ? 'error' : 'false');
+        break;
+      }
       case 'start_ai_agent': {
         // "Conectar Agente IA": a partir daqui um agente de IA atende a
         // conversa. Nó terminal — o fluxo termina e a IA assume.
@@ -267,6 +284,53 @@ async function executeSteps({ flow, conversation, contact, run, cursor, hops = 0
   }
 
   await updateRun(run.id, { currentStepId: null, status: 'completed' });
+}
+
+async function runSheetsSave(flow, contact, conversation, config) {
+  try {
+    const sheet = config.sheet_id ? await getSheet(flow.tenant_id, config.sheet_id) : null;
+    if (!sheet || !config.tab) return 'skipped';
+    const extra = await sheetExtras(contact, conversation);
+    const record = {};
+    for (const col of config.columns || []) {
+      if (col?.header) record[col.header] = renderPlain(col.value || '', contact, extra);
+    }
+    const result = await saveRecord(flow.tenant_id, sheet.spreadsheet_id, config.tab, record, { matchColumn: config.match_column || null });
+    return result.action; // appended | updated | skipped
+  } catch (err) {
+    logger.error('automation_sheets_save_failed', { flowId: flow.id, message: err.message });
+    return 'error';
+  }
+}
+
+async function runSheetsLookup(flow, contact, conversation, config) {
+  try {
+    const sheet = config.sheet_id ? await getSheet(flow.tenant_id, config.sheet_id) : null;
+    if (!sheet || !config.tab || !config.search_column) return 'not_found';
+    const value = renderPlain(config.search_value || '', contact, await sheetExtras(contact, conversation));
+    if (!value) return 'not_found';
+    const hit = await findRow(flow.tenant_id, sheet.spreadsheet_id, config.tab, config.search_column, value);
+    if (!hit) return 'not_found';
+    const wanted = (config.fields || []).length ? config.fields : Object.keys(hit.record);
+    const toSave = {};
+    for (const field of wanted) {
+      const key = Object.keys(hit.record).find((h) => h.toLowerCase() === String(field).toLowerCase());
+      if (key) toSave[key] = String(hit.record[key] ?? '');
+    }
+    if (Object.keys(toSave).length) {
+      await query(
+        `UPDATE contacts SET custom_fields = COALESCE(custom_fields, '{}'::jsonb) || $2::jsonb, updated_at = now() WHERE id = $1`,
+        [contact.id, JSON.stringify(toSave)]
+      );
+      // Já vale pros próximos passos do mesmo fluxo ({{Coluna}}).
+      contact.custom_fields = { ...(contact.custom_fields || {}), ...toSave };
+      broadcast({ type: 'contact:updated', contactId: contact.id, conversationId: conversation.id });
+    }
+    return 'found';
+  } catch (err) {
+    logger.error('automation_sheets_lookup_failed', { flowId: flow.id, message: err.message });
+    return 'error';
+  }
 }
 
 // Fluxo de destino de um "Conectar Automação": precisa existir, ser do mesmo

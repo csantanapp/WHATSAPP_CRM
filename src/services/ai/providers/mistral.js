@@ -1,8 +1,8 @@
 // Provider real via Mistral AI — API compatível com o formato Chat Completions.
 
-const MODEL = process.env.MISTRAL_MODEL || 'mistral-small-latest';
+export const DEFAULT_MODEL = process.env.MISTRAL_MODEL || 'mistral-small-latest';
 
-export async function completeMistral({ system, messages, apiKey }) {
+export async function completeMistral({ system, messages, apiKey, model = DEFAULT_MODEL }) {
   if (!apiKey) throw new Error('Chave da Mistral não configurada');
 
   const res = await fetch('https://api.mistral.ai/v1/chat/completions', {
@@ -12,7 +12,7 @@ export async function completeMistral({ system, messages, apiKey }) {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: MODEL,
+      model,
       messages: [{ role: 'system', content: system }, ...messages],
     }),
   });

@@ -1,8 +1,8 @@
 // Provider real via OpenAI Chat Completions — chamada HTTP direta.
 
-const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+export const DEFAULT_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
-export async function completeOpenAI({ system, messages, apiKey }) {
+export async function completeOpenAI({ system, messages, apiKey, model = DEFAULT_MODEL }) {
   if (!apiKey) throw new Error('Chave da OpenAI não configurada');
 
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -12,7 +12,7 @@ export async function completeOpenAI({ system, messages, apiKey }) {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: MODEL,
+      model,
       messages: [{ role: 'system', content: system }, ...messages],
     }),
   });

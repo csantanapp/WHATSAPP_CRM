@@ -3,6 +3,7 @@ import { logActivity } from './activityLog.js';
 import { getDefaultTenantId } from '../tenant.js';
 import { reportStageChange } from '../services/metaConversions.js';
 import { notify } from './notifications.js';
+import { syncNewContactToSheet } from '../integrations/sheetsSync.js';
 
 // Apesar do nome (mantido por compatibilidade com os imports existentes),
 // retorna a conversa mais recente do contato INDEPENDENTE do status — uma
@@ -28,6 +29,7 @@ export async function createConversation(contactId, { funnelId, funnelStageId } 
 
   const contactRow = await query('SELECT name, phone_display, channel FROM contacts WHERE id = $1', [contactId]);
   const ct = contactRow.rows[0] || {};
+  syncNewContactToSheet(conversation); // em paralelo: o Google não atrasa o atendimento (erros só viram log)
   await notify({
     type: 'new_lead',
     title: 'Novo lead: ' + (ct.name || ct.phone_display || 'contato sem nome'),

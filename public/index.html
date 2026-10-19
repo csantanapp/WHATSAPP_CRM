@@ -244,6 +244,18 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 .notif-time{font-size:11.5px;color:var(--text-subtle);margin-top:4px;font-variant-numeric:tabular-nums;}
 .notif-unread-dot{width:8px;height:8px;border-radius:50%;background:var(--ink);flex-shrink:0;margin-top:6px;}
 .sb-nav-divider{margin:8px 6px;}
+.int-ai-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;}
+.int-head{display:flex;align-items:flex-start;gap:14px;}
+.int-logo{width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-display);font-weight:600;font-size:18px;}
+.int-title{font-family:var(--font-display);font-size:19px;font-weight:600;letter-spacing:-0.01em;color:var(--ink);}
+.int-desc{font-size:14px;color:var(--text-muted);margin-top:3px;line-height:1.45;}
+.int-section{border-top:1px solid var(--divider);margin-top:18px;padding-top:16px;}
+.int-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+.int-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--divider);border-radius:12px;background:#FAFAF7;}
+.int-row + .int-row{margin-top:8px;}
+.int-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px;}
+.int-steps{margin:8px 0 0;padding-left:20px;font-size:13.5px;color:var(--ink);line-height:1.6;}
+.int-steps code,.int-mono{font-family:var(--font-mono);font-size:12.5px;background:#F0F0EA;border-radius:6px;padding:1px 6px;word-break:break-all;}
 .ct-link{font-size:14px;font-weight:500;color:var(--ink);display:inline-flex;align-items:center;gap:4px;text-decoration:underline;text-underline-offset:3px;}
 .radar-row{display:flex;align-items:center;gap:14px;padding:18px 22px;flex-wrap:wrap;}
 .radar-list .radar-row + .radar-row{border-top:1px solid var(--divider);}
@@ -331,7 +343,7 @@ button{font-family:var(--font-body);}
       <div class="frame" id="frame">
         <aside class="app-sidebar" id="app-sidebar" aria-label="Menu principal">
           <div class="sb-brand"><svg class="sb-mark" viewBox="48.93 31.06 132.22 132.22" width="36" height="36" aria-hidden="true" focusable="false"><rect x="48.93" y="31.06" width="132.22" height="132.22" rx="20.74" ry="20.74" fill="#111214"/><circle cx="115.04" cy="97.17" r="51.16" fill="#14EF5D"/><path fill="#111214" d="M94.42,120.54v-46.73c0-6.81,8.09-10.38,13.12-5.78l25.56,23.37c3.4,3.11,3.4,8.46,0,11.56l-25.56,23.37c-5.03,4.59-13.12,1.03-13.12-5.78Z"/><rect x="48.93" y="92.6" width="55.11" height="9.15" fill="#111214"/></svg><div class="sb-brand-text"><div class="sb-brand-name">chattrack</div><div class="sb-brand-sub">WhatsApp &amp; Instagram</div></div></div>
-          <nav class="sb-nav"><button type="button" class="sb-item sb-notif" id="sb-notif-btn" aria-label="Notificações" aria-haspopup="dialog" aria-expanded="false"><span class="sb-notif-ic" data-icon="bell" data-icon-size="18"></span><span class="sb-label">Notificações</span><span class="sb-badge sb-badge-danger" id="sb-badge-notif" hidden></span><span class="sb-notif-dot" aria-hidden="true" hidden></span></button><div class="sb-divider sb-nav-divider" role="separator"></div><button type="button" class="sb-item" data-goto="dashboard" aria-label="Dashboard"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 3v16a2 2 0 0 0 2 2h16" /> <path d="M18 17V9" /> <path d="M13 17V5" /> <path d="M8 17v-3" /></svg><span class="sb-label">Dashboard</span></button><button type="button" class="sb-item" data-goto="radar" aria-label="Radar"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34" /> <path d="M4 6h.01" /> <path d="M2.29 9.62A10 10 0 1 0 21.31 8.35" /> <path d="M16.24 7.76A6 6 0 1 0 8.23 16.67" /> <path d="M12 18h.01" /> <path d="M17.99 11.66A6 6 0 0 1 15.77 16.67" /> <circle cx="12" cy="12" r="2" /> <path d="m13.41 10.59 5.66-5.66" /></svg><span class="sb-label">Radar</span><span class="sb-badge sb-badge-danger" id="sb-badge-radar" hidden></span></button><button type="button" class="sb-item" data-goto="inbox" aria-label="Inbox"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12" /> <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" /></svg><span class="sb-label">Inbox</span><span class="sb-badge " id="sb-badge-inbox" hidden></span></button><div class="sb-divider sb-nav-divider" role="separator"></div><button type="button" class="sb-item" data-goto="kanban" aria-label="Kanban"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M8 7v7" /> <path d="M12 7v4" /> <path d="M16 7v9" /></svg><span class="sb-label">Kanban</span></button><button type="button" class="sb-item" data-goto="contatos" aria-label="Contatos"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /> <circle cx="9" cy="7" r="4" /> <path d="M22 21v-2a4 4 0 0 0-3-3.87" /> <path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg><span class="sb-label">Contatos</span></button><button type="button" class="sb-item" data-goto="automacao" aria-label="Automações"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg><span class="sb-label">Automações</span></button><button type="button" class="sb-item" data-goto="ai-agents" aria-label="Agentes IA"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 8V4H8" /> <rect width="16" height="12" x="4" y="8" rx="2" /> <path d="M2 14h2" /> <path d="M20 14h2" /> <path d="M15 13v2" /> <path d="M9 13v2" /></svg><span class="sb-label">Agentes IA</span></button><button type="button" class="sb-item" data-goto="funis" aria-label="Funis"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg><span class="sb-label">Funis</span></button><button type="button" class="sb-item" data-goto="conexoes" aria-label="Conexões"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /> <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg><span class="sb-label">Conexões</span></button></nav>
+          <nav class="sb-nav"><button type="button" class="sb-item sb-notif" id="sb-notif-btn" aria-label="Notificações" aria-haspopup="dialog" aria-expanded="false"><span class="sb-notif-ic" data-icon="bell" data-icon-size="18"></span><span class="sb-label">Notificações</span><span class="sb-badge sb-badge-danger" id="sb-badge-notif" hidden></span><span class="sb-notif-dot" aria-hidden="true" hidden></span></button><div class="sb-divider sb-nav-divider" role="separator"></div><button type="button" class="sb-item" data-goto="dashboard" aria-label="Dashboard"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 3v16a2 2 0 0 0 2 2h16" /> <path d="M18 17V9" /> <path d="M13 17V5" /> <path d="M8 17v-3" /></svg><span class="sb-label">Dashboard</span></button><button type="button" class="sb-item" data-goto="radar" aria-label="Radar"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34" /> <path d="M4 6h.01" /> <path d="M2.29 9.62A10 10 0 1 0 21.31 8.35" /> <path d="M16.24 7.76A6 6 0 1 0 8.23 16.67" /> <path d="M12 18h.01" /> <path d="M17.99 11.66A6 6 0 0 1 15.77 16.67" /> <circle cx="12" cy="12" r="2" /> <path d="m13.41 10.59 5.66-5.66" /></svg><span class="sb-label">Radar</span><span class="sb-badge sb-badge-danger" id="sb-badge-radar" hidden></span></button><button type="button" class="sb-item" data-goto="inbox" aria-label="Inbox"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12" /> <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" /></svg><span class="sb-label">Inbox</span><span class="sb-badge " id="sb-badge-inbox" hidden></span></button><div class="sb-divider sb-nav-divider" role="separator"></div><button type="button" class="sb-item" data-goto="kanban" aria-label="Kanban"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M8 7v7" /> <path d="M12 7v4" /> <path d="M16 7v9" /></svg><span class="sb-label">Kanban</span></button><button type="button" class="sb-item" data-goto="contatos" aria-label="Contatos"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /> <circle cx="9" cy="7" r="4" /> <path d="M22 21v-2a4 4 0 0 0-3-3.87" /> <path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg><span class="sb-label">Contatos</span></button><button type="button" class="sb-item" data-goto="automacao" aria-label="Automações"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg><span class="sb-label">Automações</span></button><button type="button" class="sb-item" data-goto="ai-agents" aria-label="Agentes IA"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 8V4H8" /> <rect width="16" height="12" x="4" y="8" rx="2" /> <path d="M2 14h2" /> <path d="M20 14h2" /> <path d="M15 13v2" /> <path d="M9 13v2" /></svg><span class="sb-label">Agentes IA</span></button><button type="button" class="sb-item" data-goto="funis" aria-label="Funis"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg><span class="sb-label">Funis</span></button><button type="button" class="sb-item" data-goto="conexoes" aria-label="Conexões"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /> <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg><span class="sb-label">Conexões</span></button><button type="button" class="sb-item" data-goto="integracoes" aria-label="Integrações"><span data-icon="blocks" data-icon-size="18"></span><span class="sb-label">Integrações</span></button></nav>
           <div class="sb-spacer"></div>
           <div class="sb-divider"></div>
           <a class="sb-item" id="ds-users-link" href="/users/" aria-label="Usuários"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="18" cy="15" r="3" /> <circle cx="9" cy="7" r="4" /> <path d="M10 15H6a4 4 0 0 0-4 4v2" /> <path d="m21.7 16.4-.9-.3" /> <path d="m15.2 13.9-.9-.3" /> <path d="m16.6 18.7.3-.9" /> <path d="m19.1 12.2.3-.9" /> <path d="m19.6 18.7-.4-1" /> <path d="m16.8 12.3-.4-1" /> <path d="m14.3 16.6 1-.4" /> <path d="m20.7 13.8 1-.4" /></svg><span class="sb-label">Usuários</span></a>
@@ -833,6 +845,9 @@ button{font-family:var(--font-body);}
                   <div class="pal-group"><div class="ct-group-label" style="margin:0 4px 6px;">Lógica</div>
                     <button type="button" class="flow-palette-btn" data-add-node="wait"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" /> <polyline points="12 6 12 12 16 14" /></svg></span><span>Aguardar</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="condition"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 3h5v5" /> <path d="M8 3H3v5" /> <path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3" /> <path d="m15 9 6-6" /></svg></span><span>Condição</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="repeat"><span class="ct-tile" style="width:26px;height:26px;background:#FFF4DC;color:#7A4E00;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m17 2 4 4-4 4" /> <path d="M3 11v-1a4 4 0 0 1 4-4h14" /> <path d="m7 22-4-4 4-4" /> <path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg></span><span>Repetir</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="classify_ai"><span class="ct-tile" style="width:26px;height:26px;background:#F1EBFF;color:#4A2C99;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /> <path d="M20 3v4" /> <path d="M22 5h-4" /> <path d="M4 17v2" /> <path d="M5 18H3" /></svg></span><span>Classificar (IA)</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button>
                   </div>
+                  <div class="pal-group"><div class="ct-group-label" style="margin:0 4px 6px;">Integrações</div>
+                    <button type="button" class="flow-palette-btn" data-add-node="sheets_save"><span class="ct-tile" style="width:26px;height:26px;background:#E6F4EA;color:#137333;"><span data-icon="cloud-upload" data-icon-size="14"></span></span><span>Salvar no Google Sheets</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="sheets_lookup"><span class="ct-tile" style="width:26px;height:26px;background:#E6F4EA;color:#137333;"><span data-icon="file-search" data-icon-size="14"></span></span><span>Buscar no Google Sheets</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button>
+                  </div>
                   <div class="pal-group"><div class="ct-group-label" style="margin:0 4px 6px;">Ações</div>
                     <button type="button" class="flow-palette-btn" data-add-node="action"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg></span><span>Ação</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="create_task"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.268 21a2 2 0 0 0 3.464 0" /> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></svg></span><span>Lembrete interno</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="move_stage"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16 3 4 4-4 4" /> <path d="M20 7H4" /> <path d="m8 21-4-4 4-4" /> <path d="M4 17h16" /></svg></span><span>Mover lead no funil</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="tag"><span class="ct-tile" style="width:26px;height:26px;background:#FFE9E1;color:#8A2E12;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" /> <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" /></svg></span><span>Editar tag do lead</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="start_flow"><span class="ct-tile" style="width:26px;height:26px;background:#E5F8EA;color:#13662F;"><span data-icon="workflow" data-icon-size="14"></span></span><span>Conectar Automação</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="start_ai_agent"><span class="ct-tile" style="width:26px;height:26px;background:#F1EBFF;color:#4A2C99;"><span data-icon="bot" data-icon-size="14"></span></span><span>Conectar Agente IA</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button><button type="button" class="flow-palette-btn" data-add-node="end"><span class="ct-tile" style="width:26px;height:26px;background:#EEEEE8;color:#3E4046;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /> <line x1="4" x2="4" y1="22" y2="15" /></svg></span><span>Fim</span><span class="pal-grip" data-icon="grip-vertical" data-icon-size="14"></span></button>
                   </div>
@@ -1022,6 +1037,22 @@ button{font-family:var(--font-body);}
             </div>
           </div>
         </div>
+
+        <section class="screen" id="screen-integracoes">
+          <div class="ct-page"><div class="ct-page-inner">
+            <header class="ct-page-header">
+              <div>
+                <h1 class="ct-h1">Integrações</h1>
+                <p style="font-size:14px;color:var(--text-muted);margin:6px 0 0;max-width:680px;">Conecte ferramentas externas ao chattrack: planilhas para salvar e consultar dados, e a IA que responde pelos seus agentes.</p>
+              </div>
+            </header>
+            <h2 class="ct-h2" style="margin-bottom:12px;">Planilhas</h2>
+            <div id="int-google" class="ct-card" style="margin-bottom:28px;"><div class="ct-empty">Carregando…</div></div>
+            <h2 class="ct-h2" style="margin-bottom:4px;">Inteligência artificial</h2>
+            <p style="font-size:14px;color:var(--text-muted);margin:0 0 12px;">Conecte os dois ao mesmo tempo: cada Agente de IA escolhe qual usar. O padrão vale para resumos, classificação e agentes sem provedor definido.</p>
+            <div id="int-ai" class="int-ai-grid"><div class="ct-empty">Carregando…</div></div>
+          </div></div>
+        </section>
 
         <section class="screen" id="screen-conexoes">
 
@@ -2530,6 +2561,8 @@ hydrateIcons(document);
     repeat: 'Repetir',
     start_flow: 'Conectar Automação',
     start_ai_agent: 'Conectar Agente IA',
+    sheets_save: 'Salvar no Google Sheets',
+    sheets_lookup: 'Buscar no Google Sheets',
     end: 'Fim',
   };
 
@@ -2567,7 +2600,7 @@ hydrateIcons(document);
   var STEP_SHORT = {
     send_message: 'Mensagem', ask_question: 'Pergunta', wait: 'Aguardar', condition: 'Condição', classify_ai: 'Classificar (IA)',
     add_tag: 'Tag', remove_tag: 'Tag', move_stage: 'Mover etapa', assign_user: 'Atribuir', assign_round_robin: 'Distribuir',
-    close_conversation: 'Fechar', create_task: 'Lembrete', repeat: 'Repetir', start_flow: 'Conectar Automação', start_ai_agent: 'Agente IA', end: 'Fim',
+    close_conversation: 'Fechar', create_task: 'Lembrete', repeat: 'Repetir', start_flow: 'Conectar Automação', start_ai_agent: 'Agente IA', sheets_save: 'Salvar planilha', sheets_lookup: 'Buscar planilha', end: 'Fim',
   };
   function flowChainHtml(flow) {
     var trig = TRIGGER_LABELS[flow.trigger_type] || flow.trigger_type;
@@ -2901,6 +2934,8 @@ hydrateIcons(document);
     repeat: { bg: '#FFF4DC', stroke: '#7A4E00', icon: 'repeat', label: 'Repetir' },
     start_flow: { bg: '#E5F8EA', stroke: '#13662F', icon: 'workflow', label: 'Conectar Automação' },
     start_ai_agent: { bg: '#F1EBFF', stroke: '#4A2C99', icon: 'bot', label: 'Conectar Agente IA' },
+    sheets_save: { bg: '#E6F4EA', stroke: '#137333', icon: 'cloud-upload', label: 'Salvar no Google Sheets' },
+    sheets_lookup: { bg: '#E6F4EA', stroke: '#137333', icon: 'file-search', label: 'Buscar no Google Sheets' },
     end: { bg: '#EEEEE8', stroke: '#3E4046', icon: 'flag', label: 'Fim' },
   };
 
@@ -2930,7 +2965,7 @@ hydrateIcons(document);
 
   function flowNodeHandles(node) {
     if (node.kind === 'trigger') return ['out'];
-    if (node.step_type === 'condition' || node.step_type === 'classify_ai') return ['true', 'false'];
+    if (node.step_type === 'condition' || node.step_type === 'classify_ai' || node.step_type === 'sheets_lookup') return ['true', 'false'];
     if (node.step_type === 'end' || node.step_type === 'start_flow' || node.step_type === 'start_ai_agent') return []; // terminais
     var branches = flowNodeBranchOptions(node);
     if (branches.length) return branches.map(function (_, i) { return 'opt_' + i; }).concat(['out']);
@@ -3017,6 +3052,8 @@ hydrateIcons(document);
       case 'repeat': return 'Volta pra um nó anterior';
       case 'start_flow': return flowTargetLabel(c.flow_id);
       case 'start_ai_agent': return flowAgentLabel(c.agent_id, c.reply_now !== false);
+      case 'sheets_save': return flowSheetLabel(c.sheet_id, c.tab) + ' · ' + ((c.columns || []).length) + ' colunas' + (c.match_column ? ' · sem duplicar' : '');
+      case 'sheets_lookup': return c.search_column ? 'Procura <b>' + escapeHtml(c.search_value || '') + '</b> em “' + escapeHtml(c.search_column) + '” · ' + flowSheetLabel(c.sheet_id, c.tab) : '(configurar busca)';
       case 'end': return escapeHtml(c.label || 'Fim do fluxo');
       default: return '';
     }
@@ -3029,6 +3066,13 @@ hydrateIcons(document);
     if (!target) return '<span style="color:#B4381A;">Automação removida — escolha outra</span>';
     return 'Continua em <b>' + escapeHtml(target.name) + '</b>' +
       (target.is_active ? '' : '<br><span style="color:#7A4E00;">Pausada — o lead não será levado até ela</span>');
+  }
+
+  function flowSheetLabel(sheetId, tab) {
+    if (!sheetId) return '(escolher planilha)';
+    var sh = (flowCanvas.sheets || []).find(function (x) { return String(x.id) === String(sheetId); });
+    if (!sh) return '<span style="color:#B4381A;">Planilha removida</span>';
+    return '<b>' + escapeHtml(sh.title) + '</b>' + (tab ? ' / ' + escapeHtml(tab) : '');
   }
 
   function flowAgentLabel(agentId, replyNow) {
@@ -3460,6 +3504,13 @@ hydrateIcons(document);
     if (kind === 'move_stage') { flowAddNode('move_stage', {}); return; }
     if (kind === 'start_flow') { flowAddNode('start_flow', { flow_id: null }); return; }
     if (kind === 'start_ai_agent') { flowAddNode('start_ai_agent', { agent_id: null, reply_now: true }); return; }
+    if (kind === 'sheets_save') {
+      flowAddNode('sheets_save', { sheet_id: null, tab: '', match_column: 'Telefone', columns: [
+        { header: 'Data', value: '{{data}} {{hora}}' }, { header: 'Nome', value: '{{nome}}' }, { header: 'Telefone', value: '{{telefone}}' }, { header: 'E-mail', value: '{{email}}' },
+      ] });
+      return;
+    }
+    if (kind === 'sheets_lookup') { flowAddNode('sheets_lookup', { sheet_id: null, tab: '', search_column: '', search_value: '{{telefone}}', fields: [], true_label: 'Encontrou', false_label: 'Não encontrou' }); return; }
     if (kind === 'end') { flowAddNode('end', { label: 'Convertido' }); return; }
   });
 
@@ -3711,6 +3762,93 @@ hydrateIcons(document);
           '<div style="font-size:12.5px;color:#5b5d63;line-height:1.5;">Quando o lead chegar aqui, este fluxo termina e ele segue para a automação escolhida, a partir do primeiro passo dela (o gatilho dela é ignorado). Ela precisa estar <b>ativa</b>.</div>' +
           '<div style="font-size:12.5px;color:#5b5d63;line-height:1.5;">Dica: para uma automação que só deve rodar quando for chamada por outra, use o gatilho “Disparo manual”.</div>';
       }
+    } else if (node.step_type === 'sheets_save' || node.step_type === 'sheets_lookup') {
+      var isSave = node.step_type === 'sheets_save';
+      title.textContent = isSave ? 'Salvar no Google Sheets' : 'Buscar no Google Sheets';
+      if (!flowCanvas.googleConnected || !(flowCanvas.sheets || []).length) {
+        body.innerHTML = '<div class="ct-callout">' + (flowCanvas.googleConnected ? 'Adicione uma planilha' : 'Conecte a conta Google e adicione uma planilha') + ' em <b>Integrações</b> para usar este bloco.</div>' +
+          '<button type="button" class="ct-btn ct-btn-secondary" id="f-go-integrations">' + ICON('blocks', 15) + 'Abrir Integrações</button>';
+        document.getElementById('f-go-integrations').addEventListener('click', function () { window.__goto('integracoes'); });
+      } else {
+        var varsHint = '<div style="font-size:11.5px;color:#6E7076;line-height:1.5;">Variáveis: <b>{{nome}}</b> <b>{{telefone}}</b> <b>{{email}}</b> <b>{{data}}</b> <b>{{hora}}</b> <b>{{canal}}</b> <b>{{funil}}</b> <b>{{produto_interesse}}</b> ou um campo do formulário, ex: <b>{{Curso}}</b>.</div>';
+        var sheetOpts = [{ value: '', label: 'Escolha a planilha…' }].concat(flowCanvas.sheets.map(function (x) { return { value: x.id, label: x.title }; }));
+        var common = flowFieldHtml('f-sheet', 'Planilha', flowSelectHtml('f-sheet', sheetOpts, c.sheet_id || '')) +
+          flowFieldHtml('f-tab', 'Aba', '<select id="f-tab" style="width:100%;background:#F4F4F0;border:1px solid #E3E3DC;border-radius:9px;padding:9px 12px;font-size:13px;color:#111214;box-sizing:border-box;font-family:var(--font-body);"><option value="' + escapeHtml(c.tab || '') + '">' + escapeHtml(c.tab || 'Escolha a planilha primeiro') + '</option></select>');
+        if (isSave) {
+          body.innerHTML = common +
+            '<div class="cd-label" style="font-size:12px;font-weight:600;color:#3e4046;">Colunas da planilha</div>' +
+            '<div id="f-cols" style="display:flex;flex-direction:column;gap:6px;"></div>' +
+            '<button type="button" class="ct-btn ct-btn-ghost" id="f-col-add" style="height:32px;font-size:13px;align-self:flex-start;">' + ICON('plus', 14) + 'Coluna</button>' +
+            varsHint +
+            flowFieldHtml('f-match', 'Não duplicar o lead', '<select id="f-match" style="width:100%;background:#F4F4F0;border:1px solid #E3E3DC;border-radius:9px;padding:9px 12px;font-size:13px;color:#111214;box-sizing:border-box;font-family:var(--font-body);"></select>') +
+            '<div style="font-size:11.5px;color:#6E7076;line-height:1.45;">Cabeçalhos que ainda não existem na aba são criados na primeira linha. Com “não duplicar”, se já houver uma linha com o mesmo valor nessa coluna, ela é atualizada em vez de criar outra.</div>';
+          var colsEl = document.getElementById('f-cols');
+          var inputStyle = 'width:0;min-width:0;box-sizing:border-box;background:#F4F4F0;border:1px solid #E3E3DC;border-radius:8px;padding:8px 10px;font-size:13px;color:#111214;font-family:var(--font-body);';
+          var addColRow = function (col) {
+            var row = document.createElement('div');
+            row.className = 'f-col-row';
+            row.style.cssText = 'display:flex;gap:6px;align-items:center;';
+            row.innerHTML = '<input class="f-col-h" placeholder="Coluna" value="' + escapeHtml(col.header || '') + '" style="' + inputStyle + 'flex:0 0 108px;" aria-label="Nome da coluna"/>' +
+              '<input class="f-col-v" placeholder="{{nome}}" value="' + escapeHtml(col.value || '') + '" style="' + inputStyle + 'flex:1 1 0;" aria-label="Valor da coluna"/>' +
+              '<button type="button" class="ct-icon-btn danger" aria-label="Remover coluna" style="width:28px;height:28px;flex-shrink:0;">' + ICON('x', 14) + '</button>';
+            row.querySelector('button').addEventListener('click', function () { row.remove(); refreshMatch(); });
+            row.querySelector('.f-col-h').addEventListener('input', refreshMatch);
+            colsEl.appendChild(row);
+          };
+          var refreshMatch = function () {
+            var sel = document.getElementById('f-match');
+            var current = sel.value || c.match_column || '';
+            var headers = Array.prototype.map.call(colsEl.querySelectorAll('.f-col-h'), function (i) { return i.value.trim(); }).filter(Boolean);
+            sel.innerHTML = '<option value="">Sempre adicionar uma linha nova</option>' + headers.map(function (h) {
+              return '<option value="' + escapeHtml(h) + '"' + (h === current ? ' selected' : '') + '>Atualizar a linha com o mesmo “' + escapeHtml(h) + '”</option>';
+            }).join('');
+          };
+          (c.columns && c.columns.length ? c.columns : [{ header: 'Nome', value: '{{nome}}' }]).forEach(addColRow);
+          refreshMatch();
+          document.getElementById('f-col-add').addEventListener('click', function () { addColRow({ header: '', value: '' }); refreshMatch(); });
+        } else {
+          body.innerHTML = common +
+            flowFieldHtml('f-search-col', 'Procurar na coluna', '<select id="f-search-col" style="width:100%;background:#F4F4F0;border:1px solid #E3E3DC;border-radius:9px;padding:9px 12px;font-size:13px;color:#111214;box-sizing:border-box;font-family:var(--font-body);"><option value="' + escapeHtml(c.search_column || '') + '">' + escapeHtml(c.search_column || 'Escolha a aba primeiro') + '</option></select>') +
+            flowFieldHtml('f-search-val', 'Pelo valor', flowInputHtml('f-search-val', c.search_value || '{{telefone}}')) +
+            varsHint +
+            '<div class="cd-label" style="font-size:12px;font-weight:600;color:#3e4046;">Trazer para a ficha do lead</div>' +
+            '<div id="f-fields" style="display:flex;flex-direction:column;gap:4px;font-size:13px;color:#3e4046;">Escolha a aba para ver as colunas.</div>' +
+            '<div style="font-size:11.5px;color:#6E7076;line-height:1.45;">As colunas escolhidas viram campos do lead e podem ser usadas nas próximas mensagens, ex: <b>{{Status}}</b>. Nada marcado = traz todas. Se não encontrar, segue pela saída “Não encontrou”.</div>';
+        }
+        var loadHeaders = async function () {
+          if (isSave) return;
+          var sheetId = document.getElementById('f-sheet').value;
+          var tab = document.getElementById('f-tab').value;
+          var colSel = document.getElementById('f-search-col');
+          var fieldsEl = document.getElementById('f-fields');
+          if (!sheetId || !tab) return;
+          try {
+            var headers = await api('/integrations/google/sheets/' + sheetId + '/headers?tab=' + encodeURIComponent(tab));
+            colSel.innerHTML = '<option value="">Escolha a coluna…</option>' + headers.map(function (h) { return '<option value="' + escapeHtml(h) + '"' + (h === c.search_column ? ' selected' : '') + '>' + escapeHtml(h) + '</option>'; }).join('');
+            fieldsEl.innerHTML = headers.length ? headers.map(function (h) {
+              return '<label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" class="f-field" value="' + escapeHtml(h) + '"' + ((c.fields || []).indexOf(h) !== -1 ? ' checked' : '') + '/>' + escapeHtml(h) + '</label>';
+            }).join('') : 'Essa aba ainda não tem cabeçalhos na primeira linha.';
+          } catch (err) {
+            fieldsEl.textContent = 'Não foi possível ler a aba: ' + err.message;
+          }
+        };
+        var loadTabsFor = async function (keepTab) {
+          var sheetId = document.getElementById('f-sheet').value;
+          var tabSel = document.getElementById('f-tab');
+          if (!sheetId) { tabSel.innerHTML = '<option value="">Escolha a planilha primeiro</option>'; return; }
+          tabSel.innerHTML = '<option value="">Carregando abas…</option>';
+          try {
+            var tabs = await api('/integrations/google/sheets/' + sheetId + '/tabs');
+            tabSel.innerHTML = tabs.map(function (t) { return '<option value="' + escapeHtml(t) + '"' + (t === keepTab ? ' selected' : '') + '>' + escapeHtml(t) + '</option>'; }).join('');
+            loadHeaders();
+          } catch (err) {
+            tabSel.innerHTML = '<option value="">Erro: ' + escapeHtml(err.message) + '</option>';
+          }
+        };
+        document.getElementById('f-sheet').addEventListener('change', function () { loadTabsFor(null); });
+        document.getElementById('f-tab').addEventListener('change', loadHeaders);
+        if (c.sheet_id) loadTabsFor(c.tab);
+      }
     } else if (node.step_type === 'start_ai_agent') {
       title.textContent = 'Conectar Agente IA';
       var agents = flowCanvas.allAgents || [];
@@ -3821,6 +3959,28 @@ hydrateIcons(document);
       node.config = node.step_type === 'assign_user' ? { user_id: val('f-user') ? parseInt(val('f-user'), 10) : null } : {};
     } else if (node.step_type === 'create_task') {
       node.config = { title: val('f-title'), description: val('f-description') || undefined, due_in_hours: parseInt(val('f-due'), 10) || 24 };
+    } else if (node.step_type === 'sheets_save') {
+      if (document.getElementById('f-sheet')) {
+        node.config = {
+          sheet_id: val('f-sheet') ? parseInt(val('f-sheet'), 10) : null,
+          tab: val('f-tab') || '',
+          match_column: val('f-match') || null,
+          columns: Array.prototype.map.call(document.querySelectorAll('#f-cols .f-col-row'), function (r) {
+            return { header: r.querySelector('.f-col-h').value.trim(), value: r.querySelector('.f-col-v').value };
+          }).filter(function (col) { return col.header; }),
+        };
+      }
+    } else if (node.step_type === 'sheets_lookup') {
+      if (document.getElementById('f-sheet')) {
+        node.config = {
+          sheet_id: val('f-sheet') ? parseInt(val('f-sheet'), 10) : null,
+          tab: val('f-tab') || '',
+          search_column: val('f-search-col') || '',
+          search_value: val('f-search-val') || '',
+          fields: Array.prototype.map.call(document.querySelectorAll('#f-fields .f-field:checked'), function (i) { return i.value; }),
+          true_label: 'Encontrou', false_label: 'Não encontrou',
+        };
+      }
     } else if (node.step_type === 'start_ai_agent') {
       if (document.getElementById('f-agent')) node.config = { agent_id: val('f-agent') ? parseInt(val('f-agent'), 10) : null, reply_now: document.getElementById('f-agent-reply-now').checked };
     } else if (node.step_type === 'start_flow') {
@@ -4075,6 +4235,14 @@ hydrateIcons(document);
       flowCanvas.allAgents = await api('/ai-agents');
     } catch (err) {
       flowCanvas.allAgents = [];
+    }
+    try {
+      var integ = await api('/integrations');
+      flowCanvas.sheets = integ.google.sheets;
+      flowCanvas.googleConnected = integ.google.connected;
+    } catch (err) {
+      flowCanvas.sheets = [];
+      flowCanvas.googleConnected = false;
     }
     flowCanvas.nodes = [{
       client_id: 'trigger', kind: 'trigger', step_type: 'trigger', config: {},
@@ -4803,7 +4971,8 @@ hydrateIcons(document);
         '<span style="font-weight:600;color:#111214;">Provedor:</span>' +
         '<select id="ia-provider-select" style="border:1px solid #E3E3DC;border-radius:8px;padding:6px 10px;font-size:12.5px;">' + providerOptions + '</select>' +
       '</div>' +
-      '<div id="ia-apikey-wrap" style="margin-bottom:10px;' + (currentKeyHelp ? '' : 'display:none;') + '">' +
+      '<div style="margin-bottom:10px;font-size:12.5px;color:#3e4046;">' + (settings.has_api_key ? '<span style="color:#157A3A;font-weight:600;">✓ provedor padrão conectado.</span> ' : '<span style="color:#7A4E00;font-weight:600;">Provedor padrão sem chave — a IA fica em modo de teste.</span> ') + 'As chaves do ChatGPT e do Claude ficam em <a href="#integracoes" data-goto-int style="color:#111214;font-weight:600;text-decoration:underline;">Integrações</a>.</div>' +
+      '<div id="ia-apikey-wrap" style="display:none;">' +
         '<div id="ia-apikey-label" style="font-size:11px;color:#5B5D63;margin-bottom:4px;">Chave de API — ' + keyStatusHtml + '</div>' +
         '<input id="ia-apikey-input" type="password" autocomplete="off" style="width:320px;border:1px solid #E3E3DC;border-radius:8px;padding:8px 12px;font-size:12.5px;font-family:monospace;"/>' +
       '</div>' +
@@ -4816,7 +4985,7 @@ hydrateIcons(document);
       var help = IA_KEY_HELP[providerId];
       var wrap = document.getElementById('ia-apikey-wrap');
       if (!help) { wrap.style.display = 'none'; return; }
-      wrap.style.display = 'block';
+      wrap.style.display = 'none'; // chaves agora em Integrações
       document.getElementById('ia-apikey-label').textContent = 'Chave de API — ' + help.label + (settings.provider === providerId ? (settings.has_api_key ? ' — ✓ chave configurada' : ' — chave não configurada') : ' — cole a chave desse provedor');
       document.getElementById('ia-apikey-input').placeholder = help.placeholder;
     }
@@ -4825,6 +4994,8 @@ hydrateIcons(document);
     document.getElementById('ia-provider-select').addEventListener('change', function () {
       applyKeyHelp(this.value);
     });
+    var gotoInt = box.querySelector('[data-goto-int]');
+    if (gotoInt) gotoInt.addEventListener('click', function (e) { e.preventDefault(); window.__goto('integracoes'); });
 
     document.getElementById('ia-settings-save').addEventListener('click', async function () {
       var provider = document.getElementById('ia-provider-select').value;
@@ -6158,6 +6329,294 @@ hydrateIcons(document);
   });
 
 
+  // ── Integrações (Google Sheets, ChatGPT, Claude) ──
+  var INT_AI_CARDS = {
+    openai: { name: 'ChatGPT', by: 'OpenAI', logoBg: '#111214', logoColor: '#FFFFFF', logo: ICON('sparkles', 22),
+      desc: 'Respostas dos Agentes de IA, resumos e classificação usando os modelos da OpenAI.',
+      keyHelp: 'Crie em platform.openai.com → API keys. Começa com “sk-”.', placeholder: 'sk-...' },
+    anthropic: { name: 'Claude', by: 'Anthropic', logoBg: '#F4E3D7', logoColor: '#B4532A', logo: ICON('bot', 22),
+      desc: 'Respostas dos Agentes de IA, resumos e classificação usando os modelos Claude.',
+      keyHelp: 'Crie em console.anthropic.com → Settings → API keys. Começa com “sk-ant-”.', placeholder: 'sk-ant-...' },
+  };
+  var integrationsState = { data: null };
+
+  function intIsAdmin() {
+    var u = window.__currentUser;
+    return Boolean(u && (u.role === 'admin' || u.isPlatformAdmin || u.is_platform_admin));
+  }
+
+  async function loadIntegrations() {
+    try {
+      integrationsState.data = await api('/integrations');
+    } catch (err) {
+      document.getElementById('int-google').innerHTML = '<div class="ct-empty" style="color:var(--danger-ink);">Não foi possível carregar as integrações.</div>';
+      return;
+    }
+    renderGoogleCard();
+    renderAiCards();
+  }
+
+  function renderGoogleCard() {
+    var g = integrationsState.data.google;
+    var admin = intIsAdmin();
+    var el = document.getElementById('int-google');
+    var status = g.connected
+      ? '<span class="ct-pill ct-pill-success"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);"></span>Conectado</span>'
+      : '<span class="ct-pill ct-pill-neutral">Não conectado</span>';
+    var html =
+      '<div class="int-head">' +
+        '<span class="int-logo" style="background:#E6F4EA;color:#188038;">' + ICON('sheet', 22) + '</span>' +
+        '<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span class="int-title">Google Sheets</span>' + status + '</div>' +
+          '<div class="int-desc">Salve os contatos dos clientes do bot e consulte dados diretamente nas suas planilhas do Google Sheets.</div></div>' +
+      '</div>';
+
+    if (!g.client_configured) {
+      html += '<div class="int-section">' +
+        '<div class="int-label">Configuração única</div>' +
+        '<div style="font-size:14px;color:var(--ink);">Para o botão “Conectar conta Google” funcionar, crie uma vez as credenciais do chattrack no Google Cloud:</div>' +
+        '<ol class="int-steps">' +
+          '<li>Acesse <b>console.cloud.google.com</b>, crie um projeto (ex: “chattrack”) e ative a <b>Google Sheets API</b>.</li>' +
+          '<li>Em <b>Tela de permissão OAuth</b>, escolha “Externo”, preencha nome e e-mail e adicione seu e-mail em <b>Usuários de teste</b>.</li>' +
+          '<li>Em <b>Credenciais → Criar credenciais → ID do cliente OAuth</b>, tipo “Aplicativo da Web”.</li>' +
+          '<li>Em <b>URIs de redirecionamento autorizados</b>, adicione: <code>' + escapeHtml(g.redirect_uri) + '</code> ' +
+            '<button type="button" class="ct-link" data-copy-text="' + escapeHtml(g.redirect_uri) + '" style="border:none;background:none;cursor:pointer;font-size:13px;padding:0;">Copiar</button></li>' +
+          '<li>Copie o <b>ID do cliente</b> e a <b>Chave secreta</b> e cole aqui.</li>' +
+        '</ol>' +
+        (admin ? '<div class="int-actions"><button type="button" class="ct-btn ct-btn-primary" id="int-google-client-btn">' + ICON('key-round', 16) + 'Colar credenciais do Google</button></div>'
+               : '<div class="ct-callout" style="margin-top:12px;">Peça a um administrador para configurar.</div>') +
+      '</div>';
+    } else if (!g.connected) {
+      html += '<div class="int-actions">' +
+        (admin ? '<button type="button" class="ct-btn ct-btn-primary" id="int-google-connect-btn">' + ICON('plug', 16) + 'Conectar conta Google</button>' +
+                 '<button type="button" class="ct-btn ct-btn-ghost" id="int-google-client-btn">Trocar credenciais</button>'
+               : '<div class="ct-callout">Peça a um administrador para conectar a conta Google.</div>') +
+      '</div>' +
+      '<div style="font-size:12.5px;color:var(--text-muted);margin-top:10px;">Enquanto o app não for verificado pelo Google, aparece o aviso “O Google não verificou este app” na hora de autorizar: clique em <b>Avançado → Acessar chattrack</b>.</div>';
+    } else {
+      html += '<div class="int-section">' +
+        '<div class="int-row">' + ICON('user-round', 16) + '<span style="flex:1;min-width:0;font-size:14px;">Conta conectada: <b>' + escapeHtml(g.email || 'conta Google') + '</b></span>' +
+          (admin ? '<button type="button" class="ct-btn ct-btn-ghost" id="int-google-disconnect-btn" style="height:32px;font-size:13px;color:#B4381A;">Desconectar</button>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="int-section">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;"><div class="int-label" style="margin:0;">Planilhas</div>' +
+          (admin ? '<button type="button" class="ct-btn ct-btn-secondary" id="int-sheet-add-btn" style="height:34px;font-size:13.5px;">' + ICON('plus', 15) + 'Adicionar planilha</button>' : '') + '</div>' +
+        (g.sheets.length ? g.sheets.map(function (sh) {
+          return '<div class="int-row">' + '<span style="color:#188038;display:inline-flex;">' + ICON('file-spreadsheet', 17) + '</span>' +
+            '<a href="https://docs.google.com/spreadsheets/d/' + encodeURIComponent(sh.spreadsheet_id) + '/edit" target="_blank" rel="noopener" style="flex:1;min-width:0;font-size:14px;font-weight:500;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(sh.title) + ' <span style="color:var(--text-subtle);">' + ICON('external-link', 12) + '</span></a>' +
+            (admin ? '<button type="button" class="ct-icon-btn danger" data-sheet-remove="' + sh.id + '" data-sheet-title="' + escapeHtml(sh.title) + '" aria-label="Remover ' + escapeHtml(sh.title) + '" style="width:30px;height:30px;">' + ICON('x', 15) + '</button>' : '') +
+          '</div>';
+        }).join('') : '<div style="font-size:13.5px;color:var(--text-muted);">Nenhuma planilha ainda. Adicione colando o link da planilha.</div>') +
+      '</div>' +
+      '<div class="int-section">' +
+        '<div class="int-label">Enviar todo contato novo</div>' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
+          '<button type="button" class="switch' + (g.new_contacts.enabled ? ' on' : '') + '" role="switch" id="int-nc-switch" aria-checked="' + (g.new_contacts.enabled ? 'true' : 'false') + '" aria-label="Enviar todo contato novo para a planilha"' + (admin ? '' : ' disabled') + '></button>' +
+          '<select id="int-nc-sheet" class="ct-select"' + (admin ? '' : ' disabled') + '><option value="">Escolha a planilha…</option>' + g.sheets.map(function (sh) {
+            return '<option value="' + sh.id + '"' + (String(sh.id) === String(g.new_contacts.sheet_id) ? ' selected' : '') + '>' + escapeHtml(sh.title) + '</option>';
+          }).join('') + '</select>' +
+          '<select id="int-nc-tab" class="ct-select"' + (admin ? '' : ' disabled') + '><option value="">' + (g.new_contacts.tab ? escapeHtml(g.new_contacts.tab) : 'Aba…') + '</option></select>' +
+          (admin ? '<button type="button" class="ct-btn ct-btn-primary" id="int-nc-save" style="height:38px;">Salvar</button>' : '') +
+        '</div>' +
+        '<div style="font-size:12.5px;color:var(--text-muted);margin-top:8px;">Cada lead novo vira uma linha com <b>Data, Nome, Telefone, E-mail, Canal e Funil</b>. O mesmo telefone não é duplicado.</div>' +
+      '</div>' +
+      '<div class="int-section" style="font-size:13.5px;color:var(--text-muted);">' + ICON('workflow', 15) + ' Nas automações, use os blocos <b style="color:var(--ink);">Salvar no Google Sheets</b> e <b style="color:var(--ink);">Buscar no Google Sheets</b>.</div>';
+    }
+    el.innerHTML = html;
+
+    el.querySelectorAll('[data-copy-text]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        navigator.clipboard.writeText(b.getAttribute('data-copy-text')).then(function () { b.textContent = 'Copiado'; setTimeout(function () { b.textContent = 'Copiar'; }, 1600); });
+      });
+    });
+    var clientBtn = document.getElementById('int-google-client-btn');
+    if (clientBtn) clientBtn.addEventListener('click', async function () {
+      var saved = await ctForm({
+        title: 'Credenciais do Google',
+        description: 'ID do cliente e chave secreta do OAuth criados no Google Cloud. Ficam guardados criptografados.',
+        icon: 'key-round',
+        submitLabel: 'Salvar credenciais',
+        fields: [
+          { name: 'client_id', label: 'ID do cliente', required: true, optionalHint: false, placeholder: '1234-abc.apps.googleusercontent.com' },
+          { name: 'client_secret', label: 'Chave secreta do cliente', required: true, optionalHint: false, placeholder: 'GOCSPX-...' },
+        ],
+        onSubmit: function (v) { return api('/integrations/google/client', { method: 'PUT', body: JSON.stringify(v) }); },
+      });
+      if (saved) loadIntegrations();
+    });
+    var connectBtn = document.getElementById('int-google-connect-btn');
+    if (connectBtn) connectBtn.addEventListener('click', async function () {
+      connectBtn.disabled = true;
+      try {
+        var r = await api('/integrations/google/connect', { method: 'POST' });
+        window.location.href = r.url;
+      } catch (err) {
+        connectBtn.disabled = false;
+        ctAlert('Não foi possível iniciar a conexão: ' + err.message);
+      }
+    });
+    var discBtn = document.getElementById('int-google-disconnect-btn');
+    if (discBtn) discBtn.addEventListener('click', async function () {
+      var ok = await ctConfirm({ title: 'Desconectar a conta Google?', message: 'Os blocos de planilha das automações e o envio de contatos novos param de funcionar até você conectar de novo.', confirmLabel: 'Desconectar' });
+      if (!ok) return;
+      await api('/integrations/google', { method: 'DELETE' });
+      loadIntegrations();
+    });
+    var addBtn = document.getElementById('int-sheet-add-btn');
+    if (addBtn) addBtn.addEventListener('click', async function () {
+      var added = await ctForm({
+        title: 'Adicionar planilha',
+        description: 'Cole o link da planilha do Google Sheets. A conta conectada precisa ter permissão de edição nela.',
+        icon: 'file-spreadsheet',
+        submitLabel: 'Adicionar',
+        fields: [{ name: 'url', label: 'Link da planilha', required: true, optionalHint: false, placeholder: 'https://docs.google.com/spreadsheets/d/...' }],
+        onSubmit: function (v) { return api('/integrations/google/sheets', { method: 'POST', body: JSON.stringify({ url: v.url }) }); },
+      });
+      if (added) loadIntegrations();
+    });
+    el.querySelectorAll('[data-sheet-remove]').forEach(function (b) {
+      b.addEventListener('click', async function () {
+        var ok = await ctConfirm({ title: 'Remover “' + b.getAttribute('data-sheet-title') + '” do chattrack?', message: 'A planilha continua no seu Google Drive; só deixa de aparecer aqui. Blocos de automação que usam ela param de gravar.', confirmLabel: 'Remover' });
+        if (!ok) return;
+        await api('/integrations/google/sheets/' + b.getAttribute('data-sheet-remove'), { method: 'DELETE' });
+        loadIntegrations();
+      });
+    });
+    var ncSheet = document.getElementById('int-nc-sheet');
+    if (ncSheet) {
+      var loadTabs = async function (keep) {
+        var tabSel = document.getElementById('int-nc-tab');
+        if (!ncSheet.value) { tabSel.innerHTML = '<option value="">Aba…</option>'; return; }
+        tabSel.innerHTML = '<option value="">Carregando abas…</option>';
+        try {
+          var tabs = await api('/integrations/google/sheets/' + ncSheet.value + '/tabs');
+          tabSel.innerHTML = tabs.map(function (t) { return '<option value="' + escapeHtml(t) + '"' + (t === keep ? ' selected' : '') + '>' + escapeHtml(t) + '</option>'; }).join('');
+        } catch (err) {
+          tabSel.innerHTML = '<option value="">Erro ao carregar abas</option>';
+        }
+      };
+      ncSheet.addEventListener('change', function () { loadTabs(null); });
+      if (ncSheet.value) loadTabs(g.new_contacts.tab);
+      var ncSwitch = document.getElementById('int-nc-switch');
+      ncSwitch.addEventListener('click', function () {
+        if (ncSwitch.disabled) return;
+        var on = !ncSwitch.classList.contains('on');
+        ncSwitch.classList.toggle('on', on);
+        ncSwitch.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+      var ncSave = document.getElementById('int-nc-save');
+      if (ncSave) ncSave.addEventListener('click', async function () {
+        try {
+          await api('/integrations/google/new-contacts', { method: 'PUT', body: JSON.stringify({
+            enabled: ncSwitch.classList.contains('on'), sheet_id: ncSheet.value || null, tab: document.getElementById('int-nc-tab').value || null,
+          }) });
+          ctAlert({ tone: 'success', title: 'Salvo', message: ncSwitch.classList.contains('on') ? 'Todo lead novo vai ser gravado na planilha.' : 'Envio de contatos novos desligado.' });
+          loadIntegrations();
+        } catch (err) {
+          ctAlert('Não foi possível salvar: ' + err.message);
+        }
+      });
+    }
+  }
+
+  function renderAiCards() {
+    var admin = intIsAdmin();
+    var el = document.getElementById('int-ai');
+    var list = integrationsState.data.ai.filter(function (p) { return INT_AI_CARDS[p.provider]; });
+    el.innerHTML = list.map(function (p) {
+      var meta = INT_AI_CARDS[p.provider];
+      var pills = (p.connected ? '<span class="ct-pill ct-pill-success"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);"></span>Conectado</span>' : '<span class="ct-pill ct-pill-neutral">Não conectado</span>') +
+        (p.is_default && p.connected ? ' <span class="ct-pill" style="background:var(--acc);color:var(--ink);">Padrão</span>' : '');
+      var details = p.connected
+        ? '<div style="font-size:13px;color:var(--text-muted);margin-top:12px;line-height:1.6;">Modelo: <span class="int-mono">' + escapeHtml(p.model || p.default_model) + '</span>' + (p.model ? '' : ' (padrão)') +
+            (p.via_env ? '<br>Chave configurada no servidor.' : '') +
+            (p.last_test_at ? '<br>Último teste: ' + (p.last_test_ok ? '<span style="color:var(--success-ink);font-weight:500;">funcionando</span>' : '<span style="color:#B4381A;font-weight:500;">falhou</span>') + ' · ' + new Date(p.last_test_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '') +
+          '</div>'
+        : '';
+      var actions = !admin ? '' : (p.connected
+        ? '<div class="int-actions">' +
+            '<button type="button" class="ct-btn ct-btn-secondary" data-ai-test="' + p.provider + '">' + ICON('check', 15) + 'Testar conexão</button>' +
+            (p.is_default ? '' : '<button type="button" class="ct-btn ct-btn-secondary" data-ai-default="' + p.provider + '">Usar como padrão</button>') +
+            '<button type="button" class="ct-btn ct-btn-ghost" data-ai-connect="' + p.provider + '">Trocar chave</button>' +
+            (p.via_env ? '' : '<button type="button" class="ct-btn ct-btn-ghost" data-ai-remove="' + p.provider + '" style="color:#B4381A;">Desconectar</button>') +
+          '</div>'
+        : '<div class="int-actions"><button type="button" class="ct-btn ct-btn-primary" data-ai-connect="' + p.provider + '">' + ICON('key-round', 15) + 'Conectar ' + meta.name + '</button></div>');
+      return '<article class="ct-card">' +
+        '<div class="int-head"><span class="int-logo" style="background:' + meta.logoBg + ';color:' + meta.logoColor + ';">' + meta.logo + '</span>' +
+          '<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span class="int-title">' + meta.name + '</span>' + pills + '</div>' +
+          '<div class="int-desc">' + meta.desc + '</div></div></div>' +
+        details + actions +
+      '</article>';
+    }).join('');
+
+    el.querySelectorAll('[data-ai-connect]').forEach(function (b) {
+      b.addEventListener('click', async function () {
+        var provider = b.getAttribute('data-ai-connect');
+        var meta = INT_AI_CARDS[provider];
+        var current = integrationsState.data.ai.find(function (p) { return p.provider === provider; });
+        var saved = await ctForm({
+          title: 'Conectar ' + meta.name,
+          description: 'A chave fica guardada criptografada e nunca volta para o navegador.',
+          icon: 'key-round',
+          submitLabel: 'Conectar',
+          fields: [
+            { name: 'api_key', label: 'Chave de API', required: true, optionalHint: false, placeholder: meta.placeholder, help: meta.keyHelp },
+            { name: 'model', label: 'Modelo', value: (current && current.model) || '', placeholder: current ? current.default_model : '', help: 'Deixe vazio para usar o padrão (' + (current ? current.default_model : '') + ').' },
+          ],
+          onSubmit: async function (v) {
+            await api('/integrations/ai/' + provider, { method: 'PUT', body: JSON.stringify({ api_key: v.api_key, model: v.model || null }) });
+            var t = await api('/integrations/ai/' + provider + '/test', { method: 'POST' });
+            if (!t.ok) throw new Error('A chave foi salva, mas o teste falhou: ' + t.message);
+            return t;
+          },
+        });
+        loadIntegrations();
+        if (saved) ctAlert({ tone: 'success', title: meta.name + ' conectado', message: saved.message || 'Conexão funcionando.' });
+      });
+    });
+    el.querySelectorAll('[data-ai-test]').forEach(function (b) {
+      b.addEventListener('click', async function () {
+        b.disabled = true;
+        var provider = b.getAttribute('data-ai-test');
+        try {
+          var t = await api('/integrations/ai/' + provider + '/test', { method: 'POST' });
+          ctAlert(t.ok ? { tone: 'success', title: 'Conexão funcionando', message: t.message } : { tone: 'error', title: 'O teste falhou', message: t.message });
+        } catch (err) {
+          ctAlert('Não foi possível testar: ' + err.message);
+        }
+        loadIntegrations();
+      });
+    });
+    el.querySelectorAll('[data-ai-default]').forEach(function (b) {
+      b.addEventListener('click', async function () {
+        await api('/integrations/ai/' + b.getAttribute('data-ai-default') + '/default', { method: 'POST' });
+        loadIntegrations();
+      });
+    });
+    el.querySelectorAll('[data-ai-remove]').forEach(function (b) {
+      b.addEventListener('click', async function () {
+        var meta = INT_AI_CARDS[b.getAttribute('data-ai-remove')];
+        var ok = await ctConfirm({ title: 'Desconectar o ' + meta.name + '?', message: 'Agentes de IA que usam o ' + meta.name + ' passam a usar o provedor padrão (ou ficam em silêncio, se não houver outro conectado).', confirmLabel: 'Desconectar' });
+        if (!ok) return;
+        await api('/integrations/ai/' + b.getAttribute('data-ai-remove'), { method: 'DELETE' });
+        loadIntegrations();
+      });
+    });
+  }
+
+  // Volta do Google (?integracao=google_ok|google_erro): abre a tela e avisa.
+  (function () {
+    var params = new URLSearchParams(location.search);
+    var result = params.get('integracao');
+    if (!result) return;
+    history.replaceState(null, '', location.pathname);
+    window.addEventListener('load', function () {
+      window.__goto && window.__goto('integracoes');
+      if (result === 'google_ok') ctAlert({ tone: 'success', title: 'Conta Google conectada', message: (params.get('msg') ? params.get('msg') + ' foi conectada. ' : '') + 'Agora adicione a planilha que o chattrack vai usar.' });
+      else ctAlert({ tone: 'error', title: 'Não foi possível conectar o Google', message: params.get('msg') || 'Tente de novo.' });
+    });
+  })();
+
   window.__onGoto = function (screenId) {
     if (screenId === 'dashboard') loadDashboard();
     if (screenId === 'contatos') loadContacts(document.getElementById('contatos-search').value.trim());
@@ -6168,6 +6627,7 @@ hydrateIcons(document);
     if (screenId === 'radar') loadRadar();
     if (screenId === 'ai-agents') loadAiAgents();
     if (screenId === 'conexoes') loadConexoes();
+    if (screenId === 'integracoes') loadIntegrations();
   };
 
   window.addEventListener('DOMContentLoaded', function () {

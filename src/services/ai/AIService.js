@@ -3,20 +3,22 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { query } from '../../db/pool.js';
 import { completeMock } from './providers/mock.js';
-import { completeAnthropic } from './providers/anthropic.js';
-import { completeOpenAI } from './providers/openai.js';
-import { completeGoogle } from './providers/google.js';
-import { completeMistral } from './providers/mistral.js';
+import { completeAnthropic, DEFAULT_MODEL as ANTHROPIC_MODEL } from './providers/anthropic.js';
+import { completeOpenAI, DEFAULT_MODEL as OPENAI_MODEL } from './providers/openai.js';
+import { completeGoogle, DEFAULT_MODEL as GOOGLE_MODEL } from './providers/google.js';
+import { completeMistral, DEFAULT_MODEL as MISTRAL_MODEL } from './providers/mistral.js';
 import { logger } from '../../logger.js';
 import { encryptSecret, decryptSecret } from '../crypto.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const DEFAULT_MODELS = { anthropic: ANTHROPIC_MODEL, openai: OPENAI_MODEL, google: GOOGLE_MODEL, mistral: MISTRAL_MODEL };
+
 export const AI_PROVIDERS = {
-  anthropic: { label: 'Anthropic (Claude)', fn: completeAnthropic, envFallback: 'ANTHROPIC_API_KEY' },
-  openai: { label: 'OpenAI (GPT)', fn: completeOpenAI, envFallback: 'OPENAI_API_KEY' },
-  google: { label: 'Google (Gemini)', fn: completeGoogle, envFallback: 'GOOGLE_API_KEY' },
-  mistral: { label: 'Mistral AI', fn: completeMistral, envFallback: 'MISTRAL_API_KEY' },
+  openai: { label: 'ChatGPT (OpenAI)', fn: completeOpenAI, envFallback: 'OPENAI_API_KEY', defaultModel: DEFAULT_MODELS.openai },
+  anthropic: { label: 'Claude (Anthropic)', fn: completeAnthropic, envFallback: 'ANTHROPIC_API_KEY', defaultModel: DEFAULT_MODELS.anthropic },
+  google: { label: 'Google (Gemini)', fn: completeGoogle, envFallback: 'GOOGLE_API_KEY', defaultModel: DEFAULT_MODELS.google },
+  mistral: { label: 'Mistral AI', fn: completeMistral, envFallback: 'MISTRAL_API_KEY', defaultModel: DEFAULT_MODELS.mistral },
 };
 
 function loadPrompt(name) {
@@ -54,27 +56,16 @@ async function complete({ tenantId, feature, system, messages, providerOverride 
     return null;
   }
 
+  // Cada provedor tem a própria chave (tela Integrações); um agente pode usar
+  // um provedor diferente do padrão. Sem chave, degrada pro mock.
   const providerId = providerOverride || settings.provider;
   const providerDef = AI_PROVIDERS[providerId];
-  var apiKey = null;
-  if (providerDef) {
-    // A chave salva no painel é só do provider configurado em ai_settings —
-    // um agente com provider diferente (providerOverride) só funciona de
-    // verdade se houver fallback no .env pra ele; senão degrada pro mock.
-    if (providerId === settings.provider && settings.api_key_encrypted) {
-      try {
-        apiKey = decryptSecret(settings.api_key_encrypted);
-      } catch (err) {
-        logger.error('ai_key_decrypt_failed', { tenantId, message: err.message });
-      }
-    }
-    if (!apiKey) apiKey = process.env[providerDef.envFallback] || null;
-  }
+  const { apiKey, model } = providerDef ? await getProviderCredentials(tenantId, providerId, settings) : { apiKey: null, model: null };
   const provider = providerDef && apiKey ? providerId : 'mock';
 
   try {
     const fn = provider === 'mock' ? completeMock : providerDef.fn;
-    const result = await fn({ system, messages, feature, apiKey });
+    const result = await fn({ system, messages, feature, apiKey, model: model || undefined });
     await logUsage(tenantId, feature, provider, result.tokensIn, result.tokensOut);
     return { ...result, provider };
   } catch (err) {
@@ -88,6 +79,99 @@ async function complete({ tenantId, feature, system, messages, providerOverride 
       return null;
     }
   }
+}
+
+// Chave e modelo de um provedor: tabela ai_provider_keys → chave antiga única
+// (ai_settings, só do provedor padrão) → variável de ambiente.
+async function getProviderCredentials(tenantId, providerId, settings) {
+  const providerDef = AI_PROVIDERS[providerId];
+  const row = (await query('SELECT api_key_encrypted, model FROM ai_provider_keys WHERE tenant_id = $1 AND provider = $2', [tenantId, providerId])).rows[0];
+  let apiKey = null;
+  const stored = row?.api_key_encrypted || (providerId === settings?.provider ? settings?.api_key_encrypted : null);
+  if (stored) {
+    try {
+      apiKey = decryptSecret(stored);
+    } catch (err) {
+      logger.error('ai_key_decrypt_failed', { tenantId, provider: providerId, message: err.message });
+    }
+  }
+  if (!apiKey && providerDef) apiKey = process.env[providerDef.envFallback] || null;
+  return { apiKey, model: row?.model || null };
+}
+
+// ── Integrações de IA (cartões ChatGPT / Claude) ──
+
+export async function listAiConnections(tenantId) {
+  const settings = await getSettings(tenantId);
+  const rows = (await query('SELECT provider, model, connected_at, last_test_at, last_test_ok FROM ai_provider_keys WHERE tenant_id = $1', [tenantId])).rows;
+  return Object.entries(AI_PROVIDERS).map(([id, def]) => {
+    const row = rows.find((r) => r.provider === id);
+    return {
+      provider: id,
+      label: def.label,
+      connected: Boolean(row) || Boolean(process.env[def.envFallback]),
+      via_env: !row && Boolean(process.env[def.envFallback]),
+      model: row?.model || null,
+      default_model: def.defaultModel,
+      connected_at: row?.connected_at || null,
+      last_test_at: row?.last_test_at || null,
+      last_test_ok: row?.last_test_ok ?? null,
+      is_default: settings.provider === id,
+    };
+  });
+}
+
+export async function saveAiProviderKey(tenantId, providerId, { apiKey, model }) {
+  if (!AI_PROVIDERS[providerId]) throw Object.assign(new Error('Provedor de IA desconhecido'), { status: 400 });
+  const cleanModel = model ? String(model).trim().slice(0, 80) : null;
+  if (apiKey) {
+    await query(
+      `INSERT INTO ai_provider_keys (tenant_id, provider, api_key_encrypted, model) VALUES ($1,$2,$3,$4)
+       ON CONFLICT (tenant_id, provider) DO UPDATE SET api_key_encrypted = EXCLUDED.api_key_encrypted, model = EXCLUDED.model,
+         connected_at = now(), last_test_at = NULL, last_test_ok = NULL`,
+      [tenantId, providerId, encryptSecret(String(apiKey).trim()), cleanModel]
+    );
+  } else {
+    const updated = await query('UPDATE ai_provider_keys SET model = $3 WHERE tenant_id = $1 AND provider = $2', [tenantId, providerId, cleanModel]);
+    if (!updated.rowCount) throw Object.assign(new Error('Cole a chave de API para conectar.'), { status: 400 });
+  }
+  // Primeiro provedor conectado vira o padrão (sai do modo de teste/mock).
+  const settings = await getSettings(tenantId);
+  if (!settings.provider || settings.provider === 'mock') await updateAiSettings(tenantId, { provider: providerId });
+}
+
+export async function deleteAiProviderKey(tenantId, providerId) {
+  await query('DELETE FROM ai_provider_keys WHERE tenant_id = $1 AND provider = $2', [tenantId, providerId]);
+  const settings = await getSettings(tenantId);
+  if (settings.provider === providerId) {
+    // Passa o padrão pra outro provedor conectado, se houver.
+    const other = (await query('SELECT provider FROM ai_provider_keys WHERE tenant_id = $1 ORDER BY connected_at LIMIT 1', [tenantId])).rows[0];
+    await query('UPDATE ai_settings SET provider = $2, api_key_encrypted = NULL, updated_at = now() WHERE tenant_id = $1', [tenantId, other?.provider || 'mock']);
+  }
+}
+
+export async function setDefaultAiProvider(tenantId, providerId) {
+  if (!AI_PROVIDERS[providerId]) throw Object.assign(new Error('Provedor de IA desconhecido'), { status: 400 });
+  await updateAiSettings(tenantId, { provider: providerId });
+}
+
+// "Testar conexão": uma chamada mínima direto no provedor (sem cair no mock).
+export async function testAiProvider(tenantId, providerId) {
+  const providerDef = AI_PROVIDERS[providerId];
+  if (!providerDef) throw Object.assign(new Error('Provedor de IA desconhecido'), { status: 400 });
+  const { apiKey, model } = await getProviderCredentials(tenantId, providerId, await getSettings(tenantId));
+  if (!apiKey) return { ok: false, message: 'Nenhuma chave conectada para este provedor.' };
+  let ok = false;
+  let message;
+  try {
+    const result = await providerDef.fn({ system: 'Responda apenas: ok', messages: [{ role: 'user', content: 'Teste de conexão. Responda apenas "ok".' }], feature: 'test', apiKey, model: model || undefined });
+    ok = true;
+    message = 'Conexão funcionando' + (result.text ? ' — resposta: “' + String(result.text).trim().slice(0, 40) + '”' : '') + '.';
+  } catch (err) {
+    message = err.message;
+  }
+  await query('UPDATE ai_provider_keys SET last_test_at = now(), last_test_ok = $3 WHERE tenant_id = $1 AND provider = $2', [tenantId, providerId, ok]);
+  return { ok, message };
 }
 
 function parseJsonSafe(text) {
@@ -186,7 +270,8 @@ export async function getAiSettings(tenantId) {
   const settings = await getSettings(tenantId);
   // Nunca devolve a chave (nem criptografada) pro frontend — só se tem uma configurada.
   const { api_key_encrypted, ...rest } = settings;
-  return { ...rest, has_api_key: !!api_key_encrypted };
+  const { apiKey } = AI_PROVIDERS[settings.provider] ? await getProviderCredentials(tenantId, settings.provider, settings) : { apiKey: null };
+  return { ...rest, has_api_key: Boolean(apiKey) || Boolean(api_key_encrypted) };
 }
 
 export async function updateAiSettings(tenantId, { provider, summarizeEnabled, radarEnabled, monthlyLimit, apiKey }) {

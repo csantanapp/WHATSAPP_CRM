@@ -1,9 +1,9 @@
 // Provider real via Anthropic Messages API — chamada HTTP direta (sem SDK, pra
 // não adicionar dependência pesada só por isso). Requer ANTHROPIC_API_KEY.
 
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5';
+export const DEFAULT_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
 
-export async function completeAnthropic({ system, messages, apiKey }) {
+export async function completeAnthropic({ system, messages, apiKey, model = DEFAULT_MODEL }) {
   if (!apiKey) throw new Error('Chave da Anthropic não configurada');
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -14,7 +14,7 @@ export async function completeAnthropic({ system, messages, apiKey }) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: MODEL,
+      model,
       max_tokens: 1024,
       system,
       messages,

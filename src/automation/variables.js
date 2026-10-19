@@ -39,3 +39,13 @@ export function renderTemplate(text, contact) {
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/^[ \t,]+/gm, '');
 }
+
+// Valor "cru" pra planilha (Google Sheets): troca as variáveis sem mexer na
+// pontuação. Além das de mensagem, aceita {{data}}, {{hora}}, {{canal}},
+// {{funil}}, {{produto_interesse}} e {{id}} (passados em `extra`).
+export function renderPlain(text, contact, extra = {}) {
+  if (!text || !String(text).includes('{{')) return text == null ? '' : String(text);
+  const values = variablesFor(contact);
+  for (const [k, v] of Object.entries(extra)) values[normalizeKey(k)] = v == null ? '' : String(v);
+  return String(text).replace(/\{\{\s*([^{}]+?)\s*\}\}/g, (_, key) => String(values[normalizeKey(key)] ?? '').trim());
+}

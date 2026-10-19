@@ -1,3 +1,4 @@
+import { integrationsRouter } from './integrations.js';
 import { addInterest, listInterests, deleteInterest, listInterestProducts } from '../repositories/contactInterests.js';
 import { listNotifications, markNotificationRead, markAllNotificationsRead, markConversationNotificationsRead } from '../repositories/notifications.js';
 import { Router } from 'express';
@@ -54,7 +55,7 @@ import { runTriggersForTagAdded, runTriggersForStageEntered } from '../automatio
 import { pauseAiForConversation, resumeAiForConversation } from '../automation/aiAgents.js';
 import { getTypingConfig, updateTypingConfig } from '../services/typing.js';
 import { getDistributionRule, upsertDistributionRule } from '../services/distribution.js';
-import { summarizeConversation, getLatestInsight, getAiSettings, updateAiSettings, AI_PROVIDERS } from '../services/ai/AIService.js';
+import { summarizeConversation, getLatestInsight, getAiSettings, updateAiSettings, saveAiProviderKey, AI_PROVIDERS } from '../services/ai/AIService.js';
 import { runRadarNow } from '../jobs/dailyRadarJob.js';
 import { getRiskRadarConversations } from '../repositories/radar.js';
 import {
@@ -535,6 +536,8 @@ apiRouter.post('/settings/meta-conversions/dataset', requireRole('admin'), async
   }
 }));
 
+apiRouter.use('/integrations', integrationsRouter);
+
 apiRouter.get('/ai/settings', requireRole('admin'), asyncHandler(async (req, res) => {
   res.json(await getAiSettings(req.tenantId));
 }));
@@ -542,6 +545,8 @@ apiRouter.get('/ai/settings', requireRole('admin'), asyncHandler(async (req, res
 apiRouter.put('/ai/settings', requireRole('admin'), asyncHandler(async (req, res) => {
   const { provider, summarize_enabled, radar_enabled, monthly_limit, api_key } = req.body;
   try {
+    // Chave nova também vai pra tabela por provedor (tela Integrações).
+    if (api_key && provider && provider !== 'mock') await saveAiProviderKey(req.tenantId, provider, { apiKey: api_key });
     res.json(await updateAiSettings(req.tenantId, {
       provider, summarizeEnabled: summarize_enabled, radarEnabled: radar_enabled, monthlyLimit: monthly_limit, apiKey: api_key,
     }));
