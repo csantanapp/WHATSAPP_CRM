@@ -260,6 +260,17 @@ kbd{font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);backgro
 body[data-can-manage="false"] .only-manager{display:none !important;}
 body[data-is-admin="false"] .only-admin{display:none !important;}
 body[data-can-manage="false"] .switch.flow-toggle{pointer-events:none;opacity:.45;}
+.flow-node.has-error{border-color:#E8A79A;}
+.flow-node.has-warning{border-color:#F0CC7A;}
+.flow-node-issue{position:absolute;top:-9px;left:-9px;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#FFFFFF;box-shadow:0 0 0 2px #FFFFFF;z-index:2;cursor:help;}
+.flow-node-issue.error{background:#B4381A;}
+.flow-node-issue.warning{background:#C78A00;}
+.flow-issues-error{background:#FDE8E3;color:#8A2E12;border:1px solid #F3B6AE;}
+.flow-issues-warning{background:#FFF4DC;color:#7A4E00;border:1px solid #F0CC7A;}
+.var-chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:-4px;}
+.var-chip{border:1px solid #DCDCD4;background:#FFFFFF;border-radius:999px;padding:3px 9px;font-size:12px;color:var(--ink);cursor:pointer;font-family:inherit;}
+.var-chip:hover{background:var(--acc-soft);border-color:var(--acc);}
+.flow-warn-pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;border-radius:999px;padding:2px 9px;cursor:help;}
 .ct-link{font-size:14px;font-weight:500;color:var(--ink);display:inline-flex;align-items:center;gap:4px;text-decoration:underline;text-underline-offset:3px;}
 .radar-row{display:flex;align-items:center;gap:14px;padding:18px 22px;flex-wrap:wrap;}
 .radar-list .radar-row + .radar-row{border-top:1px solid var(--divider);}
@@ -817,6 +828,10 @@ button{font-family:var(--font-body);}
                 <button type="button" id="flow-trigger-summary-btn" class="ct-pill ct-pill-acc" style="border:none;cursor:pointer;min-width:0;max-width:260px;overflow:hidden;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;flex-shrink:1;"></button>
               </div>
               <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                <div style="position:relative;">
+                  <button type="button" id="flow-issues-btn" class="ct-btn ct-btn-secondary" hidden aria-haspopup="dialog" aria-expanded="false"></button>
+                  <div id="flow-issues-panel" class="ct-menu" role="dialog" aria-label="Ajustes necessários" hidden style="left:0;right:auto;width:380px;max-height:60vh;overflow-y:auto;padding:8px;"></div>
+                </div>
                 <button type="button" id="flow-metrics-btn" class="ct-btn ct-btn-secondary" title="Ver métricas de cada nó (envios, entregas, leituras, respostas)"><span data-icon="chart-column"></span>Métricas</button>
                 <button type="button" id="flow-organize-btn" class="ct-btn ct-btn-ghost"><span data-icon="wand-sparkles"></span>Organizar</button>
                 <button type="button" id="flow-discard-btn" class="ct-btn ct-btn-ghost">Descartar</button>
@@ -2651,6 +2666,13 @@ hydrateIcons(document);
     var list = document.getElementById('automacao-list');
     var funnelId = document.getElementById('automacao-funnel-filter').value;
     var flows;
+    var listCtx = {};
+    try {
+      var ctxRes = await Promise.all([api('/integrations').catch(function () { return null; }), api('/ai-agents').catch(function () { return null; }), api('/automation-flows').catch(function () { return null; })]);
+      if (ctxRes[0]) listCtx = { googleConnected: ctxRes[0].google.connected, sheets: ctxRes[0].google.sheets, aiConnected: (ctxRes[0].ai || []).some(function (p) { return p.connected; }) };
+      if (ctxRes[1]) listCtx.agents = ctxRes[1];
+      if (ctxRes[2]) listCtx.flows = ctxRes[2];
+    } catch (e) {}
     try {
       flows = await api('/automation-flows' + (funnelId ? '?funnel_id=' + funnelId : ''));
     } catch (err) {
@@ -2699,6 +2721,13 @@ hydrateIcons(document);
         '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
           '<span style="font-weight:600;font-size:17px;color:var(--ink);">' + escapeHtml(flow.name) + '</span>' +
           '<span class="ct-tag" style="text-transform:uppercase;letter-spacing:.05em;font-size:11px;">' + escapeHtml(flowFunnel ? flowFunnel.name : 'Todos os funis') + '</span>' +
+          (function () {
+            var li = flowListIssues(flow, listCtx);
+            if (!li.length) return '';
+            var errs = li.filter(function (i) { return i.level === 'error'; }).length;
+            return '<span class="flow-warn-pill ' + (errs ? 'flow-issues-error' : 'flow-issues-warning') + '" title="' + escapeHtml(li.map(function (i) { return '• ' + i.message; }).join('\n')) + '">' + ICON('triangle-alert', 12) +
+              (errs ? errs + (errs === 1 ? ' ajuste necessário' : ' ajustes necessários') : li.length + (li.length === 1 ? ' aviso' : ' avisos')) + '</span>';
+          })() +
           (flow.is_active
             ? '<span style="font-size:12px;color:var(--success-ink);display:inline-flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);"></span>Ativa</span>'
             : '<span style="font-size:12px;color:var(--text-subtle);">Pausada</span>') +
@@ -3229,18 +3258,195 @@ hydrateIcons(document);
     return flowCanvas.nodes.find(function (n) { return n.client_id === id; });
   }
 
+
+  // ── Diagnóstico das automações ──
+  // Uma regra só, usada no editor (aviso em cada bloco + bloqueio ao publicar)
+  // e na lista de automações. nodes: [{ id, step_type, config, next, nextTrue,
+  // nextFalse, optionNext }], entryId: bloco ligado ao gatilho.
+  // ctx: { googleConnected, sheets, agents, flows, aiConnected, selfFlowId }.
+  function flowValidate(nodes, entryId, ctx) {
+    ctx = ctx || {};
+    var issues = [];
+    var byId = {};
+    nodes.forEach(function (n) { byId[n.id] = n; });
+    var add = function (id, level, msg) { issues.push({ nodeId: id, level: level, message: msg }); };
+    if (!nodes.length || !entryId || !byId[entryId]) {
+      add(null, 'error', 'Nenhum bloco está ligado ao gatilho: quando a automação dispara, nada acontece.');
+    }
+    // Blocos que o fluxo nunca alcança.
+    var seen = {};
+    var stack = entryId && byId[entryId] ? [entryId] : [];
+    while (stack.length) {
+      var cur = byId[stack.pop()];
+      if (!cur || seen[cur.id]) continue;
+      seen[cur.id] = true;
+      [cur.next, cur.nextTrue, cur.nextFalse].concat(Object.values(cur.optionNext || {})).forEach(function (t) { if (t && byId[t]) stack.push(t); });
+    }
+    var findIn = function (list, id) { return (list || []).find(function (x) { return String(x.id) === String(id); }); };
+    nodes.forEach(function (n) {
+      var c = n.config || {};
+      var label = (FLOW_NODE_META[n.step_type] || {}).label || n.step_type;
+      if (entryId && byId[entryId] && !seen[n.id]) add(n.id, 'warning', label + ': bloco solto, não está ligado ao fluxo e nunca é executado.');
+      var branchWarn = function (key, which) {
+        if (!n[key]) add(n.id, 'warning', label + ': a saída “' + which + '” não está ligada a nada — o lead sai do fluxo aqui. Se for de propósito, ligue a um bloco “Fim”.');
+      };
+      switch (n.step_type) {
+        case 'send_message':
+          if (!String(c.text || '').trim()) add(n.id, 'error', 'Resposta: a mensagem está vazia.');
+          break;
+        case 'ask_question': {
+          if (!String(c.text || '').trim()) add(n.id, 'error', 'Pergunta: falta o texto da pergunta.');
+          if (c.reply_type && c.reply_type !== 'text' && !(c.options || []).filter(Boolean).length) add(n.id, 'error', 'Pergunta: escolha as opções de resposta.');
+          if (c.save_to === 'custom' && !String(c.custom_field || '').trim()) add(n.id, 'error', 'Pergunta: dê um nome ao campo personalizado.');
+          if (c.branch_by_option) {
+            var opts = (c.options || []).filter(Boolean);
+            var missing = opts.filter(function (_, i) { return !(n.optionNext || {})[i]; });
+            if (missing.length && !n.next) add(n.id, 'warning', 'Pergunta: ' + (missing.length === 1 ? 'a opção “' + missing[0] + '” não está ligada' : missing.length + ' opções não estão ligadas') + ' e “Demais respostas” também não — o lead sai do fluxo. Se for de propósito, ligue a um bloco “Fim”.');
+          }
+          break;
+        }
+        case 'wait':
+          if (!(parseInt(c.minutes, 10) > 0)) add(n.id, 'error', 'Aguardar: defina quantos minutos.');
+          break;
+        case 'condition':
+          if ((c.check || 'tag_exists') === 'tag_exists' && !c.tag) add(n.id, 'error', 'Condição: escolha a tag.');
+          if (c.check === 'stage_equals' && !c.funnel_stage_id) add(n.id, 'error', 'Condição: escolha a etapa.');
+          branchWarn('nextTrue', c.true_label || 'Sim'); branchWarn('nextFalse', c.false_label || 'Não');
+          break;
+        case 'classify_ai':
+          if (!String(c.question || '').trim()) add(n.id, 'error', 'Classificar (IA): escreva a pergunta.');
+          if (ctx.aiConnected === false) add(n.id, 'warning', 'Classificar (IA): nenhuma IA conectada em Integrações — segue sempre pelo “' + (c.false_label || 'Não') + '”.');
+          branchWarn('nextTrue', c.true_label || 'Sim'); branchWarn('nextFalse', c.false_label || 'Não');
+          break;
+        case 'add_tag': case 'remove_tag':
+          if (!String(c.tag || '').trim()) add(n.id, 'error', label + ': escolha a tag.');
+          break;
+        case 'move_stage':
+          if (!c.funnel_stage_id) add(n.id, 'error', 'Mover lead: escolha a etapa.');
+          break;
+        case 'assign_user':
+          if (!c.user_id) add(n.id, 'error', 'Atribuir: escolha o atendente.');
+          break;
+        case 'create_task':
+          if (!String(c.title || '').trim()) add(n.id, 'error', 'Lembrete: dê um título.');
+          break;
+        case 'repeat':
+          if (!n.next) add(n.id, 'error', 'Repetir: ligue a saída ao bloco de onde o fluxo deve recomeçar.');
+          break;
+        case 'start_flow': {
+          if (!c.flow_id) { add(n.id, 'error', 'Conectar Automação: escolha a automação de destino.'); break; }
+          var target = findIn(ctx.flows, c.flow_id);
+          if (ctx.flows && !target) add(n.id, 'error', 'Conectar Automação: a automação de destino foi excluída.');
+          else if (target && !target.is_active) add(n.id, 'warning', 'Conectar Automação: “' + target.name + '” está pausada — o lead não chega até ela.');
+          break;
+        }
+        case 'start_ai_agent': {
+          if (!c.agent_id) { add(n.id, 'error', 'Conectar Agente IA: escolha o agente.'); break; }
+          var agent = findIn(ctx.agents, c.agent_id);
+          if (ctx.agents && !agent) add(n.id, 'error', 'Conectar Agente IA: o agente foi excluído.');
+          else if (agent && !agent.is_active) add(n.id, 'warning', 'Conectar Agente IA: “' + agent.name + '” está pausado.');
+          if (ctx.aiConnected === false) add(n.id, 'warning', 'Conectar Agente IA: nenhuma IA conectada em Integrações — o agente não responde.');
+          break;
+        }
+        case 'sheets_save': case 'sheets_lookup': {
+          if (ctx.googleConnected === false) add(n.id, 'error', label + ': conecte a conta Google em Integrações.');
+          if (!c.sheet_id) add(n.id, 'error', label + ': escolha a planilha.');
+          else if (ctx.sheets && !findIn(ctx.sheets, c.sheet_id)) add(n.id, 'error', label + ': a planilha foi removida das Integrações.');
+          if (!c.tab) add(n.id, 'error', label + ': escolha a aba.');
+          if (n.step_type === 'sheets_save') {
+            if (!(c.columns || []).filter(function (x) { return x && x.header; }).length) add(n.id, 'error', label + ': adicione pelo menos uma coluna.');
+          } else {
+            if (!c.search_column) add(n.id, 'error', label + ': escolha a coluna onde procurar.');
+            if (!String(c.search_value || '').trim()) add(n.id, 'error', label + ': informe o valor a procurar (ex: {{telefone}}).');
+            branchWarn('nextTrue', 'Encontrou'); branchWarn('nextFalse', 'Não encontrou');
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    });
+    return issues;
+  }
+
+  // Editor: nós do canvas no formato do diagnóstico.
+  function flowCanvasIssues() {
+    var trigger = flowCanvas.nodes.find(function (n) { return n.kind === 'trigger'; });
+    var nodes = flowCanvas.nodes.filter(function (n) { return n.kind !== 'trigger'; }).map(function (n) {
+      return { id: n.client_id, step_type: n.step_type, config: n.config, next: n.next_step_id, nextTrue: n.next_step_id_true, nextFalse: n.next_step_id_false, optionNext: n.option_next || {} };
+    });
+    return flowValidate(nodes, trigger && trigger.next_step_id, flowCanvas.validationCtx || {});
+  }
+
+  // Lista: passos vindos da API (ids reais).
+  function flowListIssues(flow, ctx) {
+    var steps = flow.steps || [];
+    var nodes = steps.map(function (st) {
+      var on = {};
+      Object.keys((st.config && st.config.option_next) || {}).forEach(function (k) { on[k] = st.config.option_next[k]; });
+      return { id: st.id, step_type: st.step_type, config: st.config, next: st.next_step_id, nextTrue: st.next_step_id_true, nextFalse: st.next_step_id_false, optionNext: on };
+    });
+    return flowValidate(nodes, steps.length ? steps[0].id : null, Object.assign({}, ctx, { selfFlowId: flow.id }));
+  }
+
+  // Botões de variável: inserem {{variavel}} no último campo de texto usado no painel.
+  var flowLastField = null;
+  function flowVarChipsHtml(kind) {
+    var vars = [['nome', 'Nome'], ['primeiro_nome', 'Primeiro nome'], ['email', 'E-mail'], ['telefone', 'Telefone']];
+    if (kind === 'sheets') vars = vars.concat([['data', 'Data'], ['hora', 'Hora'], ['canal', 'Canal'], ['funil', 'Funil'], ['produto_interesse', 'Produto de interesse']]);
+    var custom = {};
+    flowCanvas.nodes.forEach(function (n) {
+      var c = n.config || {};
+      if (n.step_type === 'ask_question' && c.save_to === 'custom' && c.custom_field) custom[c.custom_field] = true;
+      if (n.step_type === 'sheets_lookup') (c.fields || []).forEach(function (f) { custom[f] = true; });
+    });
+    Object.keys(custom).forEach(function (f) { vars.push([f, f]); });
+    return '<div class="var-chips" role="group" aria-label="Inserir variável"><span style="font-size:11.5px;color:#6E7076;margin-right:2px;">Inserir:</span>' +
+      vars.map(function (v) { return '<button type="button" class="var-chip" data-insert-var="' + escapeHtml(v[0]) + '" title="Insere {{' + escapeHtml(v[0]) + '}}">' + escapeHtml(v[1]) + '</button>'; }).join('') +
+      '</div><div style="font-size:11.5px;color:#6E7076;line-height:1.45;">Clique no campo e depois na variável. Se o lead não tiver o dado, ela fica vazia.</div>';
+  }
+  document.addEventListener('focusin', function (e) {
+    var body = document.getElementById('flow-node-modal-body');
+    if (body && body.contains(e.target) && (e.target.tagName === 'TEXTAREA' || (e.target.tagName === 'INPUT' && (!e.target.type || e.target.type === 'text')))) flowLastField = e.target;
+  });
+  document.addEventListener('mousedown', function (e) {
+    if (e.target.closest && e.target.closest('[data-insert-var]')) e.preventDefault(); // não tira o foco do campo
+  });
+  document.addEventListener('click', function (e) {
+    var chip = e.target.closest && e.target.closest('[data-insert-var]');
+    if (!chip) return;
+    var body = document.getElementById('flow-node-modal-body');
+    var field = flowLastField && body.contains(flowLastField) ? flowLastField : body.querySelector('textarea, input.f-col-v, #f-search-val, input[type=text]');
+    if (!field) return;
+    var token = '{{' + chip.getAttribute('data-insert-var') + '}}';
+    var start = field.selectionStart != null ? field.selectionStart : field.value.length;
+    var end = field.selectionEnd != null ? field.selectionEnd : field.value.length;
+    field.value = field.value.slice(0, start) + token + field.value.slice(end);
+    field.focus();
+    field.setSelectionRange(start + token.length, start + token.length);
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
   function flowRenderAll() {
     var content = document.getElementById('flow-canvas-content');
     content.style.transform = 'translate(' + flowCanvas.panX + 'px,' + flowCanvas.panY + 'px) scale(' + flowCanvas.scale + ')';
 
     content.querySelectorAll('.flow-node').forEach(function (el) { el.remove(); });
 
+    var issues = flowCanvasIssues();
+    flowCanvas.issues = issues;
+    flowUpdateIssuesButton();
+    var issuesByNode = {};
+    issues.forEach(function (i) { if (i.nodeId) (issuesByNode[i.nodeId] = issuesByNode[i.nodeId] || []).push(i); });
+
     flowCanvas.nodes.forEach(function (node) {
       var meta = FLOW_NODE_META[node.kind === 'trigger' ? 'trigger' : node.step_type] || FLOW_NODE_META.send_message;
       var handles = flowNodeHandles(node);
       var height = flowNodeHeight(node);
       var el = document.createElement('div');
-      el.className = 'flow-node' + (node.client_id === flowCanvas.selectedId ? ' selected' : '') + (node.step_type === 'end' ? ' is-end' : '');
+      var nodeIssues = issuesByNode[node.client_id] || [];
+      var nodeLevel = nodeIssues.some(function (i) { return i.level === 'error'; }) ? 'error' : (nodeIssues.length ? 'warning' : '');
+      el.className = 'flow-node' + (node.client_id === flowCanvas.selectedId ? ' selected' : '') + (node.step_type === 'end' ? ' is-end' : '') + (nodeLevel ? ' has-' + nodeLevel : '');
       el.style.left = node.x + 'px';
       el.style.top = node.y + 'px';
       el.style.minHeight = height + 'px';
@@ -3271,8 +3477,11 @@ hydrateIcons(document);
           '<div class="flow-node-handle" style="top:74px;" data-handle="false" data-node="' + node.client_id + '"></div>';
       }
 
+      var issueBadge = nodeLevel
+        ? '<span class="flow-node-issue ' + nodeLevel + '" title="' + escapeHtml(nodeIssues.map(function (i) { return i.message; }).join('\n')) + '" aria-label="' + (nodeLevel === 'error' ? 'Precisa de ajuste' : 'Atenção') + ': ' + escapeHtml(nodeIssues[0].message) + '">!</span>'
+        : '';
       el.innerHTML =
-        deleteX +
+        deleteX + issueBadge +
         (node.kind === 'trigger' ? '' : '<span class="flow-port-in" aria-hidden="true"></span>') +
         '<div class="flow-node-header">' +
           '<span class="ct-tile" style="width:22px;height:22px;background:' + meta.bg + ';color:' + meta.stroke + ';">' + ICON(meta.icon, 13) + '</span>' +
@@ -3605,7 +3814,7 @@ hydrateIcons(document);
       var saveTo = c.save_to || '';
       body.innerHTML =
         flowFieldHtml('f-text', 'Pergunta', flowTextareaHtml('f-text', c.text)) +
-        '<div style="font-size:11.5px;color:#6E7076;line-height:1.45;margin-top:-4px;">Personalize com <b>{{nome}}</b>, <b>{{primeiro_nome}}</b>, <b>{{email}}</b>, <b>{{telefone}}</b> ou um campo do formulário, ex: <b>{{Interesse}}</b>. Se o lead não tiver o dado, a variável some do texto.</div>' +
+        flowVarChipsHtml('message') +
         flowFieldHtml('f-reply-type', 'Como o lead responde', flowSelectHtml('f-reply-type', [
           { value: 'text', label: 'Resposta livre (texto)' },
           { value: 'buttons', label: 'Botões (até 3 opções)' },
@@ -3684,7 +3893,7 @@ hydrateIcons(document);
       title.textContent = 'Resposta (texto)';
       body.innerHTML =
         flowFieldHtml('f-text', 'Mensagem', flowTextareaHtml('f-text', c.text)) +
-        '<div style="font-size:11.5px;color:#6E7076;line-height:1.45;margin-top:-4px;">Personalize com <b>{{nome}}</b>, <b>{{primeiro_nome}}</b>, <b>{{email}}</b>, <b>{{telefone}}</b> ou um campo do formulário, ex: <b>{{Interesse}}</b>. Se o lead não tiver o dado, a variável some do texto.</div>' +
+        flowVarChipsHtml('message') +
         '<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#5b5d63;">' +
           '<input type="checkbox" id="f-wait-reply" ' + (node.step_type === 'ask_question' ? 'checked' : '') + '/> Pausar o fluxo esperando a resposta do lead' +
         '</label>';
@@ -3793,7 +4002,7 @@ hydrateIcons(document);
           '<button type="button" class="ct-btn ct-btn-secondary" id="f-go-integrations">' + ICON('blocks', 15) + 'Abrir Integrações</button>';
         document.getElementById('f-go-integrations').addEventListener('click', function () { window.__goto('integracoes'); });
       } else {
-        var varsHint = '<div style="font-size:11.5px;color:#6E7076;line-height:1.5;">Variáveis: <b>{{nome}}</b> <b>{{telefone}}</b> <b>{{email}}</b> <b>{{data}}</b> <b>{{hora}}</b> <b>{{canal}}</b> <b>{{funil}}</b> <b>{{produto_interesse}}</b> ou um campo do formulário, ex: <b>{{Curso}}</b>.</div>';
+        var varsHint = flowVarChipsHtml('sheets');
         var sheetOpts = [{ value: '', label: 'Escolha a planilha…' }].concat(flowCanvas.sheets.map(function (x) { return { value: x.id, label: x.title }; }));
         var common = flowFieldHtml('f-sheet', 'Planilha', flowSelectHtml('f-sheet', sheetOpts, c.sheet_id || '')) +
           flowFieldHtml('f-tab', 'Aba', '<select id="f-tab" style="width:100%;background:#F4F4F0;border:1px solid #E3E3DC;border-radius:9px;padding:9px 12px;font-size:13px;color:#111214;box-sizing:border-box;font-family:var(--font-body);"><option value="' + escapeHtml(c.tab || '') + '">' + escapeHtml(c.tab || 'Escolha a planilha primeiro') + '</option></select>');
@@ -4161,7 +4370,65 @@ hydrateIcons(document);
   document.getElementById('flow-save-btn').addEventListener('click', async function () {
     try { await flowSave(); } catch (err) { ctAlert('Não foi possível salvar: ' + err.message); }
   });
+  function flowUpdateIssuesButton() {
+    var btn = document.getElementById('flow-issues-btn');
+    if (!btn) return;
+    var issues = flowCanvas.issues || [];
+    var errors = issues.filter(function (i) { return i.level === 'error'; }).length;
+    btn.hidden = !issues.length;
+    btn.className = 'ct-btn ' + (errors ? 'flow-issues-error' : 'flow-issues-warning');
+    btn.innerHTML = ICON('triangle-alert', 15) + (errors ? errors + (errors === 1 ? ' ajuste' : ' ajustes') : issues.length + (issues.length === 1 ? ' aviso' : ' avisos'));
+    var panel = document.getElementById('flow-issues-panel');
+    if (!panel.hidden) flowRenderIssuesPanel();
+  }
+  function flowRenderIssuesPanel() {
+    var panel = document.getElementById('flow-issues-panel');
+    var issues = flowCanvas.issues || [];
+    panel.innerHTML = '<div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;padding:4px 6px 8px;">Antes de publicar</div>' +
+      issues.map(function (i, idx) {
+        return '<button type="button" class="ct-menu-item" data-issue-idx="' + idx + '" style="height:auto;align-items:flex-start;padding:8px 10px;white-space:normal;line-height:1.4;">' +
+          '<span style="color:' + (i.level === 'error' ? '#B4381A' : '#7A4E00') + ';display:inline-flex;margin-top:1px;flex-shrink:0;">' + ICON(i.level === 'error' ? 'circle-alert' : 'triangle-alert', 15) + '</span>' +
+          '<span style="font-size:13px;">' + escapeHtml(i.message) + '</span></button>';
+      }).join('') +
+      '<div style="font-size:11.5px;color:var(--text-muted);padding:6px 8px 2px;">Vermelho impede publicar. Amarelo é aviso: dá pra publicar, mas o lead pode sair do fluxo.</div>';
+    panel.querySelectorAll('[data-issue-idx]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var issue = issues[parseInt(b.getAttribute('data-issue-idx'), 10)];
+        panel.hidden = true;
+        document.getElementById('flow-issues-btn').setAttribute('aria-expanded', 'false');
+        var node = issue && issue.nodeId ? flowNodeById(issue.nodeId) : flowCanvas.nodes.find(function (n) { return n.kind === 'trigger'; });
+        if (node) { flowCanvas.selectedId = node.client_id; flowRenderAll(); flowOpenNodeModal(node); }
+      });
+    });
+  }
+  document.getElementById('flow-issues-btn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    var panel = document.getElementById('flow-issues-panel');
+    panel.hidden = !panel.hidden;
+    this.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
+    if (!panel.hidden) flowRenderIssuesPanel();
+  });
+  document.addEventListener('click', function (e) {
+    var panel = document.getElementById('flow-issues-panel');
+    if (panel && !panel.hidden && !panel.contains(e.target) && !e.target.closest('#flow-issues-btn')) panel.hidden = true;
+  });
+
   document.getElementById('flow-publish-btn').addEventListener('click', async function () {
+    var issues = flowCanvasIssues();
+    var errors = issues.filter(function (i) { return i.level === 'error'; });
+    if (errors.length) {
+      ctAlert({ tone: 'error', title: 'Ajuste antes de publicar', message: errors.map(function (i) { return '• ' + i.message; }).join('\n') + '\n\nOs blocos com “!” vermelho mostram onde.' });
+      return;
+    }
+    if (issues.length) {
+      var go = await ctChoice({
+        title: 'Publicar com avisos?',
+        message: issues.map(function (i) { return '• ' + i.message; }).join('\n'),
+        tone: 'warning', cancelValue: 'back',
+        actions: [{ value: 'back', label: 'Voltar e ajustar', variant: 'secondary' }, { value: 'go', label: 'Publicar assim mesmo', variant: 'primary' }],
+      });
+      if (go !== 'go') return;
+    }
     try { await flowSave({ activate: true }); } catch (err) { ctAlert('Não foi possível publicar: ' + err.message); }
   });
   document.getElementById('flow-deactivate-btn').addEventListener('click', async function () {
@@ -4263,10 +4530,13 @@ hydrateIcons(document);
       var integ = await api('/integrations');
       flowCanvas.sheets = integ.google.sheets;
       flowCanvas.googleConnected = integ.google.connected;
+      flowCanvas.aiConnected = (integ.ai || []).some(function (p) { return p.connected; });
     } catch (err) {
       flowCanvas.sheets = [];
       flowCanvas.googleConnected = false;
+      flowCanvas.aiConnected = null;
     }
+    flowCanvas.validationCtx = { googleConnected: flowCanvas.googleConnected, sheets: flowCanvas.sheets, agents: flowCanvas.allAgents, flows: flowCanvas.allFlows, aiConnected: flowCanvas.aiConnected };
     flowCanvas.nodes = [{
       client_id: 'trigger', kind: 'trigger', step_type: 'trigger', config: {},
       x: flow.trigger_position_x || 60, y: flow.trigger_position_y || 160,
