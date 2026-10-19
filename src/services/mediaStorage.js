@@ -2,7 +2,8 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
-const MEDIA_ROOT = process.env.MEDIA_STORAGE_PATH || '/data/media';
+// Lido na hora do uso (não no import), pra respeitar a configuração do ambiente.
+const mediaRoot = () => process.env.MEDIA_STORAGE_PATH || '/data/media';
 
 const EXT_BY_MIME = {
   'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif',
@@ -17,7 +18,7 @@ const EXT_BY_MIME = {
 export async function saveMediaFile(tenantId, buffer, mimeType) {
   const ext = EXT_BY_MIME[mimeType] || 'bin';
   const filename = `${crypto.randomUUID()}.${ext}`;
-  const dir = path.join(MEDIA_ROOT, String(tenantId));
+  const dir = path.join(mediaRoot(), String(tenantId));
   await mkdir(dir, { recursive: true });
   const fullPath = path.join(dir, filename);
   await writeFile(fullPath, buffer);
@@ -31,5 +32,5 @@ export async function saveMediaFile(tenantId, buffer, mimeType) {
 export function mediaFilePath(tenantId, filename) {
   // Impede path traversal — filename só pode ser o nome gerado por nós (uuid.ext).
   if (!/^[a-f0-9-]+\.[a-z0-9]+$/i.test(filename)) return null;
-  return path.join(MEDIA_ROOT, String(tenantId), filename);
+  return path.join(mediaRoot(), String(tenantId), filename);
 }

@@ -32,7 +32,7 @@ export async function resetDb() {
   await pool.query(`
     TRUNCATE TABLE
       automation_run_answers, automation_runs, automation_flow_steps, automation_flows,
-      activity_log, messages, conversations, funnel_stages, funnels, contacts, tags, app_settings
+      activity_log, messages, conversations, funnel_stages, funnels, contacts, tags, app_settings, quick_replies
     RESTART IDENTITY CASCADE
   `);
 }

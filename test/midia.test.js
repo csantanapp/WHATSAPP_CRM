@@ -137,7 +137,7 @@ test('mensagem de áudio recebida: tenta transcrever (mock, sem OPENAI_API_KEY) 
 
   const row = await query('SELECT transcription FROM messages WHERE id = $1', [audioMsg.id]);
   assert.ok(row.rows[0].transcription, 'transcrição (ainda que mock) deveria ter sido salva');
-  assert.ok(row.rows[0].transcription.includes('OPENAI_API_KEY'));
+  assert.match(row.rows[0].transcription, /Transcrição automática indisponível/);
 });
 
 test('envio de mídia pelo atendente: upload + Graph API + salva no histórico', async () => {

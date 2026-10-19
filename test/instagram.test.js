@@ -124,7 +124,8 @@ test('reenvio do mesmo mid (retry da Meta) não duplica a mensagem', async () =>
 });
 
 test('GET /settings/instagram-status reflete credenciais configuradas', async () => {
-  installMockFetch(async () => jsonResponse({ name: 'Página Teste', instagram_business_account: { username: 'tractom.oficial' } }));
+  // API do Instagram com login do Instagram: GET graph.instagram.com/me?fields=user_id,username,name
+  installMockFetch(async () => jsonResponse({ user_id: '17841400000000000', username: 'tractom.oficial', name: 'Página Teste' }));
   const res = await agent.get('/api/settings/instagram-status');
   assert.equal(res.status, 200);
   assert.equal(res.body.connected, true);
@@ -144,7 +145,8 @@ test('responder uma conversa do Instagram chama a Send API certa (não a do What
   const conversationId = detail.body.conversations[0].id;
 
   installMockFetch(async (url, opts) => {
-    assert.ok(String(url).includes('me/messages'));
+    // Envio pela conta profissional: POST graph.instagram.com/<INSTAGRAM_PAGE_ID>/messages
+    assert.ok(String(url).includes(`${process.env.INSTAGRAM_PAGE_ID}/messages`), String(url));
     const sentBody = JSON.parse(opts.body);
     assert.equal(sentBody.recipient.id, igsid);
     assert.equal(sentBody.message.text, 'Oi! Claro, posso te ajudar.');

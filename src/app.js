@@ -54,6 +54,10 @@ export function createApp() {
 
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, _next) => {
+    // Id que não é número na URL (ex: /api/contacts/abc): pedido inválido, não erro do servidor.
+    if (err.code === '22P02') {
+      return res.status(400).json({ error: { code: 'invalid_id', message: 'Identificador inválido.' } });
+    }
     logger.error('unhandled_error', { message: err.message, stack: err.stack, path: req.path });
     const status = err.status || 500;
     const message = err.status ? err.message : 'Erro interno';
