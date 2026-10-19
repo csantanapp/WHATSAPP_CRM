@@ -126,6 +126,31 @@ test('ChatGPT e Claude conectados ao mesmo tempo; cada agente usa a própria cha
   assert.equal(ai.find((p) => p.provider === 'anthropic').is_default, true, 'ao remover o padrão, o outro conectado assume');
 });
 
+test('Conectar conta Google sem marcar a permissão de planilhas avisa na hora; token sem escopo vira mensagem clara', async () => {
+  await agent.put('/api/integrations/google/client').send({ client_id: '123-abc.apps.googleusercontent.com', client_secret: 'GOCSPX-segredo-teste' });
+  const base = globalThis.fetch;
+  installMockFetch(async (url, opts) => {
+    if (String(url).startsWith('https://oauth2.googleapis.com/token')) {
+      return jsonResponse({ access_token: 'ya29.x', refresh_token: '1//r', expires_in: 3600, scope: 'openid https://www.googleapis.com/auth/userinfo.email' });
+    }
+    return base(url, opts);
+  });
+  const { url } = (await agent.post('/api/integrations/google/connect')).body;
+  const cb = await agent.get('/api/integrations/google/callback').query({ code: 'c', state: new URL(url).searchParams.get('state') });
+  assert.match(decodeURIComponent(cb.headers.location), /google_erro.*marque a caixa/);
+  assert.equal((await agent.get('/api/integrations')).body.google.connected, false);
+
+  // Conta já conectada sem o escopo (como aconteceu em produção): mensagem clara.
+  globalThis.fetch = base;
+  await connectGoogle();
+  installMockFetch(async (u) => (String(u).startsWith('https://sheets.googleapis.com')
+    ? jsonResponse({ error: { code: 403, message: 'Request had insufficient authentication scopes.', details: [{ reason: 'ACCESS_TOKEN_SCOPE_INSUFFICIENT' }] } }, 403)
+    : base(u)));
+  const add = await agent.post('/api/integrations/google/sheets').send({ url: `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit` });
+  assert.equal(add.status, 502);
+  assert.match(add.body.error, /sem a permissão de planilhas/);
+});
+
 test('Conectar conta Google: estado inválido é recusado; conexão guarda o e-mail e a planilha', async () => {
   await agent.put('/api/integrations/google/client').send({ client_id: '123-abc.apps.googleusercontent.com', client_secret: 'GOCSPX-segredo-teste' });
   const bad = await agent.get('/api/integrations/google/callback').query({ code: 'x', state: 'forjado' });

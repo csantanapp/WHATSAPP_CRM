@@ -95,8 +95,11 @@ test('desligado em Configurações: envia direto, sem "digitando..."', async () 
     steps: [{ client_id: 'a', step_type: 'send_message', config: { text: 'Olá!' } }],
   });
   await leadSays('5544944440002', 'oi', 'wamid.LEAD.2');
-  assert.ok(await waitFor(() => calls.length >= 1));
+  // Só as chamadas deste lead: um "digitando..." atrasado do teste anterior
+  // pode chegar aqui e não tem nada a ver com este cenário.
+  const mine = () => calls.filter((c) => c.body.to === '5544944440002' || c.body.message_id === 'wamid.LEAD.2');
+  assert.ok(await waitFor(() => mine().length >= 1));
   await new Promise((r) => setTimeout(r, 200));
-  assert.equal(calls.length, 1);
-  assert.equal(calls[0].body.type, 'text');
+  assert.equal(mine().length, 1);
+  assert.equal(mine()[0].body.type, 'text');
 });

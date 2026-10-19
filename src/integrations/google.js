@@ -91,6 +91,11 @@ async function tokenRequest(body) {
 
 export async function completeConnection({ tenantId, code, redirectUri, userId }) {
   const tokens = await tokenRequest({ code, redirect_uri: redirectUri, grant_type: 'authorization_code' });
+  // O Google mostra as permissões como caixinhas que podem vir desmarcadas:
+  // sem a de planilhas, a conexão não serve pra nada — avisa na hora.
+  if (tokens.scope && !String(tokens.scope).split(' ').includes('https://www.googleapis.com/auth/spreadsheets')) {
+    throw httpError('Faltou permitir o acesso às planilhas. Conecte de novo e, na tela do Google, marque a caixa “Ver, editar, criar e excluir todas as suas planilhas”.', 400);
+  }
   if (!tokens.refresh_token) throw httpError('O Google não devolveu acesso permanente. Tente conectar de novo.', 502);
   let email = null;
   try {
@@ -157,6 +162,14 @@ async function sheetsFetch(tenantId, url, options = {}) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const msg = data?.error?.message || `Google Sheets respondeu ${res.status}`;
+    const reason = data?.error?.details?.find((d) => d.reason)?.reason;
+    if (reason === 'ACCESS_TOKEN_SCOPE_INSUFFICIENT') {
+      throw httpError('A conta Google foi conectada sem a permissão de planilhas. Clique em Desconectar, conecte de novo e marque a caixa “Ver, editar, criar e excluir todas as suas planilhas”.', 502);
+    }
+    if (reason === 'SERVICE_DISABLED') {
+      throw httpError('A Google Sheets API não está ativada no projeto do Google Cloud. Ative em console.cloud.google.com → APIs e serviços → Biblioteca → Google Sheets API.', 502);
+    }
+    logger.info('google_sheets_error', { status: res.status, reason, message: msg });
     if (res.status === 403 || res.status === 404) throw httpError('Sem acesso a essa planilha com a conta conectada. Confira o link e se a conta tem permissão de edição.', 502);
     throw httpError(msg, 502);
   }

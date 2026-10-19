@@ -28,7 +28,20 @@ assertTestDatabase();
 // esperaria 1–5s. O teste específico dela liga de volta.
 if (!process.env.TYPING_SIMULATION) process.env.TYPING_SIMULATION = 'off';
 
+// Um fluxo do teste anterior ainda rodando em segundo plano (ex: "digitando..."
+// com espera) pode travar com o TRUNCATE (deadlock) — tenta de novo.
 export async function resetDb() {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await truncateAll();
+    } catch (err) {
+      if (err.code !== '40P01' || attempt >= 5) throw err;
+      await new Promise((r) => setTimeout(r, 200 * attempt));
+    }
+  }
+}
+
+async function truncateAll() {
   await pool.query(`
     TRUNCATE TABLE
       automation_run_answers, automation_runs, automation_flow_steps, automation_flows,
