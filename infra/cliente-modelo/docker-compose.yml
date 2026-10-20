@@ -6,6 +6,8 @@ services:
     container_name: chatpipe-__SLUG__
     restart: unless-stopped
     env_file: .env
+    # Migrações antes de subir: o servidor nunca roda com tabelas faltando.
+    command: ["sh", "-c", "node src/db/migrate.js && exec node src/server.js"]
     volumes:
       - media:/data/media
     networks:
