@@ -58,7 +58,9 @@ systemctl restart fail2ban
 
 echo "== SSH só por chave"
 if [ -s /root/.ssh/authorized_keys ]; then
-  cat > /etc/ssh/sshd_config.d/99-chatpipe.conf <<'CONF'
+  mkdir -p /run/sshd
+  # 01- para ganhar do 50-cloud-init.conf (no sshd vale o primeiro valor lido)
+  cat > /etc/ssh/sshd_config.d/01-chatpipe.conf <<'CONF'
 PasswordAuthentication no
 KbdInteractiveAuthentication no
 PermitRootLogin prohibit-password
