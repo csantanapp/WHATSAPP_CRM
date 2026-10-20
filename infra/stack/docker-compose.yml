@@ -1,0 +1,57 @@
+# Serviços compartilhados por todos os clientes do chatpipe nesta VPS:
+#  - caddy: HTTPS automático e roteamento <cliente>.chatpipe.com.br → instância
+#  - db: um Postgres, com um banco (e um usuário) por cliente
+#  - whisper: transcrição de áudio local, compartilhada
+# Subir: cd /opt/chatpipe/stack && docker compose up -d
+services:
+  caddy:
+    image: caddy:2.8-alpine
+    container_name: chatpipe-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./sites:/etc/caddy/sites:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [chatpipe_net]
+
+  db:
+    image: postgres:16-alpine
+    container_name: chatpipe-db
+    restart: unless-stopped
+    env_file: .env            # POSTGRES_PASSWORD (gerado no setup)
+    environment:
+      - POSTGRES_USER=postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [chatpipe_net]
+
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    container_name: chatpipe-whisper
+    restart: unless-stopped
+    environment:
+      - ASR_MODEL=small
+      - ASR_ENGINE=faster_whisper
+      - ASR_MODEL_PATH=/data/whisper
+    volumes:
+      - whisper_models:/data/whisper
+    networks: [chatpipe_net]
+
+networks:
+  chatpipe_net:
+    name: chatpipe_net
+
+volumes:
+  caddy_data:
+  caddy_config:
+  db_data:
+  whisper_models:

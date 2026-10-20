@@ -5,10 +5,13 @@ import { hashPassword } from '../auth/password.js';
 // Provisiona o primeiro admin do tenant Tractom. Idempotente: se o e-mail já
 // existir nesse tenant, só atualiza a senha (útil pra reset manual via SSH).
 // Uso: ADMIN_EMAIL=... ADMIN_PASSWORD=... ADMIN_NAME=... npm run seed:admin
+// ADMIN_PLATFORM=false cria um admin comum (o do cliente); o padrão é o
+// super-admin da agência (passa por todas as permissões).
 async function main() {
   const email = process.env.ADMIN_EMAIL;
   const password = process.env.ADMIN_PASSWORD;
   const name = process.env.ADMIN_NAME || 'Admin';
+  const platform = process.env.ADMIN_PLATFORM !== 'false';
 
   if (!email || !password) {
     console.error('Defina ADMIN_EMAIL e ADMIN_PASSWORD antes de rodar: ADMIN_EMAIL=... ADMIN_PASSWORD=... npm run seed:admin');
@@ -29,10 +32,10 @@ async function main() {
   const passwordHash = await hashPassword(password);
   const result = await query(
     `INSERT INTO users (tenant_id, name, email, password_hash, role, is_platform_admin)
-     VALUES ($1, $2, $3, $4, 'admin', true)
+     VALUES ($1, $2, $3, $4, 'admin', $5)
      ON CONFLICT (tenant_id, email) DO UPDATE SET password_hash = EXCLUDED.password_hash, updated_at = now()
-     RETURNING id, email, role`,
-    [tenantId, name, email, passwordHash]
+     RETURNING id, email, role, is_platform_admin`,
+    [tenantId, name, email, passwordHash, platform]
   );
 
   console.log('Admin pronto:', result.rows[0]);

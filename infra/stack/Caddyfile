@@ -1,0 +1,11 @@
+{
+	email suporte@tractom.com.br
+}
+
+# Domínio principal (futuro site/app do chatpipe). Por enquanto, uma página simples.
+chatpipe.com.br, www.chatpipe.com.br {
+	respond "chatpipe" 200
+}
+
+# Um arquivo por cliente em ./sites (gerado pelo novo-cliente.sh).
+import /etc/caddy/sites/*.caddy

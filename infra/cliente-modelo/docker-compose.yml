@@ -1,0 +1,21 @@
+# Instância de um cliente do chatpipe. Gerado por infra/bin/novo-cliente.sh —
+# __SLUG__ é trocado pelo identificador do cliente (ex: iasg).
+services:
+  app:
+    image: chatpipe-app:latest
+    container_name: chatpipe-__SLUG__
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - media:/data/media
+    networks:
+      chatpipe_net:
+        aliases: [chatpipe-__SLUG__]   # nome único na rede (nunca "app")
+
+networks:
+  chatpipe_net:
+    external: true
+
+volumes:
+  media:
+    name: chatpipe___SLUG___media
