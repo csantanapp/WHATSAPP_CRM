@@ -2,9 +2,24 @@
 	email suporte@tractom.com.br
 }
 
-# Domínio principal (futuro site/app do chatpipe). Por enquanto, uma página simples.
-chatpipe.com.br, www.chatpipe.com.br {
-	respond "chatpipe" 200
+# Site de vendas (infra/site do repositório). /entrar leva o cliente ao
+# endereço da empresa dele (<cliente>.chatpipe.com.br).
+www.chatpipe.com.br {
+	redir https://chatpipe.com.br{uri} permanent
+}
+
+chatpipe.com.br {
+	root * /srv/site
+	encode zstd gzip
+	try_files {path} {path}.html
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+	@html path / /index.html /entrar /entrar.html
+	header @html Cache-Control "no-cache"
+	file_server
 }
 
 # Um arquivo por cliente em ./sites (gerado pelo novo-cliente.sh).

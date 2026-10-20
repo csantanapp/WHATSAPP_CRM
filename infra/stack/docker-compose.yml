@@ -14,6 +14,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./sites:/etc/caddy/sites:ro
+      - /opt/chatpipe/src/infra/site:/srv/site:ro   # site de vendas (vem com o código)
       - caddy_data:/data
       - caddy_config:/config
     networks: [chatpipe_net]
