@@ -39,6 +39,7 @@ export function requireRole(...roles) {
 // imensa maioria dos POST/PATCH/DELETE modernos).
 export function verifyOrigin(req, res, next) {
   if (!['POST', 'PATCH', 'PUT', 'DELETE'].includes(req.method)) return next();
+  if (req.fromLoginPortal) return next(); // origem liberada só pro login (ver loginPortal.js)
   const origin = req.get('origin');
   if (!origin) return next(); // alguns clientes legítimos (ex: curl, apps nativos) não mandam Origin
   const host = req.get('host');

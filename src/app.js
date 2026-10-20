@@ -12,6 +12,7 @@ import { securityHeaders, webhookRateLimit, apiRateLimit } from './middleware/se
 import { logger, requestLogger } from './logger.js';
 import { createSessionMiddleware } from './auth/session.js';
 import { requireAuth, requirePasswordChanged, verifyOrigin } from './middleware/auth.js';
+import { loginPortalCors } from './middleware/loginPortal.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -69,6 +70,7 @@ export function createApp() {
   app.use('/webhook/instagram', webhookRateLimit, instagramWebhookRouter);
 
   // Sessão só é necessária a partir daqui (login e tudo que exige usuário).
+  app.use(loginPortalCors); // login vindo de chatpipe.com.br/login
   app.use(createSessionMiddleware());
   app.use(verifyOrigin);
 

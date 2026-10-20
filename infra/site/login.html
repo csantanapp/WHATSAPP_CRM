@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login · chatpipe</title>
+<meta name="description" content="Entre no chatpipe da sua empresa.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0B0B0B">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{--brand:#72E86F;--ink:#0B0B0B;--paper:#FFFFFF;--mist:#F2F4F1;--muted:#5B6058;--line:#DDE2DA;--soft:#E3FAE2;--red:#B4381A;--red-bg:#FDE8E3}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:var(--ink);text-underline-offset:3px}
+  :focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+  .page{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+
+  /* Coluna 1: boas-vindas */
+  .hello{position:relative;overflow:hidden;background:var(--ink);color:var(--paper);padding:clamp(28px,4vw,56px);display:flex;flex-direction:column;
+    background-image:radial-gradient(circle at 78% 72%,rgba(114,232,111,.16) 0,transparent 55%),radial-gradient(rgba(255,255,255,.07) 1px,transparent 1px);background-size:100% 100%,18px 18px}
+  .logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--paper);width:max-content}
+  .pill{width:40px;height:22px;border-radius:999px;background:var(--brand);display:flex;align-items:center;justify-content:flex-end;padding:0 4px;flex-shrink:0}
+  .pill i{width:14px;height:14px;border-radius:50%;background:var(--ink)}
+  .logo b{font-weight:800;font-size:23px;letter-spacing:-0.02em}
+  .hello-body{margin:auto 0;padding:48px 0}
+  .tag{display:inline-flex;align-items:center;gap:8px;border:1px solid #2B302D;border-radius:999px;padding:6px 12px 6px 8px;font-size:13px;color:#B4B9B5}
+  .tag span{width:8px;height:8px;border-radius:50%;background:var(--brand);animation:pulse 2s ease-in-out infinite}
+  h1{font-weight:800;font-size:clamp(46px,6vw,84px);line-height:.96;letter-spacing:-0.02em;margin:22px 0 0;text-wrap:balance}
+  h1 em{font-style:normal;color:var(--brand)}
+  .lead{font-size:18px;line-height:1.55;color:#B4B9B5;max-width:42ch;margin:22px 0 0}
+  .cards{position:relative;margin-top:40px;display:grid;gap:12px;max-width:400px}
+  .card{display:flex;align-items:center;gap:12px;background:#141715;border:1px solid #2B302D;border-radius:16px;padding:12px 14px;font-size:14px;animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+  .card:nth-child(2){margin-left:28px;animation-delay:.12s}
+  .card:nth-child(3){margin-left:12px;animation-delay:.24s}
+  .ico{width:34px;height:34px;border-radius:10px;background:var(--brand);color:var(--ink);display:grid;place-items:center;flex-shrink:0}
+  .card small{display:block;color:#8E948F;font-size:12px;margin-top:2px}
+  .card .v{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .sw{margin-left:auto;width:34px;height:19px;border-radius:999px;background:var(--brand);display:flex;align-items:center;justify-content:flex-end;padding:0 3px;flex-shrink:0}
+  .sw i{width:13px;height:13px;border-radius:50%;background:var(--ink)}
+  .hello-foot{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13px;color:#8E948F}
+  .hello-foot span{display:inline-flex;align-items:center;gap:7px}
+
+  /* Coluna 2: formulário */
+  .form-col{display:flex;flex-direction:column;padding:clamp(24px,4vw,56px)}
+  .top{display:flex;justify-content:flex-end}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--muted);text-decoration:none;padding:8px 12px;border-radius:999px;transition:background-color .15s,color .15s}
+  .back:hover{background:var(--mist);color:var(--ink)}
+  .box{width:100%;max-width:420px;margin:auto;padding:32px 0}
+  h2{font-weight:800;font-size:clamp(28px,3vw,36px);letter-spacing:-0.02em;line-height:1.05;margin:0}
+  .sub{color:var(--muted);line-height:1.55;margin:10px 0 28px}
+  form{display:grid;gap:18px}
+  label{display:block;font-size:14px;font-weight:500;margin-bottom:7px}
+  .f{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;background:var(--mist);transition:border-color .15s,background-color .15s,box-shadow .15s}
+  .f:focus-within{border-color:var(--ink);background:var(--paper);box-shadow:0 0 0 3px var(--soft)}
+  .f[aria-invalid="true"]{border-color:var(--red)}
+  .f input{flex:1;min-width:0;min-height:50px;border:0;background:transparent;padding:0 14px;font:inherit;font-size:16px;color:var(--ink);outline:none}
+  .suffix{padding-right:14px;color:var(--muted);font-size:15px;white-space:nowrap;flex-shrink:0}
+  .eye{border:0;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:500;padding:0 14px;min-height:44px;cursor:pointer}
+  .eye:hover{color:var(--ink)}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px;flex-wrap:wrap}
+  .row label{display:inline-flex;align-items:center;gap:8px;margin:0;font-weight:400;color:var(--muted);cursor:pointer}
+  .row input{width:16px;height:16px;accent-color:var(--ink);margin:0}
+  .err{display:none;gap:10px;align-items:flex-start;background:var(--red-bg);color:#8A2E12;border-radius:12px;padding:11px 14px;font-size:14px;line-height:1.45}
+  .err.show{display:flex}
+  .btn{min-height:52px;border-radius:999px;border:0;background:var(--ink);color:var(--paper);font:inherit;font-weight:500;font-size:16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;transition:background-color .15s,transform .15s}
+  .btn:hover{background:#262826}
+  .btn:active{transform:scale(.98)}
+  .btn[disabled]{opacity:.6;cursor:default}
+  .alt{margin-top:28px;padding-top:22px;border-top:1px solid var(--line);font-size:14px;color:var(--muted);line-height:1.55}
+  .hint{font-size:13px;color:var(--muted);margin:7px 0 0;line-height:1.45}
+  [hidden]{display:none!important}
+
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  @media (max-width:900px){
+    .page{grid-template-columns:minmax(0,1fr)}
+    .hello{padding:22px 20px 30px}
+    .hello-body{margin:0;padding:28px 0 0}
+    h1{font-size:clamp(38px,11vw,54px)}
+    .lead{font-size:16px;margin-top:14px}
+    .cards,.hello-foot{display:none}
+    .form-col{padding:8px 20px 32px}
+    .top{display:none}
+    .box{margin:0 auto;padding:28px 0 0}
+  }
+  @media (max-width:360px){.suffix{font-size:13px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <section class="hello" aria-labelledby="hello-t">
+    <a class="logo" href="/" translate="no" aria-label="chatpipe, voltar ao site"><span class="pill" aria-hidden="true"><i></i></span><b>chatpipe</b></a>
+    <div class="hello-body">
+      <span class="tag"><span aria-hidden="true"></span>Sua automação continuou ligada</span>
+      <h1 id="hello-t">Bem-vindo <em>novamente.</em></h1>
+      <p class="lead">Enquanto você esteve fora, suas conversas de WhatsApp e Instagram continuaram virando vendas. Entre para ver o que chegou.</p>
+      <div class="cards" aria-hidden="true">
+        <div class="card">
+          <span class="ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span>
+          <div>Conversas novas na fila<small>WhatsApp e Instagram</small></div><span class="v">12</span>
+        </div>
+        <div class="card">
+          <span class="ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <div>Marina S. foi para Ganho<small>Funil Black Friday</small></div><span class="v">R$ 1.188</span>
+        </div>
+        <div class="card">
+          <span class="ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></span>
+          <div>Fluxo de boas-vindas<small>Respondeu 38 leads hoje</small></div><span class="sw"><i></i></span>
+        </div>
+      </div>
+    </div>
+    <div class="hello-foot">
+      <span><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#72E86F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>API oficial da Meta</span>
+      <span><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#72E86F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Acesso protegido</span>
+    </div>
+  </section>
+
+  <section class="form-col" aria-labelledby="form-t">
+    <div class="top"><a class="back" href="/"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>Voltar ao site</a></div>
+    <div class="box">
+      <!-- Passo 1: login -->
+      <div id="step-login">
+        <h2 id="form-t">Entrar na sua conta</h2>
+        <p class="sub">Use o e-mail e a senha do chatpipe da sua empresa.</p>
+        <form id="login" novalidate>
+          <div>
+            <label for="slug">Endereço da empresa</label>
+            <div class="f" id="f-slug"><input id="slug" name="slug" autocomplete="organization" autocapitalize="none" spellcheck="false" placeholder="suaempresa" required><span class="suffix">.chatpipe.com.br</span></div>
+            <p class="hint">Está no e-mail de boas-vindas que você recebeu.</p>
+          </div>
+          <div>
+            <label for="email">E-mail</label>
+            <div class="f" id="f-email"><input id="email" name="email" type="email" autocomplete="username" inputmode="email" spellcheck="false" placeholder="voce@empresa.com.br" required></div>
+          </div>
+          <div>
+            <label for="password">Senha</label>
+            <div class="f" id="f-password"><input id="password" name="password" type="password" autocomplete="current-password" required><button type="button" class="eye" data-eye="password" aria-controls="password" aria-pressed="false">Mostrar</button></div>
+          </div>
+          <div class="row">
+            <label><input type="checkbox" id="remember" checked>Lembrar empresa e e-mail</label>
+            <a href="https://wa.me/554431010272?text=Ol%C3%A1!%20Esqueci%20minha%20senha%20do%20chatpipe." target="_blank" rel="noopener">Esqueci minha senha</a>
+          </div>
+          <div class="err" id="err" role="alert"></div>
+          <button class="btn" type="submit" id="go">Entrar <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+        </form>
+        <p class="alt">Ainda não usa o chatpipe? <a href="/#contato">Agende uma demonstração</a>.</p>
+      </div>
+
+      <!-- Passo 2: primeiro acesso, criar a senha própria -->
+      <div id="step-new" hidden>
+        <h2>Crie sua senha</h2>
+        <p class="sub">É o seu primeiro acesso. Troque a senha provisória por uma só sua.</p>
+        <form id="newpass" novalidate>
+          <div>
+            <label for="np1">Nova senha</label>
+            <div class="f"><input id="np1" type="password" autocomplete="new-password" minlength="8" required><button type="button" class="eye" data-eye="np1" aria-controls="np1" aria-pressed="false">Mostrar</button></div>
+            <p class="hint">Pelo menos 8 caracteres.</p>
+          </div>
+          <div>
+            <label for="np2">Repita a nova senha</label>
+            <div class="f"><input id="np2" type="password" autocomplete="new-password" minlength="8" required></div>
+          </div>
+          <div class="err" id="err2" role="alert"></div>
+          <button class="btn" type="submit" id="go2">Salvar e entrar</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var KEY = 'chatpipe:login';
+  var SLUG_RE = /^[a-z0-9][a-z0-9-]{1,29}$/;
+  var $ = function (id) { return document.getElementById(id); };
+  var slugIn = $('slug'), emailIn = $('email'), passIn = $('password');
+  var base = null, currentPassword = '';
+
+  function cleanSlug(v) {
+    return String(v || '').trim().toLowerCase()
+      .replace(/^https?:\/\//, '').replace(/\.chatpipe\.com\.br.*$/, '').replace(/\/.*$/, '');
+  }
+  function show(el, msg) { el.textContent = msg; el.classList.add('show'); }
+  function hide(el) { el.classList.remove('show'); }
+  function busy(btn, on, label) { btn.disabled = on; if (label) btn.firstChild.textContent = label; }
+  function api(path, body) {
+    return fetch(base + path, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (data) { return { ok: r.ok, status: r.status, data: data }; });
+    });
+  }
+  function enter() { location.href = base + '/'; }
+
+  // Lembra empresa e e-mail (nunca a senha). ?empresa=iasg também preenche.
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (saved && SLUG_RE.test(saved.slug || '')) { slugIn.value = saved.slug; emailIn.value = saved.email || ''; }
+  } catch (e) {}
+  var q = new URLSearchParams(location.search).get('empresa');
+  if (q && SLUG_RE.test(cleanSlug(q))) slugIn.value = cleanSlug(q);
+  (slugIn.value ? (emailIn.value ? passIn : emailIn) : slugIn).focus();
+
+  document.querySelectorAll('[data-eye]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var i = $(b.getAttribute('data-eye')); var on = i.type === 'password';
+      i.type = on ? 'text' : 'password'; b.textContent = on ? 'Ocultar' : 'Mostrar'; b.setAttribute('aria-pressed', String(on));
+    });
+  });
+  ['slug', 'email', 'password'].forEach(function (k) {
+    $(k).addEventListener('input', function () { $('f-' + k).removeAttribute('aria-invalid'); hide($('err')); });
+  });
+
+  $('login').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var err = $('err'); hide(err);
+    var slug = cleanSlug(slugIn.value), email = emailIn.value.trim(), pass = passIn.value;
+    if (!SLUG_RE.test(slug)) { $('f-slug').setAttribute('aria-invalid', 'true'); slugIn.focus(); return show(err, 'Confira o endereço da empresa: só letras minúsculas, números e hífen.'); }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('f-email').setAttribute('aria-invalid', 'true'); emailIn.focus(); return show(err, 'Digite um e-mail válido.'); }
+    if (!pass) { $('f-password').setAttribute('aria-invalid', 'true'); passIn.focus(); return show(err, 'Digite a sua senha.'); }
+
+    base = 'https://' + slug + '.chatpipe.com.br';
+    var btn = $('go'); busy(btn, true, 'Entrando… ');
+    api('/api/auth/login', { email: email, password: pass }).then(function (r) {
+      if (!r.ok) {
+        busy(btn, false, 'Entrar ');
+        passIn.value = ''; passIn.focus();
+        return show(err, (r.data && r.data.error && r.data.error.message) || 'Não foi possível entrar. Tente de novo.');
+      }
+      try {
+        if ($('remember').checked) localStorage.setItem(KEY, JSON.stringify({ slug: slug, email: email }));
+        else localStorage.removeItem(KEY);
+      } catch (e2) {}
+      if (r.data.user && r.data.user.mustChangePassword) {
+        currentPassword = pass;
+        $('step-login').hidden = true; $('step-new').hidden = false; $('np1').focus();
+        return;
+      }
+      enter();
+    }).catch(function () {
+      busy(btn, false, 'Entrar ');
+      $('f-slug').setAttribute('aria-invalid', 'true');
+      show(err, 'Não encontramos a empresa "' + slug + '". Confira o endereço ou fale com a gente.');
+    });
+  });
+
+  $('newpass').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var err = $('err2'); hide(err);
+    var p1 = $('np1').value, p2 = $('np2').value;
+    if (p1.length < 8) return show(err, 'A nova senha precisa ter pelo menos 8 caracteres.');
+    if (p1 !== p2) return show(err, 'As duas senhas não são iguais.');
+    var btn = $('go2'); busy(btn, true, 'Salvando…');
+    api('/api/auth/change-password', { currentPassword: currentPassword, newPassword: p1 }).then(function (r) {
+      if (!r.ok) { busy(btn, false, 'Salvar e entrar'); return show(err, (r.data && r.data.error && r.data.error.message) || 'Não foi possível salvar a senha.'); }
+      enter();
+    }).catch(function () { busy(btn, false, 'Salvar e entrar'); show(err, 'Falha de conexão. Tente de novo.'); });
+  });
+})();
+</script>
+</body>
+</html>

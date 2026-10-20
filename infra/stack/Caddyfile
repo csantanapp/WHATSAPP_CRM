@@ -2,14 +2,15 @@
 	email suporte@tractom.com.br
 }
 
-# Site de vendas (infra/site do repositório). /entrar leva o cliente ao
-# endereço da empresa dele (<cliente>.chatpipe.com.br).
+# Site de vendas (infra/site do repositório). /login entra direto na
+# instalação da empresa (<cliente>.chatpipe.com.br).
 www.chatpipe.com.br {
 	redir https://chatpipe.com.br{uri} permanent
 }
 
 chatpipe.com.br {
 	root * /srv/site
+	redir /entrar /login permanent
 	encode zstd gzip
 	try_files {path} {path}.html
 	header {
@@ -17,7 +18,7 @@ chatpipe.com.br {
 		Referrer-Policy strict-origin-when-cross-origin
 		-Server
 	}
-	@html path / /index.html /entrar /entrar.html
+	@html path / /index.html /login /login.html
 	header @html Cache-Control "no-cache"
 	file_server
 }
