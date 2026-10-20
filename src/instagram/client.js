@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { getInstagramToken } from './token.js';
 
 const GRAPH_VERSION = 'v21.0';
 
@@ -16,9 +17,9 @@ function igApiUrl(path) {
 // tela "Instagram API com login do Instagram" do app, não um token de
 // Página) e o ID numérico dessa conta (INSTAGRAM_PAGE_ID).
 export async function sendInstagramMessage(igsid, text) {
-  const igToken = process.env.INSTAGRAM_PAGE_ACCESS_TOKEN;
+  const igToken = await getInstagramToken();
   const igBusinessId = process.env.INSTAGRAM_PAGE_ID;
-  if (!igToken) throw new Error('INSTAGRAM_PAGE_ACCESS_TOKEN não configurado');
+  if (!igToken) throw new Error('Token do Instagram não configurado');
   if (!igBusinessId) throw new Error('INSTAGRAM_PAGE_ID não configurado');
 
   const res = await fetch(igApiUrl(`${igBusinessId}/messages`), {
@@ -38,7 +39,7 @@ export async function sendInstagramMessage(igsid, text) {
 
 // "Digitando..." no Instagram DM (sender_action da mesma Messaging API).
 export async function sendInstagramTyping(igsid) {
-  const igToken = process.env.INSTAGRAM_PAGE_ACCESS_TOKEN;
+  const igToken = await getInstagramToken();
   const igBusinessId = process.env.INSTAGRAM_PAGE_ID;
   if (!igToken || !igBusinessId) return null;
   const res = await fetch(igApiUrl(`${igBusinessId}/messages`), {
@@ -57,7 +58,7 @@ export async function sendInstagramTyping(igsid) {
 // perfil junto (diferente do WhatsApp), então enriquecemos num passo à parte,
 // melhor esforço (nunca derruba o processamento da mensagem se falhar).
 export async function getInstagramProfile(igsid) {
-  const igToken = process.env.INSTAGRAM_PAGE_ACCESS_TOKEN;
+  const igToken = await getInstagramToken();
   if (!igToken) return null;
   try {
     const res = await fetch(igApiUrl(`${igsid}?fields=name,username,profile_pic`), {
@@ -75,7 +76,7 @@ export async function getInstagramProfile(igsid) {
 // WhatsApp, usada na tela de Conexões. No fluxo "login do Instagram" não há
 // Página pra consultar: validamos o token direto perguntando "quem sou eu".
 export async function checkInstagramConnectionStatus() {
-  const igToken = process.env.INSTAGRAM_PAGE_ACCESS_TOKEN;
+  const igToken = await getInstagramToken();
   const igBusinessId = process.env.INSTAGRAM_PAGE_ID;
 
   if (!igToken || !igBusinessId) {
