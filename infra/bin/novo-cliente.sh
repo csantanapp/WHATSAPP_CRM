@@ -73,7 +73,11 @@ $SLUG.$DOMAIN {
 	reverse_proxy chatpipe-$SLUG:3000
 }
 CADDY
-docker exec chatpipe-caddy caddy reload --config /etc/caddy/Caddyfile
+if docker ps --format '{{.Names}}' | grep -qx chatpipe-caddy; then
+  docker exec chatpipe-caddy caddy reload --config /etc/caddy/Caddyfile
+else
+  echo "   (Caddy ainda não está no ar — o endereço passa a responder quando ele subir)"
+fi
 
 VERIFY=$(grep ^WHATSAPP_VERIFY_TOKEN "$DIR/.env" | cut -d= -f2)
 cat <<INFO
