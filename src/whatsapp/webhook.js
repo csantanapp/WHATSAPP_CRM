@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { wa } from './credentials.js';
 import { query } from '../db/pool.js';
 import crypto from 'node:crypto';
 import { findOrCreateContactByWaId } from '../repositories/contacts.js';
@@ -31,14 +32,14 @@ webhookRouter.get('/', (req, res) => {
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
-  if (mode === 'subscribe' && token === process.env.WHATSAPP_VERIFY_TOKEN) {
+  if (mode === 'subscribe' && token === wa().verifyToken) {
     return res.status(200).send(challenge);
   }
   return res.sendStatus(403);
 });
 
 function isValidSignature(req) {
-  const appSecret = process.env.WHATSAPP_APP_SECRET;
+  const appSecret = wa().appSecret;
   // Fallback só fora de produção (dev local, sem secret configurado ainda).
   // Em produção o boot já recusa subir sem WHATSAPP_APP_SECRET (ver server.js),
   // mas blindamos aqui também — nunca aceitar sem assinatura quando NODE_ENV=production.

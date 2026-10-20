@@ -18,7 +18,7 @@
       <div class="card card-padded">
         <div style="text-align:center;margin-bottom:var(--space-6);">
           <h1 class="ds-h1" style="font-family:var(--font-display);letter-spacing:-0.02em;">chattrack</h1>
-          <p class="ds-muted" style="margin-top:4px;">Entre com seu e-mail e senha</p>
+          <p class="ds-muted" style="margin-top:4px;" id="login-subtitle">Entre com seu e-mail e senha</p>
         </div>
 
         <div id="login-error" class="ds-auth-error"></div>
@@ -34,6 +34,19 @@
           </div>
           <button type="submit" class="btn btn-primary btn-block" id="login-submit">Entrar</button>
         </form>
+
+        <form id="change-form" hidden style="flex-direction:column;flex-direction:column;gap:var(--space-4);">
+          <div class="field">
+            <label class="label" for="new-password">Nova senha</label>
+            <input class="input" id="new-password" type="password" autocomplete="new-password" minlength="8" required />
+            <span class="ds-muted" style="font-size:var(--font-size-sm);">Pelo menos 8 caracteres. Não use a senha provisória.</span>
+          </div>
+          <div class="field">
+            <label class="label" for="new-password-2">Repita a nova senha</label>
+            <input class="input" id="new-password-2" type="password" autocomplete="new-password" minlength="8" required />
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="change-submit">Salvar e entrar</button>
+        </form>
       </div>
     </div>
   </div>
@@ -42,6 +55,61 @@
     const form = document.getElementById('login-form');
     const errorBox = document.getElementById('login-error');
     const submitBtn = document.getElementById('login-submit');
+
+    const changeForm = document.getElementById('change-form');
+    const changeBtn = document.getElementById('change-submit');
+    let currentPassword = '';
+
+    // Só caminhos do próprio sistema ("/..."), nunca outro site ("//site", "https:").
+    function goNext() {
+      const next = new URLSearchParams(window.location.search).get('next') || '/';
+      window.location.href = /^\/(?![\/\\])/.test(next) ? next : '/';
+    }
+
+    // Primeiro acesso com senha provisória: cria a senha própria antes de entrar.
+    function showChangeForm() {
+      errorBox.classList.remove('show');
+      form.style.display = 'none';
+      changeForm.hidden = false;
+      changeForm.style.display = 'flex';
+      document.getElementById('login-subtitle').textContent = 'Primeiro acesso: crie sua senha';
+      document.getElementById('new-password').focus();
+    }
+
+    changeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBox.classList.remove('show');
+      const p1 = document.getElementById('new-password').value;
+      const p2 = document.getElementById('new-password-2').value;
+      if (p1.length < 8) return showError('A nova senha precisa ter pelo menos 8 caracteres.');
+      if (p1 !== p2) return showError('As duas senhas não são iguais.');
+      if (!currentPassword) {
+        // Chegou aqui já logado (sessão com senha provisória): volta pro login normal.
+        window.location.href = '/login.html';
+        return;
+      }
+      changeBtn.disabled = true;
+      changeBtn.textContent = 'Salvando...';
+      try {
+        const res = await fetch('/api/auth/change-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentPassword, newPassword: p1 }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          showError(data.error?.message || 'Não foi possível salvar a senha.');
+          changeBtn.disabled = false;
+          changeBtn.textContent = 'Salvar e entrar';
+          return;
+        }
+        goNext();
+      } catch (err) {
+        showError('Falha de conexão. Tente de novo.');
+        changeBtn.disabled = false;
+        changeBtn.textContent = 'Salvar e entrar';
+      }
+    });
 
     function showError(message) {
       errorBox.textContent = message;
@@ -72,8 +140,11 @@
           return;
         }
 
-        const params = new URLSearchParams(window.location.search);
-        window.location.href = params.get('next') || '/';
+        if (data.user?.mustChangePassword) {
+          currentPassword = password;
+          return showChangeForm();
+        }
+        goNext();
       } catch (err) {
         showError('Falha de conexão. Tente de novo.');
         submitBtn.disabled = false;

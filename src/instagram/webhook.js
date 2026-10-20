@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { wa } from '../whatsapp/credentials.js';
 import crypto from 'node:crypto';
 import { query } from '../db/pool.js';
 import { findOrCreateContactByIgUserId } from '../repositories/contacts.js';
@@ -32,7 +33,7 @@ function isValidSignature(req) {
   // Mesmo app secret do WhatsApp por padrão — na prática é o mesmo app da
   // Meta assinando os dois produtos, a menos que INSTAGRAM_APP_SECRET seja
   // configurado separadamente (app diferente).
-  const appSecret = process.env.INSTAGRAM_APP_SECRET || process.env.WHATSAPP_APP_SECRET;
+  const appSecret = process.env.INSTAGRAM_APP_SECRET || wa().appSecret;
   if (!appSecret) return process.env.NODE_ENV !== 'production';
   const signature = req.get('x-hub-signature-256');
   if (!signature) return false;

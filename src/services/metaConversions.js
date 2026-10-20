@@ -1,4 +1,5 @@
 import { query } from '../db/pool.js';
+import { wa } from '../whatsapp/credentials.js';
 import { getSetting, setSetting } from '../repositories/settings.js';
 import { logger } from '../logger.js';
 
@@ -25,8 +26,8 @@ export async function getConversionsConfig() {
   return {
     enabled: (await getSetting('capi_enabled')) === 'true',
     datasetId: (await getSetting('capi_dataset_id')) || null,
-    wabaId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID || null,
-    hasToken: Boolean(process.env.WHATSAPP_ACCESS_TOKEN),
+    wabaId: wa().wabaId || null,
+    hasToken: Boolean(wa().accessToken),
   };
 }
 
@@ -40,10 +41,10 @@ export async function updateConversionsConfig({ enabled, datasetId }) {
 // devolve o id (e é idempotente — repetir devolve o mesmo).
 export async function ensureDataset() {
   const { wabaId } = await getConversionsConfig();
-  if (!wabaId || !process.env.WHATSAPP_ACCESS_TOKEN) throw new Error('WhatsApp não configurado (WABA ou token ausente)');
+  if (!wabaId || !wa().accessToken) throw new Error('WhatsApp não configurado (WABA ou token ausente)');
   const res = await fetch(`${GRAPH}/${wabaId}/dataset`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}` },
+    headers: { Authorization: `Bearer ${wa().accessToken}` },
     signal: AbortSignal.timeout(10000),
   });
   const data = await res.json();
@@ -124,7 +125,7 @@ export async function emitConversion({ conversationId, eventName, value = null, 
     try {
       const res = await fetch(`${GRAPH}/${config.datasetId}/events`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${wa().accessToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(buildEventPayload({
           eventName,
           eventTime: Math.floor(Date.now() / 1000),

@@ -66,7 +66,7 @@ export async function updateUser(tenantId, id, { name, role, status }) {
 export async function setUserPassword(tenantId, id, newPassword) {
   const passwordHash = await hashPassword(newPassword);
   const result = await query(
-    `UPDATE users SET password_hash = $3, updated_at = now()
+    `UPDATE users SET password_hash = $3, must_change_password = false, updated_at = now()
      WHERE tenant_id = $1 AND id = $2 RETURNING ${SAFE_COLUMNS}`,
     [tenantId, id, passwordHash]
   );

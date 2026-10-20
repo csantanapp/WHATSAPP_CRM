@@ -10,6 +10,12 @@
         return;
       }
       const { user } = await res.json();
+      if (user.mustChangePassword) {
+        // Senha provisória: a API recusa tudo até criar a senha nova — volta pro login.
+        await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+        window.location.href = '/login.html';
+        return;
+      }
       window.__currentUser = user;
       document.dispatchEvent(new CustomEvent('ct:user', { detail: user }));
       const nameEl = document.getElementById('ds-user-name');

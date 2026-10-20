@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import http from 'node:http';
 import { createApp } from './app.js';
+import { loadWhatsAppCredentials } from './whatsapp/credentials.js';
 import { attachRealtime, closeRealtime } from './realtime.js';
 import { logger } from './logger.js';
 import { assertProductionSecrets } from './startupChecks.js';
@@ -13,6 +14,7 @@ try {
   process.exit(1);
 }
 
+await loadWhatsAppCredentials(); // credenciais salvas pela tela Conexões (se houver)
 const app = createApp();
 const server = http.createServer(app);
 attachRealtime(server);

@@ -11,7 +11,7 @@ import { usersRouter } from './routes/users.js';
 import { securityHeaders, webhookRateLimit, apiRateLimit } from './middleware/security.js';
 import { logger, requestLogger } from './logger.js';
 import { createSessionMiddleware } from './auth/session.js';
-import { requireAuth, verifyOrigin } from './middleware/auth.js';
+import { requireAuth, requirePasswordChanged, verifyOrigin } from './middleware/auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -74,7 +74,7 @@ export function createApp() {
 
   app.use('/api/auth', apiRateLimit, authRouter);
   app.use('/api/users', apiRateLimit, usersRouter);
-  app.use('/api', apiRateLimit, requireAuth, apiRouter);
+  app.use('/api', apiRateLimit, requireAuth, requirePasswordChanged, apiRouter);
   // Nome do produto por instalação (BRAND_NAME): as instalações de clientes
   // mostram "chatpipe"; sem a variável, fica "chattrack". Só nas páginas HTML.
   app.use(brandedHtml(path.join(__dirname, '..', 'public')));

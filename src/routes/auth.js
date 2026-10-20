@@ -55,6 +55,7 @@ authRouter.post('/login', loginRateLimit, async (req, res) => {
     email: user.email,
     role: user.role,
     isPlatformAdmin: user.is_platform_admin,
+    mustChangePassword: Boolean(user.must_change_password),
   };
   await touchLastLogin(user.id);
   await logAudit({ tenantId: user.tenant_id, userId: user.id, action: 'LOGIN', ip: req.ip });
@@ -94,7 +95,12 @@ authRouter.post('/change-password', requireAuth, async (req, res) => {
     return res.status(400).json({ error: { code: 'wrong_password', message: 'Senha atual incorreta.' } });
   }
 
+  if (newPassword === currentPassword) {
+    return res.status(400).json({ error: { code: 'same_password', message: 'A nova senha precisa ser diferente da atual.' } });
+  }
+
   await setUserPassword(req.tenantId, req.user.id, newPassword);
+  if (req.session.user.mustChangePassword) req.session.user = { ...req.session.user, mustChangePassword: false };
   await logAudit({ tenantId: req.tenantId, userId: req.user.id, action: 'PASSWORD_CHANGED' });
   res.json({ ok: true });
 });

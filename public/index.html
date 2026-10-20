@@ -6541,6 +6541,8 @@ hydrateIcons(document);
     }
     try { agents = await api('/ai-agents'); } catch (e) { agents = []; }
     try { rule = await api('/distribution-rule'); } catch (e) { rule = null; }
+    var creds = null;
+    if (intIsAdmin()) { try { creds = await api('/settings/whatsapp-credentials'); } catch (e) { creds = null; } }
 
     var badge, badgeColor, badgeBg;
     if (status.connected) { badge = 'Conectado'; badgeColor = '#157A3A'; badgeBg = '#E8F3EC'; }
@@ -6562,7 +6564,7 @@ hydrateIcons(document);
     var phoneNumber = status.phoneNumber || status.manualPhoneNumber || 'Não configurado';
     var verifiedLine = status.connected
       ? 'Nome verificado: ' + escapeHtml(status.verifiedName || '--')
-      : escapeHtml(status.message || 'Preencha as credenciais da Meta no servidor para conectar.');
+      : escapeHtml(status.message || 'WhatsApp ainda não conectado — configure em Conexões.');
 
     card.innerHTML =
       '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">' +
@@ -6581,6 +6583,7 @@ hydrateIcons(document);
       (!activeAgents.length ? '<button id="conexoes-config-ia-btn" style="margin-top:4px;background:#FFFFFF;border:1px solid #E3E3DC;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:#3e4046;cursor:pointer;">Configurar acesso da IA</button>' : '') +
 
       '<div style="font-size:12px;color:#5B5D63;margin-top:14px;padding-top:14px;border-top:1px solid #EEEEE8;">' + distribuicaoText + '</div>' +
+      (creds ? waCredentialsHtml(creds, status) : '') +
 
       '<div style="display:flex;align-items:center;gap:8px;margin-top:16px;flex-wrap:wrap;">' +
         '<button id="conexoes-reconectar-btn" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;border:1px solid #E3E3DC;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;color:#3e4046;cursor:pointer;">' +
@@ -6603,6 +6606,16 @@ hydrateIcons(document);
       '</div>';
 
     document.getElementById('conexoes-reconectar-btn').addEventListener('click', loadConexoes);
+    var credBtn = document.getElementById('conexoes-cred-btn');
+    if (credBtn) credBtn.addEventListener('click', function () { openWhatsAppCredentialsForm(creds); });
+    card.querySelectorAll('[data-copy]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var v = b.getAttribute('data-copy');
+        (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(function () {
+          var old = b.textContent; b.textContent = 'Copiado'; setTimeout(function () { b.textContent = old; }, 1400);
+        }, function () { ctAlert({ title: 'Copie manualmente', message: v }); });
+      });
+    });
     var configIaBtn = document.getElementById('conexoes-config-ia-btn');
     if (configIaBtn) {
       configIaBtn.addEventListener('click', function () {
@@ -6617,9 +6630,75 @@ hydrateIcons(document);
   }
 
   document.getElementById('conexoes-refresh-btn').addEventListener('click', loadConexoes);
-  document.getElementById('conexoes-novo-btn').addEventListener('click', function () {
-    ctAlert({ title: 'Conectar outro número', message: 'Hoje o CRM se conecta a 1 número oficial do WhatsApp por vez, configurado pelo servidor (variáveis WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_ACCESS_TOKEN e WHATSAPP_BUSINESS_ACCOUNT_ID). Pra conectar um segundo número, fale com quem administra o servidor — não é algo que dá pra fazer por aqui ainda.' });
+  document.getElementById('conexoes-novo-btn').addEventListener('click', async function () {
+    if (!intIsAdmin()) {
+      return ctAlert({ title: 'Só o administrador', message: 'Quem conecta o WhatsApp é o administrador da conta. Peça a ele pra fazer em Conexões.' });
+    }
+    var creds = null;
+    try { creds = await api('/settings/whatsapp-credentials'); } catch (e) { creds = null; }
+    openWhatsAppCredentialsForm(creds);
   });
+
+  // Credenciais do app da Meta: o token e a chave secreta nunca voltam pra tela,
+  // só a informação de que já existem (campo vazio = mantém o que está salvo).
+  function waCredentialsHtml(c, status) {
+    var row = function (label, value) {
+      return '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;">' +
+        '<span style="font-size:12px;color:#5B5D63;min-width:150px;">' + label + '</span>' +
+        '<code class="ct-mono" style="font-size:12px;background:var(--surface-muted);border-radius:7px;padding:5px 9px;color:var(--ink);word-break:break-all;">' + escapeHtml(value || '—') + '</code>' +
+        (value ? '<button type="button" class="ct-btn ct-btn-secondary" style="height:28px;padding:0 10px;font-size:12px;" data-copy="' + escapeHtml(value) + '">Copiar</button>' : '') +
+      '</div>';
+    };
+    var ready = c.phone_number_id && c.has_access_token && c.has_app_secret;
+    return '<div style="margin-top:14px;padding-top:14px;border-top:1px solid #EEEEE8;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">' +
+        '<div style="font-size:13px;font-weight:600;color:var(--ink);">App da Meta</div>' +
+        '<button type="button" id="conexoes-cred-btn" class="ct-btn ' + (ready ? 'ct-btn-secondary' : 'ct-btn-primary') + '" style="height:32px;font-size:12.5px;">' + (ready ? 'Trocar credenciais' : 'Conectar WhatsApp') + '</button>' +
+      '</div>' +
+      '<div style="font-size:12px;color:#5B5D63;margin-top:4px;">' + (ready
+        ? 'Credenciais salvas' + (c.source === 'env' ? ' no servidor.' : ' por aqui (guardadas criptografadas).') + (status.connected ? '' : ' A Meta recusou — confira o token e o ID do número.')
+        : 'Cole as credenciais do app da Meta da empresa. No painel do app, em WhatsApp → Configuração, use o endereço e o token abaixo no Webhook e assine o campo “messages”.') + '</div>' +
+      row('URL do webhook', c.webhook_url) +
+      row('Token de verificação', c.verify_token) +
+      row('ID do número', c.phone_number_id) +
+      row('ID da conta (WABA)', c.waba_id) +
+    '</div>';
+  }
+
+  function openWhatsAppCredentialsForm(c) {
+    c = c || {};
+    return ctForm({
+      title: c.has_access_token ? 'Trocar credenciais do WhatsApp' : 'Conectar WhatsApp',
+      description: 'Tudo está no painel do app em developers.facebook.com. O token e a chave secreta ficam guardados criptografados e não aparecem de novo.',
+      icon: 'link',
+      submitLabel: 'Salvar e testar',
+      fields: [
+        { name: 'phone_number_id', label: 'ID do número de telefone', value: c.phone_number_id || '', required: true, placeholder: 'ex: 123456789012345', help: 'WhatsApp → Configuração da API → “Identificação do número de telefone”.' },
+        { name: 'waba_id', label: 'ID da conta do WhatsApp Business', value: c.waba_id || '', placeholder: 'ex: 109876543210987', help: 'Na mesma tela. Usado pros modelos de mensagem e pra inscrever o app.' },
+        { name: 'access_token', label: 'Token de acesso permanente', type: 'password', required: !c.has_access_token, placeholder: c.has_access_token ? 'Deixe vazio pra manter o atual' : 'EAA...', help: 'Gere em Configurações do negócio → Usuários do sistema (o token temporário da tela de API expira em 24h).' },
+        { name: 'app_secret', label: 'Chave secreta do app', type: 'password', required: !c.has_app_secret, placeholder: c.has_app_secret ? 'Deixe vazio pra manter a atual' : '32 caracteres', help: 'Configurações do app → Básico → Chave secreta do app. Garante que as mensagens vêm mesmo da Meta.' },
+      ],
+      validate: function (v) {
+        if (!/^\d{6,25}$/.test(v.phone_number_id.replace(/\s/g, ''))) return 'O ID do número tem só números.';
+        if (v.waba_id && !/^\d{6,25}$/.test(v.waba_id.replace(/\s/g, ''))) return 'O ID da conta do WhatsApp Business tem só números.';
+      },
+      onSubmit: async function (v) {
+        var r = await api('/settings/whatsapp-credentials', { method: 'PUT', body: JSON.stringify({
+          phone_number_id: v.phone_number_id.replace(/\s/g, ''), waba_id: v.waba_id.replace(/\s/g, ''),
+          access_token: v.access_token, app_secret: v.app_secret,
+        }) });
+        loadConexoes();
+        var ok = r.status && r.status.connected;
+        ctAlert({
+          title: ok ? 'WhatsApp conectado' : 'Salvo, mas a Meta não confirmou',
+          tone: ok ? 'success' : 'error',
+          message: ok
+            ? 'Número ' + (r.status.phoneNumber || '') + ' (' + (r.status.verifiedName || '') + ') pronto pra enviar.' + (r.subscription && r.subscription.ok ? '\nO app também foi inscrito pra receber as mensagens.' : (v.waba_id ? '\nNão consegui inscrever o app pra receber mensagens: ' + ((r.subscription && r.subscription.message) || '') : '')) + '\nFalta só cadastrar o webhook no painel da Meta com o endereço e o token mostrados em Conexões.'
+            : ((r.status && r.status.message) || 'Confira o token e o ID do número.'),
+        });
+      },
+    });
+  }
 
 
   // ── Integrações (Google Sheets, ChatGPT, Claude) ──

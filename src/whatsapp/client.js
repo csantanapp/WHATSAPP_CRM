@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { wa } from './credentials.js';
 
 const GRAPH_VERSION = 'v21.0';
 
@@ -10,7 +11,7 @@ async function callGraphApi(path, body) {
   const res = await fetch(apiUrl(path), {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
+      Authorization: `Bearer ${wa().accessToken}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
@@ -25,7 +26,7 @@ async function callGraphApi(path, body) {
 }
 
 export async function sendTextMessage(toWaId, text) {
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const phoneNumberId = wa().phoneNumberId;
   return callGraphApi(`${phoneNumberId}/messages`, {
     messaging_product: 'whatsapp',
     to: toWaId,
@@ -39,8 +40,8 @@ export async function sendTextMessage(toWaId, text) {
 // vazia (em vez de lançar) se a conta ainda não tiver WABA/token configurado,
 // pra não quebrar a tela de templates antes da conexão real estar pronta.
 export async function listMessageTemplates() {
-  const wabaId = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
-  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+  const wabaId = wa().wabaId;
+  const token = wa().accessToken;
   if (!wabaId || !token) return [];
 
   const res = await fetch(apiUrl(`${wabaId}/message_templates?fields=name,language,status,category,components&limit=100`), {
@@ -54,7 +55,7 @@ export async function listMessageTemplates() {
 }
 
 export async function sendTemplateMessage(toWaId, { name, language, components }) {
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const phoneNumberId = wa().phoneNumberId;
   return callGraphApi(`${phoneNumberId}/messages`, {
     messaging_product: 'whatsapp',
     to: toWaId,
@@ -68,7 +69,7 @@ export async function sendTemplateMessage(toWaId, { name, language, components }
 }
 
 export async function markMessageAsRead(waMessageId) {
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const phoneNumberId = wa().phoneNumberId;
   return callGraphApi(`${phoneNumberId}/messages`, {
     messaging_product: 'whatsapp',
     status: 'read',
@@ -80,7 +81,7 @@ export async function markMessageAsRead(waMessageId) {
 // em até 25s). A Meta exige o id de uma mensagem recebida do contato e, no
 // mesmo comando, marca essa mensagem como lida.
 export async function sendTypingIndicator(waMessageId) {
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const phoneNumberId = wa().phoneNumberId;
   return callGraphApi(`${phoneNumberId}/messages`, {
     messaging_product: 'whatsapp',
     status: 'read',
@@ -92,11 +93,11 @@ export async function sendTypingIndicator(waMessageId) {
 // Faz uma chamada de leitura simples (GET) contra o número configurado, só pra
 // confirmar que o token/phone_number_id são válidos — usado na tela de Configurações.
 export async function checkConnectionStatus() {
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+  const phoneNumberId = wa().phoneNumberId;
+  const token = wa().accessToken;
 
   if (!phoneNumberId || !token) {
-    return { configured: false, connected: false, message: 'Credenciais não configuradas no .env' };
+    return { configured: false, connected: false, message: 'WhatsApp ainda não conectado — configure em Conexões.' };
   }
 
   try {
@@ -123,7 +124,7 @@ export async function checkConnectionStatus() {
 // 1) Pega a URL temporária (expira em minutos) + mime type de um media_id recebido.
 // 2) Baixa os bytes de verdade com o token de acesso (a URL sozinha não é pública).
 export async function downloadMedia(mediaId) {
-  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+  const token = wa().accessToken;
   const metaRes = await fetch(apiUrl(mediaId), {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -140,8 +141,8 @@ export async function downloadMedia(mediaId) {
 // Envia o arquivo (multipart/form-data) pra Meta antes de poder mandar como
 // mensagem — a API exige um media_id próprio dela, não aceita bytes direto.
 export async function uploadMedia(buffer, mimeType, filename) {
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+  const phoneNumberId = wa().phoneNumberId;
+  const token = wa().accessToken;
 
   const form = new FormData();
   form.append('messaging_product', 'whatsapp');
@@ -158,7 +159,7 @@ export async function uploadMedia(buffer, mimeType, filename) {
 }
 
 export async function sendMediaMessage(toWaId, mediaId, type, caption) {
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const phoneNumberId = wa().phoneNumberId;
   const body = {
     messaging_product: 'whatsapp',
     to: toWaId,
@@ -171,7 +172,7 @@ export async function sendMediaMessage(toWaId, mediaId, type, caption) {
 // Mensagem interativa com até 3 botões de resposta rápida (nó "Perguntar" do
 // formulário em conversa). A Meta corta título de botão em 20 caracteres.
 export async function sendButtonsMessage(toWaId, text, options) {
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const phoneNumberId = wa().phoneNumberId;
   return callGraphApi(`${phoneNumberId}/messages`, {
     messaging_product: 'whatsapp',
     to: toWaId,
@@ -192,7 +193,7 @@ export async function sendButtonsMessage(toWaId, text, options) {
 // Mensagem interativa em formato de lista (até 10 opções) — o lead toca no
 // botão `buttonLabel` e escolhe uma linha. Título de linha: até 24 caracteres.
 export async function sendListMessage(toWaId, text, buttonLabel, options) {
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const phoneNumberId = wa().phoneNumberId;
   return callGraphApi(`${phoneNumberId}/messages`, {
     messaging_product: 'whatsapp',
     to: toWaId,

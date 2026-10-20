@@ -64,7 +64,7 @@ echo "== subindo a instância"
 sleep 3
 docker exec "chatpipe-$SLUG" node src/db/migrate.js
 docker exec -e ADMIN_EMAIL="$AGENCY_EMAIL" -e ADMIN_PASSWORD="$AGENCY_PASS" -e ADMIN_NAME="Suporte Tractom" "chatpipe-$SLUG" node src/db/seedAdmin.js >/dev/null
-docker exec -e ADMIN_EMAIL="$ADMIN_EMAIL" -e ADMIN_PASSWORD="$CLIENT_PASS" -e ADMIN_NAME="$ADMIN_NAME" -e ADMIN_PLATFORM=false "chatpipe-$SLUG" node src/db/seedAdmin.js >/dev/null
+docker exec -e ADMIN_EMAIL="$ADMIN_EMAIL" -e ADMIN_PASSWORD="$CLIENT_PASS" -e ADMIN_NAME="$ADMIN_NAME" -e ADMIN_PLATFORM=false -e ADMIN_MUST_CHANGE=true "chatpipe-$SLUG" node src/db/seedAdmin.js >/dev/null
 
 echo "== endereço https://$SLUG.$DOMAIN"
 cat > "$ROOT/stack/sites/$SLUG.caddy" <<CADDY
@@ -85,7 +85,7 @@ cat <<INFO
 Cliente $SLUG criado.
   Endereço:        https://$SLUG.$DOMAIN
   Agência:         $AGENCY_EMAIL  /  $AGENCY_PASS
-  Admin cliente:   $ADMIN_EMAIL  /  $CLIENT_PASS   (pedir para trocar no 1º acesso)
+  Admin cliente:   $ADMIN_EMAIL  /  $CLIENT_PASS   (senha provisória — o sistema pede uma nova no 1º acesso)
   Webhook Meta:    https://$SLUG.$DOMAIN/webhook/whatsapp   (token de verificação: $VERIFY)
 Guarde as senhas agora — elas não ficam salvas em texto em lugar nenhum.
 INFO

@@ -1,3 +1,4 @@
+import { describeWhatsAppCredentials, saveWhatsAppCredentials, subscribeAppToWaba } from '../whatsapp/credentials.js';
 import { integrationsRouter } from './integrations.js';
 import { addInterest, listInterests, deleteInterest, listInterestProducts } from '../repositories/contactInterests.js';
 import { listNotifications, markNotificationRead, markAllNotificationsRead, markConversationNotificationsRead } from '../repositories/notifications.js';
@@ -301,6 +302,26 @@ apiRouter.get('/settings/instagram-status', asyncHandler(async (_req, res) => {
 
 // Permite cadastrar o número público do WhatsApp manualmente (só pra gerar os
 // links wa.me das campanhas), sem precisar da API oficial da Meta já validada.
+// Conectar o WhatsApp pela tela (cada instalação de cliente usa o app Meta da empresa dele).
+apiRouter.get('/settings/whatsapp-credentials', requireRole('admin'), asyncHandler(async (req, res) => {
+  const base = process.env.PUBLIC_URL ? process.env.PUBLIC_URL.replace(/\/$/, '') : `${req.protocol}://${req.get('host')}`;
+  res.json({ ...describeWhatsAppCredentials(), webhook_url: `${base}/webhook/whatsapp` });
+}));
+
+apiRouter.put('/settings/whatsapp-credentials', requireRole('admin'), asyncHandler(async (req, res) => {
+  try {
+    await saveWhatsAppCredentials({
+      phoneNumberId: req.body.phone_number_id, wabaId: req.body.waba_id,
+      accessToken: req.body.access_token, appSecret: req.body.app_secret,
+    });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    throw err;
+  }
+  const [status, subscription] = await Promise.all([checkConnectionStatus(), subscribeAppToWaba()]);
+  res.json({ ...describeWhatsAppCredentials(), status, subscription });
+}));
+
 apiRouter.put('/settings/whatsapp-number', requireRole('admin'), asyncHandler(async (req, res) => {
   const { phone_number } = req.body;
   await setSetting('whatsapp_public_number', phone_number || null);

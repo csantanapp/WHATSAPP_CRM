@@ -11,6 +11,15 @@ export function requireAuth(req, res, next) {
   next();
 }
 
+// Senha provisória: até criar a própria senha, o usuário só pode trocar a
+// senha, ver quem é e sair — o resto da API responde 403.
+export function requirePasswordChanged(req, res, next) {
+  if (req.session?.user?.mustChangePassword) {
+    return res.status(403).json({ error: { code: 'password_change_required', message: 'Crie sua senha antes de continuar.' } });
+  }
+  next();
+}
+
 export function requireRole(...roles) {
   return (req, res, next) => {
     if (!req.user) {

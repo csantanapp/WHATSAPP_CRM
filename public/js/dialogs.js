@@ -3,7 +3,7 @@
 //   ctForm({ title, description, icon, fields, submitLabel, validate, onSubmit })
 //     → Promise com os valores ({ nome_do_campo: valor }) ou null se cancelou.
 //     fields: [{ name, label, type, value, placeholder, required, help, options, rows, suggestions }]
-//       type: text | email | tel | textarea | money | select | choice
+//       type: text | email | tel | password | textarea | money | select | choice
 //       choice = lista de opções em cartões (options: [{ value, label, description }])
 //     validate(values) → texto do erro (mostrado no pop-up) ou nada.
 //     onSubmit(values) → async; se lançar erro, a mensagem aparece no pop-up e
@@ -133,7 +133,7 @@
     } else if (f.type === 'money') {
       control = '<div class="cd-money"><span aria-hidden="true">R$</span><input class="cd-input" id="' + id + '" name="' + esc(f.name) + '" inputmode="decimal" autocomplete="off" value="' + esc(formatMoneyInput(f.value)) + '"' + (ph || ' placeholder="0,00"') + req + describedby + '/></div>';
     } else {
-      var type = f.type === 'email' ? 'email' : f.type === 'tel' ? 'tel' : 'text';
+      var type = f.type === 'email' ? 'email' : f.type === 'tel' ? 'tel' : f.type === 'password' ? 'password' : 'text';
       // suggestions: lista de valores já usados (vira <datalist>, o navegador sugere ao digitar).
       var list = f.suggestions && f.suggestions.length ? id + '-list' : '';
       control = '<input class="cd-input" type="' + type + '" id="' + id + '" name="' + esc(f.name) + '" value="' + esc(f.value) + '" autocomplete="off"' + (list ? ' list="' + list + '"' : '') + (type === 'tel' ? ' inputmode="tel"' : '') + ph + req + describedby + (f.maxLength ? ' maxlength="' + f.maxLength + '"' : '') + '/>' +
