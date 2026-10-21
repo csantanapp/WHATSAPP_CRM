@@ -1,4 +1,3 @@
-import { readFile } from 'node:fs/promises';
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,36 +12,13 @@ import { logger, requestLogger } from './logger.js';
 import { createSessionMiddleware } from './auth/session.js';
 import { requireAuth, requirePasswordChanged, verifyOrigin } from './middleware/auth.js';
 import { loginPortalCors } from './middleware/loginPortal.js';
+import { brandedAssets, loginPortalRedirect } from './brand.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Fábrica do app Express, separada do bootstrap em server.js (que faz o
 // .listen() e anexa o WebSocket) — permite testar rotas com supertest sem
 // abrir uma porta de verdade.
-// Serve as páginas HTML trocando o nome do produto pelo de BRAND_NAME.
-function brandedHtml(publicDir) {
-  const cache = new Map();
-  return async (req, res, next) => {
-    const brand = (process.env.BRAND_NAME || '').trim();
-    if (!brand || brand.toLowerCase() === 'chattrack' || req.method !== 'GET') return next();
-    let rel = decodeURIComponent(req.path);
-    if (rel.endsWith('/')) rel += 'index.html';
-    if (!rel.endsWith('.html')) return next();
-    const file = path.normalize(path.join(publicDir, rel));
-    if (!file.startsWith(publicDir + path.sep)) return next();
-    try {
-      let html = cache.get(file);
-      if (!html) {
-        html = (await readFile(file, 'utf8')).replace(/chattrack/g, brand).replace(/Chattrack/g, brand.charAt(0).toUpperCase() + brand.slice(1));
-        cache.set(file, html);
-      }
-      res.type('html').send(html);
-    } catch {
-      next();
-    }
-  };
-}
-
 export function createApp() {
   const app = express();
 
@@ -77,9 +53,10 @@ export function createApp() {
   app.use('/api/auth', apiRateLimit, authRouter);
   app.use('/api/users', apiRateLimit, usersRouter);
   app.use('/api', apiRateLimit, requireAuth, requirePasswordChanged, apiRouter);
-  // Nome do produto por instalação (BRAND_NAME): as instalações de clientes
-  // mostram "chatpipe"; sem a variável, fica "chattrack". Só nas páginas HTML.
-  app.use(brandedHtml(path.join(__dirname, '..', 'public')));
+  // Identidade por instalação (BRAND_NAME): clientes veem o chatpipe (nome,
+  // ícone e verde da marca); sem a variável fica o chattrack da Tractom.
+  app.use(loginPortalRedirect);
+  app.use(brandedAssets(path.join(__dirname, '..', 'public')));
   app.use(express.static(path.join(__dirname, '..', 'public')));
 
   // eslint-disable-next-line no-unused-vars
