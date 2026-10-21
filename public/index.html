@@ -2714,7 +2714,7 @@ hydrateIcons(document);
         loadAutomationFlows();
       });
 
-      var flowFunnel = state.funnels.find(function (f) { return f.id === flow.funnel_id; });
+      var flowFunnel = state.funnels.find(function (f) { return String(f.id) === String(flow.funnel_id); });
       var info = document.createElement('div');
       info.style.cssText = 'flex:1;min-width:260px;';
       info.innerHTML =
@@ -3137,12 +3137,12 @@ hydrateIcons(document);
 
   function flowStageLabel(stageId) {
     var flow = flowCanvas.flow;
-    var funnel = state.funnels.find(function (f) { return f.id === flow.funnel_id; });
-    var stage = funnel ? funnel.stages.find(function (s) { return s.id === stageId; }) : null;
+    var funnel = state.funnels.find(function (f) { return String(f.id) === String(flow.funnel_id); });
+    var stage = funnel ? funnel.stages.find(function (s) { return String(s.id) === String(stageId); }) : null;
     return stage ? 'Mover para <b>' + escapeHtml(stage.name) + '</b>' : '(escolher etapa)';
   }
   function flowUserLabel(userId) {
-    var u = (state.flowUsers || []).find(function (u) { return u.id === userId; });
+    var u = (state.flowUsers || []).find(function (u) { return String(u.id) === String(userId); });
     return u ? 'Atribuir a <b>' + escapeHtml(u.name) + '</b>' : '(escolher atendente)';
   }
 
@@ -3806,7 +3806,7 @@ hydrateIcons(document);
     }
 
     var c = node.config || {};
-    var flowFunnel = state.funnels.find(function (f) { return f.id === flowCanvas.flow.funnel_id; });
+    var flowFunnel = state.funnels.find(function (f) { return String(f.id) === String(flowCanvas.flow.funnel_id); });
 
     if (node.step_type === 'ask_question') {
       title.textContent = 'Pergunta (formulário)';
